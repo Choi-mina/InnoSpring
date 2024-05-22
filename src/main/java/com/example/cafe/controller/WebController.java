@@ -12,6 +12,6 @@ public class WebController {
 
     @RequestMapping("/")
     public String MainWeb() {
-        return "home.html";
+        return "html/home.html";
     }
 }

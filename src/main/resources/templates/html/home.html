@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
+    <link href="../css/home.css" rel="stylesheet" type="text/css"/>
+    <title>Home</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-size: 14px;
+        }
+        .name {
+            color: #fff;
+        }
+        .v3001_3873 {
+            width: 100%;
+            height: 700px;
+            background: url("images/v3001_3873.png");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            padding: 10px 104px;
+            margin: 10px;
+            opacity: 1;
+            position: absolute;
+            top: 84px;
+            left: 0px;
+            overflow: hidden;
+        }
+        .v3001_3879 {
+            width: 461px;
+            height: 255px;
+            background: url("images/v3001_3879.png");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            margin: 40px;
+            opacity: 1;
+            position: absolute;
+            top: 222px;
+            left: 104px;
+            overflow: hidden;
+        }
+        .v3001_3874 {
+            width: 461px;
+            /*color: rgba(255,255,255,1);*/
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            font-family: Cairo;
+            font-weight: SemiBold;
+            font-size: 72px;
+            opacity: 1;
+            text-align: left;
+        }
+        .v3001_3883 {
+            width: 256px;
+            height: 43px;
+            background: url("images/v3001_3883.png");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            margin: 16px;
+            opacity: 1;
+            position: absolute;
+            top: 212px;
+            left: 0px;
+            overflow: hidden;
+        }
+        .name {
+            color: #fff;
+        }
+        .name {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
+<div class="v3001_3873">
+    <div class="v3001_3879">
+        <span class="v3001_3874">Tailored & TrulyBespoke</span>
+        <div class="v3001_3883">
+            <div class="name"></div>
+            <div class="name"></div>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+</body>
+</html>

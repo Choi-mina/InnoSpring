@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .header-navbar {
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100px;
+            position: absolute;
+            align-items: flex-start;
+            flex-shrink: 1;
+            background-color: rgba(243, 241, 230, 1);
+        }
+        .navbar-div {
+            top: 28px;
+            left: 35px;
+            width: 95%;
+            height: 50px;
+            position: relative;
+            display: flex;
+            background-color: transparent;
+        }
+        .div1 {
+            flex: 1;
+        }
+        .logo {
+            color: black;
+            font-size: 36px;
+            font-style: inherit;
+            text-align: left;
+            font-family: DM Sans;
+            font-weight: 700;
+            flex: 1;
+            border: 0;
+            background-color: transparent;
+        }
+        .consult {
+            color: rgba(255, 255, 255, 1);
+            font-size: 20px;
+            font-style: inherit;
+            text-align: left;
+            font-family: DM Sans;
+            font-weight: 700;
+            flex: 1;
+            border: 0;
+            background-color: transparent;
+        }
+        .mypage {
+            color: rgba(255, 255, 255, 1);
+            font-size: 20px;
+            font-style: inherit;
+            text-align: right;
+            font-family: DM Sans;
+            font-weight: 700;
+            flex: 1;
+            border: 0;
+            background-color: transparent;
+        }
+        .login-join {
+            color: rgba(255, 255, 255, 1);
+            width: 50px;
+            font-size: 20px;
+            font-style: inherit;
+            text-align: right;
+            font-family: DM Sans;
+            font-weight: 700;
+            flex: 1;
+            border: 0;
+            background-color: transparent;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+<div class="header-navbar" id="header-navbar">
+    <div class="navbar-div" id="navbar-div">
+        <button class="logo" onclick="location.href='/'"><span>MINA</span></button>
+        <div class="div1"> </div>
+        <button class="consult" id="consult" onclick="location.href='/consult'"><span>화상진료</span></button>
+        <button class="mypage" id="mypage"><span>마이페이지</span></button>
+        <div class="div1"> </div>
+        <button class="login-join" id="login-btn"><img src="images/logout.png" alt="logout image" class="login-join"></button>
+    </div>
+</div>
+</body>
+<script th:src="@{/common/common.ajax.js}"></script>
+</html>
