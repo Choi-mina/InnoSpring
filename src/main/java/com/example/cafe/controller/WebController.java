@@ -14,4 +14,9 @@ public class WebController {
     public String MainWeb() {
         return "html/home.html";
     }
+
+    @RequestMapping("/login")
+    public String LoginWeb() {
+        return "html/login.html";
+    }
 }

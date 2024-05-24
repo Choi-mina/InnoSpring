@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <style>
         .header-navbar {
-            top: 0px;
-            left: 0px;
-            width: 100%;
+            top: 0;
+            left: 0;
+            right: 0; /* 오른쪽을 0으로 설정하여 양쪽을 채움 */
             height: 100px;
+            width: 100%;
             position: absolute;
-            align-items: flex-start;
-            flex-shrink: 1;
-            background-color: rgba(243, 241, 230, 1);
+            display: flex; /* flexbox로 자식 요소를 정렬 */
+            align-items: center; /* 중앙 정렬로 수정 */
+            background-color: rgba(256 , 248 , 220);
         }
+
         .navbar-div {
-            top: 28px;
-            left: 35px;
-            width: 95%;
+            width: 100%;
             height: 50px;
-            position: relative;
             display: flex;
+            justify-content: space-between; /* 요소들을 좌우로 벌리기 */
+            align-items: center; /* 중앙 정렬 */
+            padding: 0 35px; /* 좌우 패딩 추가 */
             background-color: transparent;
         }
         .div1 {
@@ -37,7 +39,7 @@
             background-color: transparent;
         }
         .consult {
-            color: rgba(255, 255, 255, 1);
+            color: rgba(105 , 105 , 105);
             font-size: 20px;
             font-style: inherit;
             text-align: left;
@@ -78,10 +80,10 @@
     <div class="navbar-div" id="navbar-div">
         <button class="logo" onclick="location.href='/'"><span>MINA</span></button>
         <div class="div1"> </div>
-        <button class="consult" id="consult" onclick="location.href='/consult'"><span>화상진료</span></button>
+        <button class="consult" id="consult" onclick="location.href='/consult'"><span>공지사항</span></button>
         <button class="mypage" id="mypage"><span>마이페이지</span></button>
         <div class="div1"> </div>
-        <button class="login-join" id="login-btn"><img src="images/logout.png" alt="logout image" class="login-join"></button>
+        <button class="login-join" id="login-btn" onclick="location.href='/login'"><img src="images/logout.png" alt="logout image" class="login-join"></button>
     </div>
 </div>
 </body>
