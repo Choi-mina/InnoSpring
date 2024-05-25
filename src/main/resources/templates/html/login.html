@@ -72,6 +72,13 @@
         .login-form input[type="submit"]:hover {
             background-color: #45a049;
         }
+        .sign-up {
+            margin-top: 10px;
+            position: absolute;
+            top: 48%;
+            border: none;
+            background-color: white;
+        }
     </style>
 </head>
 <body>
@@ -86,6 +93,7 @@
                 <input type="submit" value="Login">
             </form>
         </div>
+        <button class="sign-up" onclick="location.href='/sign-up'">아직 회원이 아니신가요?</button>
     </div>
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
