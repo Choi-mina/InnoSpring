@@ -1,5 +1,6 @@
 package com.example.cafe.controller;
 
+import com.example.cafe.Service.MemberService;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/member")
 public class MemberController {
+    private final MemberService memberService;
 
     @PostMapping("/sign-up")
-    public ResultEntity memLogin(@RequestBody MemberDto memberDto) {
+    public ResultEntity memSignUp(@RequestBody MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
+        try{
+            memberService.memSignUp(memberDto);
 
+            // 회원가입 및 로그인 성공 반환
+            result.setCode("0000");
+            result.setMessage("Sign-up Success");
+            log.info("Sign-up Success");
+        }catch (Exception e) {
+            log.error("Sign-up Fail");
+            return new ResultEntity(e);
+        }
         return result;
     }
 }

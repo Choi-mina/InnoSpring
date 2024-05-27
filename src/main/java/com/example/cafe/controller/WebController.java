@@ -37,16 +37,16 @@ public class WebController {
 
     @RequestMapping("/sign-up-result")
     public String SginUp(@ModelAttribute MemberDto memberDto, Model model) {
-        String url = baseUrl + "/member/up";
+        String url = baseUrl + "/member/sign-up";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity httpEntity = new HttpEntity<>(memberDto, headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.POST,
-//                httpEntity,
-//                ResultEntity.class);
+        HttpEntity httpEntity = new HttpEntity<>(memberDto, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
         return "html/login.html";
     }
 }
