@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,56 @@ public class MemberService {
         member.setPassword(memberDto.getPassword());
 
         memberRepository.save(member);
+    }
+    
+    public MemberDto findById(Long id) {
+        Optional<Member> member = memberRepository.findById(id);
+        MemberDto memberDto = null;
+        // Entity -> Dto
+        if(member.isPresent())
+            memberDto = MemberDto.builder()
+                    .userName(member.get().getUserName())
+                    .email(member.get().getEmail())
+                    .phoneNum(member.get().getPhoneNum())
+                    .password(member.get().getPassword())
+                    .createDate(member.get().getCreateDate())
+                    .updateDate(member.get().getUpdateDate())
+                    .build();
+        return memberDto;
+    }
+
+    public MemberDto findByPhoneNum(String phoneNum) {
+        Member member = memberRepository.findByPhone(phoneNum);
+        // Entity -> Dto
+        MemberDto memberDto = null;
+        if(member != null) {
+            memberDto = MemberDto.builder()
+                    .userName(member.getUserName())
+                    .email(member.getEmail())
+                    .phoneNum(member.getPhoneNum())
+                    .password(member.getPassword())
+                    .createDate(member.getCreateDate())
+                    .updateDate(member.getUpdateDate())
+                    .build();
+        }
+        return memberDto;
+    }
+
+    public MemberDto findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email);
+        // Entity -> Dto
+        MemberDto memberDto = null;
+        if(member != null) {
+            memberDto = MemberDto.builder()
+                    .userName(member.getUserName())
+                    .email(member.getEmail())
+                    .phoneNum(member.getPhoneNum())
+                    .password(member.getPassword())
+                    .createDate(member.getCreateDate())
+                    .updateDate(member.getUpdateDate())
+                    .build();
+        }
+        return memberDto;
     }
 
 }

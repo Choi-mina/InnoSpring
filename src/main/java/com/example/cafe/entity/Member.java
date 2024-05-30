@@ -1,9 +1,6 @@
 package com.example.cafe.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,4 +19,15 @@ public class Member {
     public String password;
     public Timestamp createDate;
     public Timestamp updateDate;
+
+
+    @PrePersist
+    protected void onCreate() {
+        this.createDate = new Timestamp(System.currentTimeMillis());
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updateDate = new Timestamp(System.currentTimeMillis());
+    }
 }
