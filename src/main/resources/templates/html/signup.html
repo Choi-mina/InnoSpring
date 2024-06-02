@@ -128,9 +128,24 @@
       return false;
     }
 
-    alert("회원가입 성공");
-    // If all validations pass, submit the form
-    form.submit();
+    var memberDto = {
+      userName: userName.value,
+      phoneNum: phoneNum.value,
+      email: email.value,
+      password: password.value
+    };
+
+    ajaxPostJsonCall('/sign-up-result', JSON.stringify(memberDto), function(data) {
+      if (data.code === "0000") {
+        alert("회원가입 성공");
+        window.location.href = "/login";
+      } else {
+        console.log("이미 존재하는 회원");
+        alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");
+      }
+    }, function(error) {
+      alert("An error occurred: " + error.message);
+    });
   }
 
   window.onload = function() {

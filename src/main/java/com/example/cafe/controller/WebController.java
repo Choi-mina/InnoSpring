@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
@@ -36,17 +38,18 @@ public class WebController {
     }
 
     @RequestMapping("/sign-up-result")
-    public String SginUp(@ModelAttribute MemberDto memberDto, Model model) {
+    @ResponseBody
+    public ResultEntity SginUp(@RequestBody MemberDto memberDto) {
         String url = baseUrl + "/member/sign-up";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity httpEntity = new HttpEntity<>(memberDto, headers);
+        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(memberDto, headers);
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ResultEntity> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
                 httpEntity,
                 ResultEntity.class);
-        return "html/login.html";
+        return response.getBody();
     }
 }
