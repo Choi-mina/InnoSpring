@@ -62,6 +62,30 @@ public class MemberController {
         return result;
     }
 
+    @GetMapping("/find-by-email")
+    public ResultEntity findByEmail(@RequestParam("email") String email) {
+        ResultEntity result = new ResultEntity();
+        try {
+            MemberDto member = memberService.findByEmail(email);
+
+            if(member != null) {
+                result.setCode("0000");
+                result.setMessage("Find By Email Success");
+                result.setData(member);
+            } else {
+                result.setCode("0001");
+                result.setMessage("No Data");
+            }
+            log.info("Find By Email Success");
+        } catch (Exception e) {
+            log.error("Find By Phone Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+
+
     // 회원이 존재하는지 validation
     public Boolean memValid(String email) {
         log.info("Find Member");

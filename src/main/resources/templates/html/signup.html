@@ -72,6 +72,33 @@
     .sign-up-form input[type="submit"]:hover {
       background-color: #45a049;
     }
+
+    .email-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .email-container input[name="email"] {
+      width: auto; /* Adjust width as necessary */
+      flex: 1;
+    }
+
+    .email-container button {
+      height: 30px;
+      margin-left: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      border: none;
+      border-radius: 3px;
+      color: white;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .email-container button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -83,7 +110,10 @@
       <form method="post" id="sign-up-form" action="/sign-up-result" th:object="${memberDto}">
         <input type="text" name="userName" th:field="*{userName}" placeholder="UserName">
         <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" placeholder="PhoneNum">
-        <input type="text" name="email" th:field="*{email}" placeholder="Email">
+        <div class="email-container">
+          <input type="text" name="email" th:field="*{email}" placeholder="Email">
+          <button id="emailCheck" type="button">중복확인</button>
+        </div>
         <input type="password" name="password" th:field="*{password}" placeholder="Password">
         <input type="submit" value="SignUp">
       </form>
@@ -150,6 +180,27 @@
 
   window.onload = function() {
     document.getElementById("sign-up-form").addEventListener("submit", validateForm);
+
+    document.getElementById("emailCheck").addEventListener("click", function(event) {
+      event.preventDefault();
+      var form = document.getElementById("sign-up-form");
+      var email = form.querySelector('[name="email"]');
+      var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      if (!email || email.value === "" || !emailPattern.test(email.value)) {
+        alert("Invalid email address");
+      } else {
+        ajaxJsonCall('/find-email?email=' + encodeURIComponent(email.value), null, function(data) {
+          if (data.code === "0000") {
+            alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");
+          } else {
+            alert("사용 가능한 이메일입니다.");
+
+          }
+        }, function(error) {
+          alert("An error occurred: " + error.message);
+        });
+      }
+    });
   }
 </script>
 </body>

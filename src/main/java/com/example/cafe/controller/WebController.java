@@ -7,12 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+
+import javax.xml.transform.Result;
 
 @Slf4j
 @Controller
@@ -35,6 +34,22 @@ public class WebController {
     public String SignUpWeb(Model model) {
         model.addAttribute("memberDto", new MemberDto());
         return "html/signup.html";
+    }
+
+    @RequestMapping("/find-email")
+    @ResponseBody
+    public ResultEntity FindByEmail(@RequestParam("email") String email) {
+        String url = baseUrl + "/member/find-by-email?email=" + email;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
     }
 
     @RequestMapping("/sign-up-result")
