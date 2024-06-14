@@ -122,12 +122,17 @@
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 <script>
+
+  // 0: 버튼을 클릭하지 않음, 1: 이미 존재하는 이메일, 2: 중복확인 완료
+  var emailCheckFlag = 0;
+
   function oninputPhone(target) {
     target.value = target.value
             .replace(/[^0-9]/g, '')
             .replace(/(^02.{0}|^01.{1}|[0-9]{3,4})([0-9]{3,4})([0-9]{4})/g, "$1-$2-$3");
   }
 
+  // 회원가입 전 유효성 검증
   function validateForm(event) {
     event.preventDefault();
 
@@ -138,23 +143,31 @@
     var password = form.querySelector('[name="password"]');
 
     if (!userName || userName.value === "") {
-      alert("UserName must be filled out");
+      alert("이름을 입력해주세요.");
       return false;
     }
 
     if (!phoneNum || phoneNum.value === "" || phoneNum.value.length !== 13) {
-      alert("Phone number must be filled out and contain only 13 digits");
+      alert("올바른 휴대폰 번호를 입력해주세요.");
       return false;
     }
 
     var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!email || email.value === "" || !emailPattern.test(email.value)) {
-      alert("Invalid email address");
+      alert("올바른 주소를 입력해주세요.");
       return false;
     }
 
     if (!password || password.value === "" || password.value.length < 7) {
-      alert("Password must be at least 7 characters long");
+      alert("7글자 이상의 비밀번호를 입력해주세요.");
+      return false;
+    }
+
+    if (emailCheckFlag == 0) {
+      alert("이메일 중복확인을 해주세요.");
+      return false;
+    } else if (emailCheckFlag == 1) {
+      alert("이미 존재하는 회원입니다. 다른 이메일을 입력 후 중복확인을 해주세요.");
       return false;
     }
 
@@ -171,7 +184,7 @@
         window.location.href = "/login";
       } else {
         console.log("이미 존재하는 회원");
-        alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");
+        alert("회원가입에 실패했습니다. 잠시후에 이용해주세요.");
       }
     }, function(error) {
       alert("An error occurred: " + error.message);
@@ -191,8 +204,10 @@
       } else {
         ajaxJsonCall('/find-email?email=' + encodeURIComponent(email.value), null, function(data) {
           if (data.code === "0000") {
+            emailCheckFlag = 1;
             alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");
           } else {
+            emailCheckFlag = 2;
             alert("사용 가능한 이메일입니다.");
 
           }
