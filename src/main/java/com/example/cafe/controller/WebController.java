@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.client.RestTemplate;
 
 import javax.xml.transform.Result;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -31,9 +33,17 @@ public class WebController {
     public String MainWeb() {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         // redis에서 key에 해당하는 value를 찾음.
-        String cachedData = ops.get("user:login:" + email);
+//        String cachedData = ops.get("user:login:" + email);
 
         return "html/home.html";
+    }
+
+    @RequestMapping("/get-session")
+    public ResponseEntity<Map<String, Object>> getSessionValues(HttpSession session) {
+
+        Map<String, Object> sessionValues = new HashMap<>();
+        sessionValues.put("email", session.getAttribute("email"));
+        return ResponseEntity.ok(sessionValues);
     }
 
     @RequestMapping("/login")

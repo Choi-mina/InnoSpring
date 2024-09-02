@@ -40,6 +40,7 @@ public class LoginController {
     @ResponseBody
     public ResultEntity logIn(@RequestParam("email") String email, @RequestParam("password") String password, final HttpServletRequest httpRequest) {
         String url = baseUrl + "/member/login-in?email=" + email + "&password=" + password;
+        HttpSession session = httpRequest.getSession();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
@@ -52,7 +53,6 @@ public class LoginController {
         );
 
         if (response.getBody().getCode().equals("0000")) {
-            final HttpSession session = httpRequest.getSession();
             session.setAttribute("email", email);
             session.setMaxInactiveInterval(3600);
 

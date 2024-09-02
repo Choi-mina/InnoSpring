@@ -89,4 +89,22 @@
 </div>
 </body>
 <script th:src="@{/common/common.ajax.js}"></script>
+<script>
+    // 세션 확인
+    ajaxJsonCall('/get-session', null, function (data) {
+        console.log(data);
+        // if (data.code === "0000") {
+        //     document.getElementById("login-btn").querySelector('img').src = "images/login.png";
+        //     document.getElementById("mypage").style.display = "display";
+        //     // location.href = '/';
+        // } else if (data.code === "9999") {
+        //     alert("비밀번호를 다시 확인해주세요.")
+        // } else {
+        //     alert("이메일이 존재하지 않습니다.");
+        //
+        // }
+    }, function (error) {
+        alert("An error occurred: " + error.message);
+    });
+</script>
 </html>
