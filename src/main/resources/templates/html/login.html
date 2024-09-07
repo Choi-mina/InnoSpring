@@ -118,9 +118,7 @@
                 ajaxJsonCall('/log-in-result?email=' + encodeURIComponent(email) + '&password=' + password, null, function (data) {
                     console.log(data);
                     if (data.code === "0000") {
-                        document.getElementById("login-btn").querySelector('img').src = "images/login.png";
-                        document.getElementById("mypage").style.display = "display";
-                        // location.href = '/';
+                        location.href = '/';
                     } else if (data.code === "9999") {
                         alert("비밀번호를 다시 확인해주세요.")
                     } else {

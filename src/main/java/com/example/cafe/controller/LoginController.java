@@ -39,6 +39,12 @@ public class LoginController {
     @RequestMapping("/log-in-result")
     @ResponseBody
     public ResultEntity logIn(@RequestParam("email") String email, @RequestParam("password") String password, final HttpServletRequest httpRequest) {
+        /**
+         * Redis 조회
+         * Redis O -> Redis 정보 이용해 로그인
+         * Redis X -> DB 조회
+         * */
+
         String url = baseUrl + "/member/login-in?email=" + email + "&password=" + password;
         HttpSession session = httpRequest.getSession();
         HttpHeaders headers = new HttpHeaders();
@@ -53,9 +59,11 @@ public class LoginController {
         );
 
         if (response.getBody().getCode().equals("0000")) {
+            // Session save
             session.setAttribute("email", email);
             session.setMaxInactiveInterval(3600);
 
+            // Redis save
             ValueOperations<String, String> vop = redisTemplate.opsForValue();
             vop.set("user:login:" + email, "true");
         }
@@ -63,7 +71,7 @@ public class LoginController {
         return response.getBody();
     }
 
-    @PostMapping("/logout")
+    @RequestMapping("/logout")
     @ResponseBody
     public ResultEntity logOut(@RequestParam("email") String email, final HttpServletRequest httpRequest) {
         final HttpSession session = httpRequest.getSession(false);

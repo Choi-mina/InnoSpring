@@ -90,38 +90,4 @@ public class WebController {
                 ResultEntity.class);
         return response.getBody();
     }
-
-    // 로그인을 위한 Web APi
-//    @RequestMapping("/log-in-result")
-//    @ResponseBody
-//    public ResultEntity LogIn(@RequestParam("email") String email, @RequestParam("password") String password, final HttpServletRequest httpRequest) {
-//        String url = baseUrl + "/member/login-in?email=" + email + "&password=" + password;
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-//                url,
-//                HttpMethod.GET,
-//                httpEntity,
-//                ResultEntity.class);
-//
-//        final HttpSession session = httpRequest.getSession();
-//        session.setAttribute("email", email);
-//        session.setMaxInactiveInterval(3600);
-//
-//        if(response.getBody().getCode().equals("0000")) {
-////            String RedisUrl = baseUrl + "/redis/set";
-////            HttpHeaders RedisHeaders = new HttpHeaders();
-////            headers.setContentType(MediaType.APPLICATION_JSON);
-////            HttpEntity<MemberDto> RedisHttpEntity = new HttpEntity<>(headers);
-////            RestTemplate RedisRestTemplate = new RestTemplate();
-////            ResponseEntity<ResultEntity> RedisResponse = restTemplate.exchange(
-////                    url,
-////                    HttpMethod.POST,
-////                    httpEntity,
-////                    ResultEntity.class);
-//        }
-//        return response.getBody();
-//    }
 }
