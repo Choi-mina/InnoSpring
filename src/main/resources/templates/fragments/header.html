@@ -118,21 +118,25 @@
             // 로그인 상태인 경우 로그아웃 처리
             console.log("로그아웃 버튼 클릭");
 
-            // 로그아웃 API 호출
-            ajaxJsonCall('/logout?email=' + sessionEmail, null, function (data) {
-                console.log(data);
-                if (data.code === "0000") {
-                    console.log("로그아웃 성공");
-
-                    // 로그인 상태로 변경
-                    button.setAttribute('id', 'login-btn');
-                    document.getElementById("login-btn-image").src = "/images/login.png";
-                    document.getElementById('login-btn-image').setAttribute('alt', 'login btn image');
-                    document.getElementById('mypage').style.display = "none";
-                }
-            }, function (error) {
-                alert("An error occurred: " + error.message);
-            });
+            const result = confirm('로그아웃 하시겠습니까?');
+            if(result) {
+                // 로그아웃 API 호출
+                ajaxPostJsonCall('/logout', sessionEmail, function (data) {
+                    if (data.code === "0000") {
+                        console.log("로그아웃 성공");
+                        // 로그인 상태로 변경
+                        button.setAttribute('id', 'login-btn');
+                        document.getElementById("login-btn-image").src = "/images/login.png";
+                        document.getElementById('login-btn-image').setAttribute('alt', 'login btn image');
+                        document.getElementById('mypage').style.display = "none";
+                    }
+                }, function (error) {
+                    alert("An error occurred: " + error.message);
+                });
+                window.location.href = "/";
+            } else {
+                return false;
+            }
         }
     });
 

@@ -71,15 +71,17 @@ public class LoginController {
         return response.getBody();
     }
 
-    @RequestMapping("/logout")
+    @PostMapping("/logout")
     @ResponseBody
-    public ResultEntity logOut(@RequestParam("email") String email, final HttpServletRequest httpRequest) {
+    public ResultEntity logOut(@RequestBody String email, final HttpServletRequest httpRequest) {
         final HttpSession session = httpRequest.getSession(false);
         if (session != null) {
             session.invalidate();
         }
 
         redisTemplate.delete("user:login:" + email);
+
+        log.info("logout success");
 
         return new ResultEntity("0000", "Logout successful", null);
     }
