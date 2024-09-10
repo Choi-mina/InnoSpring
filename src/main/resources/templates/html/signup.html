@@ -59,20 +59,6 @@
       border-radius: 3px;
     }
 
-    .sign-up-form input[type="submit"] {
-      padding: 10px;
-      background-color: #4CAF50;
-      border: none;
-      border-radius: 3px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .sign-up-form input[type="submit"]:hover {
-      background-color: #45a049;
-    }
-
     .email-container {
       display: flex;
       align-items: center;
@@ -99,6 +85,40 @@
     .email-container button:hover {
       background-color: #45a049;
     }
+    .sign-up-form .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .sign-up-form input[type="submit"],
+    .sign-up-form button#cancelBtn {
+      padding: 10px;
+      border: none;
+      border-radius: 3px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .sign-up-form input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      margin-left: 10px; /* 간격 조절 */
+    }
+
+    .sign-up-form input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    .sign-up-form button#cancelBtn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .sign-up-form button#cancelBtn:hover {
+      background-color: #e53935;
+    }
+
   </style>
 </head>
 <body>
@@ -115,7 +135,10 @@
           <button id="emailCheck" type="button">중복확인</button>
         </div>
         <input type="password" name="password" th:field="*{password}" placeholder="Password">
-        <input type="submit" value="SignUp">
+        <div class="button-container">
+          <button type="button" id="cancelBtn">취소</button>
+          <input type="submit" value="SignUp">
+        </div>
       </form>
     </div>
   </div>
@@ -192,6 +215,9 @@
   }
 
   window.onload = function() {
+    document.getElementById("cancelBtn").addEventListener("click", function() {
+      window.location.href='/login';
+    });
     document.getElementById("sign-up-form").addEventListener("submit", validateForm);
 
     document.getElementById("emailCheck").addEventListener("click", function(event) {
@@ -200,7 +226,7 @@
       var email = form.querySelector('[name="email"]');
       var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
       if (!email || email.value === "" || !emailPattern.test(email.value)) {
-        alert("Invalid email address");
+        alert("이메일 형식이 올바르지 않습니다.");
       } else {
         ajaxJsonCall('/find-email?email=' + encodeURIComponent(email.value), null, function(data) {
           if (data.code === "0000") {
