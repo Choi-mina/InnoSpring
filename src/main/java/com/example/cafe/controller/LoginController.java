@@ -1,8 +1,10 @@
 package com.example.cafe.controller;
 
 import com.example.cafe.Service.MemberService;
+import com.example.cafe.Service.UserService;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.ResultEntity;
+import com.example.cafe.util.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,8 @@ public class LoginController {
     private String baseUrl;
 
     private final MemberService memberService;
+    @Autowired
+    private UserService userService;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Autowired
@@ -38,13 +42,7 @@ public class LoginController {
 
     @RequestMapping("/log-in-result")
     @ResponseBody
-    public ResultEntity logIn(@RequestParam("email") String email, @RequestParam("password") String password, final HttpServletRequest httpRequest) {
-        /**
-         * Redis 조회
-         * Redis O -> Redis 정보 이용해 로그인
-         * Redis X -> DB 조회
-         * */
-
+    public ResultEntity logIn(@RequestParam("email") String email, @RequestParam("password") String password, final HttpServletRequest httpRequest) throws Exception {
         String url = baseUrl + "/member/login-in?email=" + email + "&password=" + password;
         HttpSession session = httpRequest.getSession();
         HttpHeaders headers = new HttpHeaders();
@@ -58,14 +56,19 @@ public class LoginController {
                 ResultEntity.class
         );
 
+        String sessionId = session.getId();
+
         if (response.getBody().getCode().equals("0000")) {
-            // Session save
+            // 세션 저장
             session.setAttribute("email", email);
             session.setMaxInactiveInterval(3600);
 
-            // Redis save
-            ValueOperations<String, String> vop = redisTemplate.opsForValue();
-            vop.set("user:login:" + email, "true");
+            // Redis 저장
+            try {
+                userService.saveUserData(email, password, sessionId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return response.getBody();
@@ -79,7 +82,8 @@ public class LoginController {
             session.invalidate();
         }
 
-        redisTemplate.delete("user:login:" + email);
+        // Redis에서 세션 정보 삭제
+        redisTemplate.delete("user:session:" + email);
 
         log.info("logout success");
 
