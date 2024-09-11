@@ -20,7 +20,7 @@ public class UserService {
     }
 
     public void saveUserData(String email, String password, String sessionId) throws Exception {
-        String encryptedPassword = EncryptionUtil.encrypt(password);
+        String encryptedPassword = EncryptionUtil.encrypt(password);    // 비밀번호 암호화
         String key = "user:session:" + email;
         hashOps.put(key, "sessionId", sessionId);
         hashOps.put(key, "password", encryptedPassword);
@@ -33,8 +33,11 @@ public class UserService {
 
     public String getPassword(String email) throws Exception {
         String key = "user:session:" + email;
-        String encryptedPassword = hashOps.get(key, "password");
-        return EncryptionUtil.decrypt(encryptedPassword);
+        String encryptedPassword = hashOps.get(key, "password");    // 비밀번호 복호화
+        if(encryptedPassword != null) { // redis에 key-value가 있는 경우
+            return EncryptionUtil.decrypt(encryptedPassword);
+        }
+        return null;
     }
 
     public void deleteUserData(String email) {

@@ -3,6 +3,7 @@ package com.example.cafe.controller;
 import com.example.cafe.Service.MemberService;
 import com.example.cafe.Service.UserService;
 import com.example.cafe.dto.MemberDto;
+import com.example.cafe.entity.ApiResult;
 import com.example.cafe.entity.ResultEntity;
 import com.example.cafe.util.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
@@ -43,35 +44,52 @@ public class LoginController {
     @RequestMapping("/log-in-result")
     @ResponseBody
     public ResultEntity logIn(@RequestParam("email") String email, @RequestParam("password") String password, final HttpServletRequest httpRequest) throws Exception {
-        String url = baseUrl + "/member/login-in?email=" + email + "&password=" + password;
-        HttpSession session = httpRequest.getSession();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                httpEntity,
-                ResultEntity.class
-        );
+        String LoginPassword = userService.getPassword(email);
+        ResultEntity response = new ResultEntity<>();
 
-        String sessionId = session.getId();
+        if(LoginPassword != null){ // redis에 정보가 있는 경우
+            if(LoginPassword.equals(password)){ // 비밀번호가 일치하는 경우 -> 로그인 성공
+                response.setCode(ApiResult.SUCCESSS.getCode());
+                response.setMessage("Login Success");
+            } else {    // 비밀번호가 일치하지 않는 경우 -> 로그인 실패
+                response.setCode(ApiResult.FAIL.getCode());
+                response.setMessage("Login Fail");
+            }
+        } else {    // redis에 정보가 없는 경우 -> DB 조회
+            String url = baseUrl + "/member/login-in?email=" + email + "&password=" + password;
+            HttpSession session = httpRequest.getSession();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<ResultEntity> result = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    httpEntity,
+                    ResultEntity.class
+            );
 
-        if (response.getBody().getCode().equals("0000")) {
-            // 세션 저장
-            session.setAttribute("email", email);
-            session.setMaxInactiveInterval(3600);
+            String sessionId = session.getId();
 
-            // Redis 저장
-            try {
-                userService.saveUserData(email, password, sessionId);
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (result.getBody().getCode().equals("0000")) {    //  일치하는 회원O
+                // 세션 저장
+                session.setAttribute("email", email);
+                session.setMaxInactiveInterval(3600);
+
+                // Redis 저장
+                try {
+                    userService.saveUserData(email, password, sessionId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                response.setCode(ApiResult.SUCCESSS.getCode());
+                response.setMessage("Login Success");
+            } else {    // 일치하는 회원X -> 로그인 실패
+                response.setCode(ApiResult.FAIL.getCode());
+                response.setMessage("Login Fail");
             }
         }
-
-        return response.getBody();
+        return response;
     }
 
     @PostMapping("/logout")
@@ -83,7 +101,11 @@ public class LoginController {
         }
 
         // Redis에서 세션 정보 삭제
-        redisTemplate.delete("user:session:" + email);
+        try {
+            userService.deleteUserData(email);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         log.info("logout success");
 
