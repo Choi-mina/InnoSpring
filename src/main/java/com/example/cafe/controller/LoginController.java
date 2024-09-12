@@ -51,6 +51,9 @@ public class LoginController {
             if(LoginPassword.equals(password)){ // 비밀번호가 일치하는 경우 -> 로그인 성공
                 response.setCode(ApiResult.SUCCESSS.getCode());
                 response.setMessage("Login Success");
+                HttpSession session = httpRequest.getSession();
+                session.setAttribute("email", email);
+                session.setMaxInactiveInterval(3600);
             } else {    // 비밀번호가 일치하지 않는 경우 -> 로그인 실패
                 response.setCode(ApiResult.FAIL.getCode());
                 response.setMessage("Login Fail");
