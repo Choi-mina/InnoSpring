@@ -78,7 +78,7 @@ var ajaxJsonCallSync = function(url, param, successCallback, errorCallback, head
         dataParam = $.param(param);
         dataType = "json"
     } else {
-        $.alert("ajaxJsonCall Type Error", function(){ hideLoading() });
+        // $.alert("ajaxJsonCall Type Error", function(){ hideLoading() });
     }
 
     $.ajax({
@@ -159,7 +159,7 @@ var ajaxPostJsonCall = function(url, param, successCallback, errorCallback, head
             }
         }
         ,error : function(xhr, status, error) {
-            $.alert("서버 응답 오류:" + error, function(){ hideLoading() });
+            // $.alert("서버 응답 오류:" + error, function(){ hideLoading() });
         }
     });
 };

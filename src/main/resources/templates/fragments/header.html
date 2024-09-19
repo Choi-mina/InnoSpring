@@ -39,7 +39,7 @@
             background-color: transparent;
         }
         .consult {
-            color: rgba(105 , 105 , 105);
+            color: rgba(105 , 105 , 105);;
             font-size: 20px;
             font-style: inherit;
             text-align: left;
@@ -51,7 +51,7 @@
         }
         .mypage {
             display: none;
-            color: rgba(255, 255, 255, 1);
+            color: rgba(105 , 105 , 105);;
             font-size: 20px;
             font-style: inherit;
             text-align: right;
@@ -84,9 +84,56 @@
         <button class="consult" id="consult" onclick="location.href='/consult'"><span>공지사항</span></button>
         <button class="mypage" id="mypage"><span>마이페이지</span></button>
         <div class="div1"> </div>
-        <button class="login-join" id="login-btn" onclick="location.href='/login'"><img src="images/logout.png" alt="logout image" class="login-join"></button>
+        <button class="login-join" id="login-btn"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
     </div>
 </div>
 </body>
 <script th:src="@{/common/common.ajax.js}"></script>
+<script>
+    var sessionEmail;
+    // 세션 확인
+    ajaxJsonCall('/get-session', null, function (session) {
+        console.log(session);
+        sessionEmail = session.email;
+        if (session.email != "null" && session.email != null) {
+            document.querySelector('.login-join').setAttribute('id', 'logout-btn');
+            document.getElementById("login-btn-image").src = "/images/login.png";
+            document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
+            document.getElementById("mypage").style.display = "block";
+        }
+    }, function (error) {
+        alert("An error occurred: " + error.message);
+    });
+
+    // 롷그인 버튼 클릭
+    // 클릭 이벤트 리스너 추가
+    document.getElementById("login-btn").addEventListener("click", function(event) {
+        const button = document.querySelector(".login-join");
+        const buttonId = button.getAttribute('id');
+
+        if (buttonId === "login-btn") {
+            // 로그인 상태가 아닌 경우 로그인 페이지로 이동
+            window.location.href = "/login";
+        } else if (buttonId === "logout-btn") {
+            // 로그인 상태인 경우 로그아웃 처리
+            console.log("로그아웃 버튼 클릭");
+
+            const result = confirm('로그아웃 하시겠습니까?');
+            if(result) {
+                // 로그아웃 API 호출
+                ajaxPostJsonCall('/logout', sessionEmail, function (data) {
+                    if (data.code === "0000") {
+                        console.log("로그아웃 성공");
+                        window.location.href = "/";
+                    }
+                }, function (error) {
+                    alert("An error occurred: " + error.message);
+                });
+            } else {
+                return false;
+            }
+        }
+    });
+
+</script>
 </html>

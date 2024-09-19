@@ -2,6 +2,7 @@ package com.example.cafe.controller;
 
 import com.example.cafe.Service.MemberService;
 import com.example.cafe.dto.MemberDto;
+import com.example.cafe.entity.ApiResult;
 import com.example.cafe.entity.Member;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,34 @@ public class MemberController {
             }
         }catch (Exception e) {
             log.error("Sign-up Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+    @GetMapping("/login-in")
+    public ResultEntity<ApiResult> logIn(@RequestParam("email") String email, @RequestParam("password") String password) {
+        ResultEntity<ApiResult> result = new ResultEntity<ApiResult>();
+        try{
+            // email로 회원 정보 조회
+            MemberDto member = memberService.findByEmail(email);
+
+            if(member != null) {    // 존재하는 회원
+                if(member.getPassword().equals(password)) { // email과 password가 일치 -> 로그인 성공
+                    result.setCode(ApiResult.SUCCESSS.getCode());
+                    result.setMessage(ApiResult.SUCCESSS.getMessage());
+                } else {    // 로그인 실패
+                    result.setCode(ApiResult.FAIL.getCode());
+                    result.setMessage(ApiResult.FAIL.getMessage());
+                }
+            } else {    // 존재하는 회원이 없는 경우
+                result.setCode(ApiResult.USER_NOT_FOUND.getCode());
+                result.setMessage(ApiResult.USER_NOT_FOUND.getMessage());
+                log.info("Log-in >>>>> Not Found User");
+            }
+            log.info("Log-in >>>>> Success");
+        }catch (Exception e) {
+            log.error("Log-in >>>>> Fail");
             return new ResultEntity(e);
         }
         return result;

@@ -88,14 +88,46 @@
         <span class="login-text">Login</span>
         <div class="login-form">
             <form method="post" id="login-form">
-                <input type="text" name="userName" placeholder="Email">
+                <input type="text" name="email" placeholder="Email">
                 <input type="password" name="userPassword" placeholder="Password">
-                <input type="submit" value="Login">
+                <input id="loginBtn" type="submit" value="Login">
             </form>
         </div>
         <button class="sign-up" onclick="location.href='/sign-up'">아직 회원이 아니신가요?</button>
     </div>
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+</body>
+<script>
+    window.onload = function() {
+        document.getElementById("login-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const email = document.querySelector('input[name="email"]').value;
+            const password = document.querySelector('input[name="userPassword"]').value;
+
+            console.log("email = " + email + " password = " + password);
+
+            if (!email) {
+                alert("이메일을 입력해주세요.");
+                return false;
+            } else if (!password) {
+                alert("비밀번호를 입력해주세요.");
+                return false;
+            } else {
+                ajaxJsonCall('/log-in-result?email=' + encodeURIComponent(email) + '&password=' + password, null, function (data) {
+                    console.log(data);
+                    if (data.code === "0000") {
+                        location.href = '/';
+                    } else if (data.code === "9999") {
+                        alert("이메일이나 비밀번호를 다시 확인해주세요.")
+                    }
+                }, function (error) {
+                    alert("An error occurred: " + error.message);
+                });
+            }
+        });
+    }
+</script>
 </body>
 </html>
