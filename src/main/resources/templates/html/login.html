@@ -120,10 +120,7 @@
                     if (data.code === "0000") {
                         location.href = '/';
                     } else if (data.code === "9999") {
-                        alert("비밀번호를 다시 확인해주세요.")
-                    } else {
-                        alert("이메일이 존재하지 않습니다.");
-
+                        alert("이메일이나 비밀번호를 다시 확인해주세요.")
                     }
                 }, function (error) {
                     alert("An error occurred: " + error.message);

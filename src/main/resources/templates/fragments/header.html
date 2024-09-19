@@ -124,16 +124,11 @@
                 ajaxPostJsonCall('/logout', sessionEmail, function (data) {
                     if (data.code === "0000") {
                         console.log("로그아웃 성공");
-                        // 로그인 상태로 변경
-                        button.setAttribute('id', 'login-btn');
-                        document.getElementById("login-btn-image").src = "/images/login.png";
-                        document.getElementById('login-btn-image').setAttribute('alt', 'login btn image');
-                        document.getElementById('mypage').style.display = "none";
+                        window.location.href = "/";
                     }
                 }, function (error) {
                     alert("An error occurred: " + error.message);
                 });
-                window.location.href = "/";
             } else {
                 return false;
             }
