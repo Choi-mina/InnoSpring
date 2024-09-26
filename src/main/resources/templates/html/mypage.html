@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
+  <link href="../css/home.css" rel="stylesheet" type="text/css"/>
+  <title>Mypage</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-size: 14px;
+      overflow: scroll;
+    }
+    .frame-container {
+      top: 100px;
+      left: 0px;
+      width: 100%;
+      height: 87%;
+      position: absolute;
+      align-items: center;
+    }
+    .menu-bar {
+      top: 0%;
+      left: 0%;
+      width: 15%;
+      height: 100%;
+      position: relative;
+      border: 2px solid;
+      border-color: rgba(256 , 248 , 220);
+      border-radius: 1em;
+    }
+
+  </style>
+</head>
+<body>
+<th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
+<div class="frame-container">
+  <div class="menu-bar" id="login-div">
+  </div>
+</div>
+<th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+</body>
+<script>
+
+</script>
+</body>
+</html>

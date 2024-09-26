@@ -57,6 +57,11 @@ public class WebController {
         return "html/signup.html";
     }
 
+    @RequestMapping("/mypage")
+    public String MyPageWeb(Model model) {
+        return "html/mypage.html";
+    }
+
     // 이메일 중복확인을 위한 Web API
     @RequestMapping("/find-email")
     @ResponseBody
