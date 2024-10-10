@@ -5,7 +5,7 @@
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
     <link href="../css/home.css" rel="stylesheet" type="text/css"/>
-    <title>Home</title>
+    <title>Artist</title>
     <style>
         * {
             box-sizing: border-box;
@@ -34,9 +34,6 @@
 <body>
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
 <div class="home-div">
-    <button onclick="location.href='/community-web'">Community</button>
-    <button onclick="location.href='/artist-web'">Artist</button>
-    <button onclick="location.href='/schedule-web'">Schedule</button>
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>

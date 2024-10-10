@@ -62,6 +62,21 @@ public class WebController {
         return "html/mypage.html";
     }
 
+    @RequestMapping("/community-web")
+    public String CommunityWeb(Model model) {
+        return "html/community.html";
+    }
+
+    @RequestMapping("artist-web")
+    public String ArtistWeb(Model model) {
+        return "html/artist.html";
+    }
+
+    @RequestMapping("schedule-web")
+    public String ScheduleWeb(Model model) {
+        return "html/schedule.html";
+    }
+
     // 이메일 중복확인을 위한 Web API
     @RequestMapping("/find-email")
     @ResponseBody
