@@ -409,7 +409,7 @@
             var formattedDate = yearMonth + '-' + ('0' + day).slice(-2); // 'xxxx-xx-xx' 형식으로 만들기
 
             // 모달의 날짜 설정
-            $('#modal-date').text(formattedDate + '의 스케줄 추가');
+            $('#modal-date').text(formattedDate);
             $('#schedule-modal').fadeIn(); // 모달 창 열기
         });
 
@@ -429,23 +429,34 @@
         $('#schedule-form').on('submit', function(e) {
             e.preventDefault(); // 폼의 기본 제출 동작 방지
 
-            var eventTitle = $('#event-title').val();
-            var eventTime = $('#event-time').val();
+            var scheduleName = $('#event-title').val();
+            var scheduleTime = $('#event-time').val();
             // var eventDesc = $('#event-desc').val();
-            var selectedDate = $('#modal-date').text();
+            var scheduleDate = $('#modal-date').text();
 
-            console.log('스케줄 저장:', {
-                date: selectedDate,
-                title: eventTitle,
-                time: eventTime,
-                // description: eventDesc
-            });
+            // console.log('스케줄 저장:', {
+            //     date: selectedDate,
+            //     title: eventTitle,
+            //     time: eventTime,
+            //     // description: eventDesc
+            // });
+
+            var scheduleDto = {
+                scheduleDate: scheduleDate,
+                scheduleTime: scheduleTime,
+                scheduleName: scheduleName
+            };
 
             // 여기서 Ajax 등을 통해 서버에 데이터를 전송하는 로직을 추가
-
-            // 모달 창 닫기 및 폼 초기화
-            $('#schedule-modal').fadeOut();
-            $('#schedule-form')[0].reset(); // 폼 초기화
+            ajaxPostJsonCall('/schedule-save-web', JSON.stringify(scheduleDto), function(data) {
+                if (data.code === "0000") {
+                    // 모달 창 닫기 및 폼 초기화
+                    $('#schedule-modal').fadeOut();
+                    $('#schedule-form')[0].reset(); // 폼 초기화
+                }
+            }, function(error) {
+                alert("An error occurred: " + error.message);
+            });
         });
     });
 

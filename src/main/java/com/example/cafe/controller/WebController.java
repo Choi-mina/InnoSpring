@@ -1,6 +1,7 @@
 package com.example.cafe.controller;
 
 import com.example.cafe.dto.MemberDto;
+import com.example.cafe.dto.ScheduleDto;
 import com.example.cafe.entity.ResultEntity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -102,6 +103,23 @@ public class WebController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<MemberDto> httpEntity = new HttpEntity<>(memberDto, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    // 스케줄 저장을 위한 Web API
+    @RequestMapping("/schedule-save-web")
+    @ResponseBody
+    public ResultEntity ScheduleSave(@RequestBody ScheduleDto scheduleDto) {
+        String url = baseUrl + "/schedule/save";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ScheduleDto> httpEntity = new HttpEntity<>(scheduleDto, headers);
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ResultEntity> response = restTemplate.exchange(
                 url,
