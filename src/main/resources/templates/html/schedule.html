@@ -166,6 +166,42 @@
             text-align: left;
         }
 
+
+        .schedule-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 모달 창 내용 */
+        .schedule-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 500px;
+            text-align: left;
+        }
+
+        /* 닫기 버튼 스타일 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -216,7 +252,7 @@
         </table>
     </div>
 
-    <!--    모달창     -->
+    <!--    일정 확인 모달창     -->
     <div id="event-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
@@ -224,6 +260,26 @@
             <div id="event-list">
                 <!-- 여기에 해당 날짜의 일정을 표시 -->
             </div>
+        </div>
+    </div>
+
+    <!-- 스케줄 추가 모달 -->
+    <div id="schedule-modal" class="schedule-modal" style="display:none;">
+        <div class="schedule-modal-content">
+            <span class="close">&times;</span>
+            <h2 id="schedule-modal-date"></h2>
+            <form id="schedule-form">
+                <label for="event-title">스케줄 제목:</label>
+                <input type="text" id="event-title" name="event-title" required><br><br>
+
+                <label for="event-time">시간:</label>
+                <input type="time" id="event-time" name="event-time"><br><br>
+
+<!--                <label for="event-desc">설명:</label><br>-->
+<!--                <textarea id="event-desc" name="event-desc" rows="4" cols="50"></textarea><br><br>-->
+
+                <button type="submit">저장</button>
+            </form>
         </div>
     </div>
 </div>
@@ -299,7 +355,7 @@
         $('#tbl-month').empty();
 
         var td = '<td class="__REST__ __TODAY__"><a __HREF__>__DATE__</a><button class="add-event">+</button></td>';
-        var href = '/depart/schedule?date=' + date.substring(0, 8);
+        // var href = '/depart/schedule?date=' + date.substring(0, 8);
         var hasEvent;
         var tdClass;
         var week = null;
@@ -310,7 +366,6 @@
 
             var $tr = $('<tr></tr>');
             week.forEach(function (obj, index) {
-                // 매주 수요일에 이벤트가 있다고 가정
                 hasEvent = (index === 3);
                 tdClass = (index === 0)? 'sun': '';
                 tdClass = (index === 6)? 'sat': tdClass;
@@ -342,12 +397,59 @@
         });
     });
 
+    // '+' 버튼 클릭 시 스케줄 추가를 위한 모달 표시
     $(document).on('click', '.add-event', function(e) {
         e.stopPropagation();
-        var date = $(this).siblings('a').text(); // 해당 날짜를 가져옴
-        alert('이 날짜에 이벤트 추가: ' + date); // 예시로 알림창 표시
+        $(document).on('click', '.add-event', function(e) {
+            e.preventDefault(); // 기본 동작 방지
+            e.stopPropagation(); // 클릭 이벤트 전파 방지
+
+            var day = $(this).siblings('a').text(); // 클릭한 날짜의 일 가져오기
+            var yearMonth = $('#month-this').text().replace('.', '-'); // 현재 연도-월
+            var formattedDate = yearMonth + '-' + ('0' + day).slice(-2); // 'xxxx-xx-xx' 형식으로 만들기
+
+            // 모달의 날짜 설정
+            $('#modal-date').text(formattedDate + '의 스케줄 추가');
+            $('#schedule-modal').fadeIn(); // 모달 창 열기
+        });
+
+        // 모달 창 닫기
+        $('.close').on('click', function() {
+            $('#schedule-modal').fadeOut(); // 모달 창 닫기
+        });
+
+        // 모달 외부 클릭 시 닫기
+        $(window).on('click', function(e) {
+            if (e.target.id === 'schedule-modal') {
+                $('#schedule-modal').fadeOut();
+            }
+        });
+
+        // 스케줄 저장
+        $('#schedule-form').on('submit', function(e) {
+            e.preventDefault(); // 폼의 기본 제출 동작 방지
+
+            var eventTitle = $('#event-title').val();
+            var eventTime = $('#event-time').val();
+            // var eventDesc = $('#event-desc').val();
+            var selectedDate = $('#modal-date').text();
+
+            console.log('스케줄 저장:', {
+                date: selectedDate,
+                title: eventTitle,
+                time: eventTime,
+                // description: eventDesc
+            });
+
+            // 여기서 Ajax 등을 통해 서버에 데이터를 전송하는 로직을 추가
+
+            // 모달 창 닫기 및 폼 초기화
+            $('#schedule-modal').fadeOut();
+            $('#schedule-form')[0].reset(); // 폼 초기화
+        });
     });
 
+    // 날짜 버튼 클릭 시 일정 보여주는 모달
     $(document).on('click', 'td a', function(e) {
         e.preventDefault();  // 링크 기본 동작을 막음
         var date = $(this).text();  // 클릭한 날짜를 가져옴
@@ -401,6 +503,7 @@
         };
         return events[date] || [];
     }
+
 
 </script>
 </html>
