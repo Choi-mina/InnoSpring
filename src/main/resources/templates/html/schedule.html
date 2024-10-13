@@ -474,7 +474,6 @@
         // 해당 날짜에 대한 일정을 불러와서 #event-list에 표시
         ajaxJsonCall('/find-schedule-web?date=' + formattedDate, null, function(data) {
             if (data.code === "0000") {
-                console.log(data.data);
                 $('#event-list').empty();  // 기존 일정을 초기화
 
                 if (data.data.length > 0) {
