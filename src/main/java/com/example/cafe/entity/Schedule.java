@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class Schedule {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private int scheduleID;
+    private int scheduleId;
     public Timestamp scheduleDate;
     public String scheduleName;
     public String scheduleDescription;

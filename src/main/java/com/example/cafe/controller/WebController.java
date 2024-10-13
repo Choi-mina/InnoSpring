@@ -128,4 +128,21 @@ public class WebController {
                 ResultEntity.class);
         return response.getBody();
     }
+
+    // 스케줄 조회 Web API
+    @RequestMapping("/find-schedule-web")
+    @ResponseBody
+    public ResultEntity FindSchedule(@RequestParam("date") String date) {
+        String url = baseUrl + "/schedule/find-by-date?date=" + date;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
 }

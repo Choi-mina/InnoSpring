@@ -5,12 +5,10 @@ import com.example.cafe.dto.ScheduleDto;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,6 +36,26 @@ public class ScheduleController {
             log.error("Schedule-save Fail");
             return new ResultEntity(e);
         }
+        return result;
+    }
+
+    @GetMapping("/find-by-date")
+    public ResultEntity findScheduleByDate(@RequestParam("date") String date) {
+        ResultEntity result = new ResultEntity();
+
+        try {
+            List<ScheduleDto> scheduleDtoList = scheduleService.findByDate(date);
+
+            // schedule find success
+            result.setCode("0000");
+            result.setMessage("Schedule find Success");
+            result.setData(scheduleDtoList);
+            log.info("Schedule find Success");
+        } catch (Exception e) {
+            log.error("Find Schedule Fail");
+            return new ResultEntity(e);
+        }
+
         return result;
     }
 }
