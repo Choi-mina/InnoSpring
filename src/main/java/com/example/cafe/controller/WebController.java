@@ -152,6 +152,23 @@ public class WebController {
         return response.getBody();
     }
 
+    // 스케줄 수정 Web API
+    @RequestMapping("/modify-schedule-web")
+    @ResponseBody
+    public ResultEntity ScheduleModify(@RequestBody ScheduleDto scheduleDto) {
+        String url = baseUrl + "/schedule/modify";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ScheduleDto> httpEntity = new HttpEntity<>(scheduleDto, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
     // 공지사항 저장 Web API
     @RequestMapping("/save-notice-web")
     @ResponseBody

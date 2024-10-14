@@ -33,6 +33,7 @@ public class ScheduleService {
         if(schedule != null)
             for(Schedule s : schedule) {
                 ScheduleDto dto = ScheduleDto.builder()
+                        .scheduleId(s.getScheduleId())
                         .scheduleName(s.getScheduleName())  // Schedule 객체의 값을 사용
                         .scheduleDate(String.valueOf(s.getScheduleDate()))  // 날짜를 문자열로 변환
                         .build();
@@ -41,5 +42,17 @@ public class ScheduleService {
             }
 
         return scheduleDtoList;
+    }
+
+    public void modifySchedule(ScheduleDto scheduleDto) {
+        Schedule schedule = new Schedule();
+
+        // Dto -> Entity
+        schedule.setScheduleId(scheduleDto.getScheduleId());
+        schedule.setScheduleName(scheduleDto.getScheduleName());
+        schedule.setScheduleDate(scheduleDto.getScheduleDateTime());
+        schedule.setScheduleDescription(scheduleDto.getScheduleDescription());
+
+        scheduleRepository.save(schedule);
     }
 }

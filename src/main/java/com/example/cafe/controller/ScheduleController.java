@@ -58,4 +58,26 @@ public class ScheduleController {
 
         return result;
     }
+
+    @PostMapping("/modify")
+    public ResultEntity modifySchedule(@RequestBody ScheduleDto scheduleDto) {
+        ResultEntity result = new ResultEntity();
+
+        // Date + Time 데이터 타입 변경
+        String dateTimeString = scheduleDto.getScheduleDate() + " " + scheduleDto.scheduleTime + ":00";
+        Timestamp timestamp = Timestamp.valueOf(dateTimeString);
+        scheduleDto.setScheduleDateTime(timestamp);
+        try {
+            scheduleService.modifySchedule(scheduleDto);
+
+            // schedule save success
+            result.setCode("0000");
+            result.setMessage("Schedule Modify Success");
+            log.info("Schedule Modify Success");
+        } catch (Exception e) {
+            log.error("Schedule-modify Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
 }

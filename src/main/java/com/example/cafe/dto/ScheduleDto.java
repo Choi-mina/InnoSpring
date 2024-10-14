@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScheduleDto {
+    public int scheduleId;
     public String scheduleDate;
     public String scheduleTime;
     public Timestamp scheduleDateTime;
