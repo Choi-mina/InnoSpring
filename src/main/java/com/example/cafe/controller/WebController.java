@@ -169,6 +169,23 @@ public class WebController {
         return response.getBody();
     }
 
+    // 스케줄 삭제 Web API
+    @RequestMapping("/delete-schedule-web")
+    @ResponseBody
+    public ResultEntity DeleteSchedule(@RequestParam("id") int id) {
+        String url = baseUrl + "/schedule/delete?id=" + id;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ScheduleDto> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
     // 공지사항 저장 Web API
     @RequestMapping("/save-notice-web")
     @ResponseBody

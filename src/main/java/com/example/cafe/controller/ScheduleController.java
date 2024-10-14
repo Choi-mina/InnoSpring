@@ -80,4 +80,21 @@ public class ScheduleController {
         }
         return result;
     }
+
+    @PostMapping("/delete")
+    public ResultEntity deleteSchedule(@RequestParam("id") int scheduleId) {
+        ResultEntity result = new ResultEntity();
+        try {
+            scheduleService.deleteSchedule(scheduleId);
+
+            // schedule save success
+            result.setCode("0000");
+            result.setMessage("Schedule Delete Success");
+            log.info("Schedule Delete Success");
+        } catch (Exception e) {
+            log.error("Schedule-delete Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
 }

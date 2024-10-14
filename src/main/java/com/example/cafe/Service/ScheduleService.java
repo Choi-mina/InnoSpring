@@ -55,4 +55,8 @@ public class ScheduleService {
 
         scheduleRepository.save(schedule);
     }
+
+    public void deleteSchedule(int scheduleId) {
+        scheduleRepository.deleteById((long) scheduleId);
+    }
 }
