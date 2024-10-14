@@ -78,6 +78,11 @@ public class WebController {
         return "html/schedule.html";
     }
 
+    @RequestMapping("/notice-web")
+    public String InformWeb(Model model) {
+        return "html/notice.html";
+    }
+
     // 이메일 중복확인을 위한 Web API
     @RequestMapping("/find-email")
     @ResponseBody

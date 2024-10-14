@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Notice</title>
+    <style>
+        .frame-container {
+            top: 100px;
+            left: 0px;
+            width: 100%;
+            height: 87%;
+            position: absolute;
+            align-items: center;
+        }
+        .table-class {
+            top: 20%;
+            left: 10%;
+            width: 80%;
+            position: absolute;
+            border-radius: 8px;
+            border: 1px solid rgba(232 , 217 , 255);
+        }
+        tr {
+            height : 40px;
+            text-align: center;
+        }
+        .table-header-text-title {
+            width: 80%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .table-header-text-date {
+            width: 20%;
+            text-align: center;
+            font-weight: bold;
+        }
+        .search-div {
+            left: 32%;
+            top: 8%;
+            width: 35%;
+            height: 6%;
+            position: relative;
+            display: flex;
+            border: 1px solid rgba(232 , 217 , 255);
+            border-radius: 5px;
+        }
+        .select-search {
+            width: 25%;
+            height: 100%;
+            position: absolute;
+            text-align: center;
+            flex: 0.3;
+            border: 0px;
+            border-right: 1px solid rgba(232 , 217 , 255);
+        }
+        .search-box {
+            left: 28%;
+            width: 60%;
+            height: 90%;
+            flex: 1;
+            position: absolute;
+        }
+        .search-text-box {
+            width: 100%;
+            height: 100%;
+            text-align: right;
+            position: absolute;
+            border: 0px;
+        }
+        .search-text-box2 {
+            left: 60%;
+            width: 40%;
+            height: 100%;
+            text-align: right;
+            position: absolute;
+            border: 0px;
+        }
+        .search-btn {
+            left: 90%;
+            width: 10%;
+            height: 98%;
+            position: absolute;
+            flex: 0.2;
+            background-color: white;
+            border: 0px;
+        }
+        .search-image {
+            left: 10%;
+            top: 5%;
+            width: 80%;
+            height: 80%;
+            position: absolute;
+            background-color: white;
+        }
+        .write-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(232 , 217 , 255);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .write-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+        /* 모달 기본 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
+        }
+
+        /* 모달 콘텐츠 */
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: transparent;
+            width: 50%;
+            border-radius: 10px;
+        }
+
+        input,textarea {
+            border: 1px solid rgba(83 , 52 , 129);
+            border-radius: 8px;
+        }
+
+        /* 닫기 버튼 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+<th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
+
+<div class="frame-container">
+    <div class="search-div">
+        <select class="select-search" id="select-search">
+            <option value="all" selected>전체</option>
+            <option value="title">제목</option>
+            <option value="date">기간</option>
+        </select>
+        <div class="search-box" id="search-box">
+            <input type="text" class="search-text-box" id="search-text-box">
+        </div>
+        <button class="search-btn" id="search-btn" type="button">
+            <img class = "search-image" src="images/search-icon.png"/>
+        </button>
+    </div>
+    <table class="table-class" id="notice-table">
+        <td class="table-header-text-title">제목</td>
+        <td class="table-header-text-date">날짜</td>
+    </table>
+    <button class="write-btn" id="write-btn">+</button>
+
+    <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
+    <div id="writeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>공지사항 등록</h2>
+            <form id="writeForm">
+                <label for="title">제목:</label><br>
+                <input type="text" id="title" name="title"><br><br>
+                <label for="content">내용:</label><br>
+                <textarea id="content" name="content" rows="10" cols="50"></textarea><br><br>
+                <button type="submit" style="background-color: rgba(232 , 217 , 255); border-color: transparent">등록</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+
+<script th:src="@{/common/common.ajax.js}"></script>
+<script>
+    // select-search 옵션 값 가지고오기
+    $("#select-search").change(function() {
+        $('#search-text-box').val('');
+        var selectedValue = $(this).val();
+
+        // select 박스 값에 따라 input type 변경
+        if(selectedValue === "date") {
+            var spanElement = $("<span id = \"dateHy\">-</span>");
+            var additionalInput = $("<input>", {
+                type: "date",
+                class: "search-text-box2",
+                id: "search-text-box2"
+            });
+            $(".search-box").append(spanElement);
+            $(".search-box").append(additionalInput);
+            $("#search-text-box").width("40%");
+            $("#search-text-box").attr("type", "date");
+            $("#search-text-box2").attr("type", "date");
+        } else {
+            // date가 아닌 경우 추가적인 input 요소 제거
+            $("#dateHy").remove();
+            $("#search-text-box2").remove();
+            $("#search-text-box").width("100%");
+            $("#search-text-box").attr("type", "text");
+        }
+    });
+
+    // 모달 관련 요소들 가져오기
+    var modal = document.getElementById("writeModal");
+    var btn = document.getElementById("write-btn");
+    var span = document.getElementsByClassName("close")[0];
+
+    // 글작성 버튼 클릭 시 모달 열기
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // X 버튼 클릭 시 모달 닫기
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // 모달 외부 클릭 시 모달 닫기
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    //  공지사항 등록
+    $('#writeForm').on('submit', function(e) {
+        e.preventDefault(); // 폼의 기본 제출 동작 방지
+
+
+        var noticeDto = {
+        };
+
+        // schedule 저장을 위한 API 호출
+        ajaxPostJsonCall('', JSON.stringify(noticeDto), function(data) {
+            if (data.code === "0000") {
+                // 모달 창 닫기 및 폼 초기화
+                $('#schedule-modal').fadeOut();
+                $('#schedule-form')[0].reset(); // 폼 초기화
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+</script>
+</body>
+
+</html>
