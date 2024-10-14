@@ -1,6 +1,7 @@
 package com.example.cafe.controller;
 
 import com.example.cafe.dto.MemberDto;
+import com.example.cafe.dto.NoticeDto;
 import com.example.cafe.dto.ScheduleDto;
 import com.example.cafe.entity.ResultEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -139,6 +140,39 @@ public class WebController {
     @ResponseBody
     public ResultEntity FindSchedule(@RequestParam("date") String date) {
         String url = baseUrl + "/schedule/find-by-date?date=" + date;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    // 공지사항 저장 Web API
+    @RequestMapping("/save-notice-web")
+    @ResponseBody
+    public ResultEntity SaveNotice(@RequestBody NoticeDto noticeDto) {
+        String url = baseUrl + "/notice/save";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<NoticeDto> httpEntity = new HttpEntity<>(noticeDto, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    @RequestMapping("/find-all-notice-web")
+    @ResponseBody
+    public ResultEntity FindAllNotice() {
+        String url = baseUrl + "/notice/find-all";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);

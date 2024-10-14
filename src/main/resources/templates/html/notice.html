@@ -203,6 +203,13 @@
 
 <script th:src="@{/common/common.ajax.js}"></script>
 <script>
+    var table = document.getElementById("notice-table");
+
+    // 페이지 로드
+    $(document).ready(function() {
+        findNotice();
+    });
+
     // select-search 옵션 값 가지고오기
     $("#select-search").change(function() {
         $('#search-text-box').val('');
@@ -255,22 +262,65 @@
     //  공지사항 등록
     $('#writeForm').on('submit', function(e) {
         e.preventDefault(); // 폼의 기본 제출 동작 방지
-
+        var noticeTitle = $('#title').val();
+        var noticeContent = $('#content').val();
 
         var noticeDto = {
+            noticeTitle: noticeTitle,
+            noticeContent: noticeContent
         };
 
         // schedule 저장을 위한 API 호출
-        ajaxPostJsonCall('', JSON.stringify(noticeDto), function(data) {
+        ajaxPostJsonCall('/save-notice-web', JSON.stringify(noticeDto), function(data) {
             if (data.code === "0000") {
                 // 모달 창 닫기 및 폼 초기화
-                $('#schedule-modal').fadeOut();
-                $('#schedule-form')[0].reset(); // 폼 초기화
+                $('#writeModal').fadeOut();
+                $('#writeForm')[0].reset(); // 폼 초기화
+                findNotice();
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
         });
     });
+
+    function dateFormat(date) {
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+
+        var dateString = year + '-' + month  + '-' + day;
+
+        return dateString;
+    }
+
+    // 모든 공지사항 조회
+    function findNotice() {
+        ajaxJsonCall('/find-all-notice-web', null, function (data) {
+            console.log(data);
+            // 테이블의 행 개수
+            var rowCount = table.rows.length;
+
+            if(data.code == "0000" && data.data.length > 0) {
+                // 헤더를 제외한 모든 행 삭제
+                for (var i = rowCount - 1; i > 0; i--) {
+                    table.deleteRow(i);
+                }
+                // 데이터 개수만큼 테이블에 추가
+                for (var i = 0; i < data.data.length; i++) {
+                    var row = table.insertRow(-1);
+
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+
+                    cell1.innerHTML = data.data[i].noticeTitle;
+                    var date = new Date(data.data[i].createDate);
+                    cell2.innerHTML = dateFormat(date);
+                }
+            }
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    }
 
 </script>
 </body>
