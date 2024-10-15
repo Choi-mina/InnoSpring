@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +66,65 @@ public class NoticeService {
         }
 
         return noticeDto;
+    }
+
+    public List<NoticeDto> findByTitle(String title) {
+        List<Notice> notices = noticeRepository.findByTitle(title);
+        List<NoticeDto> noticeDtoList = new ArrayList<>();
+
+        if(notices != null)
+            // 내림차순으로 Entity -> Dto
+            for(int i = notices.size() - 1; i >= 0; i--) {
+                NoticeDto dto = NoticeDto.builder()
+                        .noticeId(notices.get(i).getNoticeId())
+                        .noticeTitle(notices.get(i).getNoticeTitle())
+                        .noticeContent(notices.get(i).getNoticeContent())
+                        .createDate(notices.get(i).getCreateDate())
+                        .updateDate(notices.get(i).getUpdateDate())
+                        .build();
+
+                noticeDtoList.add(dto);  // 리스트에 추가
+            }
+
+        return noticeDtoList;
+    }
+
+    public List<NoticeDto> findByDate(String date1, String date2) {
+        // DateTimeFormatter를 사용해 문자열을 LocalDate로 변환
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date1LocalDate = LocalDate.parse(date1, formatter);
+        LocalDate date2LocalDate = LocalDate.parse(date2, formatter);
+
+        // 날짜 비교 및 startDate, endDate 설정
+        LocalDate startDate;
+        LocalDate endDate;
+
+        if (date1LocalDate.isBefore(date2LocalDate)) {
+            startDate = date1LocalDate;
+            endDate = date2LocalDate;
+        } else {
+            startDate = date2LocalDate;
+            endDate = date1LocalDate;
+        }
+
+        List<Notice> notices = noticeRepository.findByDate(startDate, endDate);
+        List<NoticeDto> noticeDtoList = new ArrayList<>();
+
+        if(notices != null)
+            // 내림차순으로 Entity -> Dto
+            for(int i = notices.size() - 1; i >= 0; i--) {
+                NoticeDto dto = NoticeDto.builder()
+                        .noticeId(notices.get(i).getNoticeId())
+                        .noticeTitle(notices.get(i).getNoticeTitle())
+                        .noticeContent(notices.get(i).getNoticeContent())
+                        .createDate(notices.get(i).getCreateDate())
+                        .updateDate(notices.get(i).getUpdateDate())
+                        .build();
+
+                noticeDtoList.add(dto);  // 리스트에 추가
+            }
+
+        return noticeDtoList;
     }
 
     public void modifyNotice(NoticeDto noticeDto) {

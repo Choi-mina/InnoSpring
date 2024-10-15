@@ -203,6 +203,7 @@ public class WebController {
         return response.getBody();
     }
 
+    // 공지사항 전체 조회 Web API
     @RequestMapping("/find-all-notice-web")
     @ResponseBody
     public ResultEntity FindAllNotice() {
@@ -219,6 +220,7 @@ public class WebController {
         return response.getBody();
     }
 
+    // 공지사항 상세보기 Web API
     @RequestMapping("/find-by-id-notice-web")
     @ResponseBody
     public ResultEntity FindByIdNotice(@RequestParam("id") int id) {
@@ -235,6 +237,41 @@ public class WebController {
         return response.getBody();
     }
 
+    // 제목으로 공지사항 조회 Web API
+    @RequestMapping("/find-by-title-notice-web")
+    @ResponseBody
+    public ResultEntity FindByTitleNotice(@RequestParam String title) {
+        String url = baseUrl + "/notice/find-by-title?title=" + title;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    // 날짜로 공지사항 조회 Web API
+    @RequestMapping("/find-by-date-notice-web")
+    @ResponseBody
+    public ResultEntity FindByDateNotice(@RequestParam String date1, @RequestParam String date2) {
+        String url = baseUrl + "/notice/find-by-date?date1=" + date1 + "&date2=" + date2;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    // 공지사항 수정 Web API
     @RequestMapping("/modify-notice-web")
     @ResponseBody
     public ResultEntity ModifyNotice(@RequestBody NoticeDto noticeDto) {
@@ -251,6 +288,7 @@ public class WebController {
         return response.getBody();
     }
 
+    // 공지사항 삭제 Web API
     @RequestMapping("/delete-notice-web")
     @ResponseBody
     public ResultEntity DeleteNotice(@RequestParam("id") int id) {

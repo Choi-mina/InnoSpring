@@ -55,13 +55,47 @@ public class NoticeController {
         ResultEntity result = new ResultEntity();
         try {
             NoticeDto noticeDto = noticeService.getNoticeById(noticeId);
-            // Find All Notice success
+            // Find All Notice Success
             result.setCode("0000");
             result.setMessage("Find Notice Success");
             result.setData(noticeDto);
             log.info("Find Notice Success");
         }   catch (Exception e) {
             log.error("Find Notice Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+    @GetMapping("/find-by-title")
+    public ResultEntity findByTitle(@RequestParam String title) {
+        ResultEntity result = new ResultEntity();
+        try {
+            List<NoticeDto> noticeDtoList = noticeService.findByTitle(title);
+            // Find By Title Notice Success
+            result.setCode("0000");
+            result.setMessage("Find By Title Notice Success");
+            result.setData(noticeDtoList);
+            log.info("Find By Title Notice Success");
+        }   catch (Exception e) {
+            log.error("Find By Title Notice Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+    @GetMapping("/find-by-date")
+    public ResultEntity findByDate(@RequestParam String date1, @RequestParam String date2) {
+        ResultEntity result = new ResultEntity();
+        try {
+            List<NoticeDto> noticeDtoList = noticeService.findByDate(date1, date2);
+            // Find By Date Notice Success
+            result.setCode("0000");
+            result.setMessage("Find By Date Notice Success");
+            result.setData(noticeDtoList);
+            log.info("Find By Date Notice Success");
+        }   catch (Exception e) {
+            log.error("Find By Date Notice Fail");
             return new ResultEntity(e);
         }
         return result;

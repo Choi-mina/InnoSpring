@@ -21,11 +21,13 @@ public class Notice {
 
     @PrePersist
     protected void onCreate() {
-        this.createDate = new Timestamp(System.currentTimeMillis());
+        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        this.createDate = currentTimestamp;
+        this.updateDate = currentTimestamp;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updateDate = new Timestamp(System.currentTimeMillis());
+        this.updateDate = new Timestamp(System.currentTimeMillis());  // Only update the updateDate when the entity is updated
     }
 }
