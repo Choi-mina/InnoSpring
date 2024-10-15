@@ -49,4 +49,51 @@ public class NoticeController {
         }
         return result;
     }
+
+    @GetMapping("/find-by-id")
+    public ResultEntity findNoticeById(@RequestParam("id") int noticeId) {
+        ResultEntity result = new ResultEntity();
+        try {
+            NoticeDto noticeDto = noticeService.getNoticeById(noticeId);
+            // Find All Notice success
+            result.setCode("0000");
+            result.setMessage("Find Notice Success");
+            result.setData(noticeDto);
+            log.info("Find Notice Success");
+        }   catch (Exception e) {
+            log.error("Find Notice Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+    @PostMapping("/modify")
+    public ResultEntity modifyNotice(@RequestBody NoticeDto notice) {
+        ResultEntity result = new ResultEntity();
+        try {
+            noticeService.modifyNotice(notice);
+            result.setCode("0000");
+            result.setMessage("Notice Modify Success");
+            log.info("Notice Modify Success");
+        }   catch (Exception e) {
+            log.error("Notice Modify Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+    @PostMapping("/delete")
+    public ResultEntity deleteNotice(@RequestParam("id") int noticeId) {
+        ResultEntity result = new ResultEntity();
+        try {
+            noticeService.deleteNotice(noticeId);
+            result.setCode("0000");
+            result.setMessage("Notice Delete Success");
+            log.info("Notice Delete Success");
+        }   catch (Exception e) {
+            log.error("Notice Delete Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
 }

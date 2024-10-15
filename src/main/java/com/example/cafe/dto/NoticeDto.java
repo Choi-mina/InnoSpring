@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NoticeDto {
+    private int noticeId;
     private String noticeTitle;
     private String noticeContent;
     public Timestamp createDate;

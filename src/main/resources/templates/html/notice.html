@@ -155,6 +155,29 @@
             cursor: pointer;
         }
 
+        .detail-modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .edit-btn, .delete-btn, .save-btn {
+            background-color: rgba(232 , 217 , 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(255, 100, 100);
+        }
 
 
     </style>
@@ -197,6 +220,25 @@
             </form>
         </div>
     </div>
+
+    <!-- 공지사항 상세 보기 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-detail">&times;</span>
+            <h3></h3>
+            <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
+            <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
+
+            <p id="detail-date">등록일: YYYY-MM-DD</p>
+
+            <!-- 수정 및 삭제 버튼 -->
+            <div class="detail-modal-buttons">
+                <button class="edit-btn" id="edit-btn">수정</button>
+                <button class="delete-btn" id="delete-btn">삭제</button>
+                <button class="save-btn" id="save-btn" style="display: none;">저장</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
@@ -204,6 +246,8 @@
 <script th:src="@{/common/common.ajax.js}"></script>
 <script>
     var table = document.getElementById("notice-table");
+    var selectedNoticeId = null;
+    var isEditing = false;
 
     // 페이지 로드
     $(document).ready(function() {
@@ -249,13 +293,13 @@
 
     // X 버튼 클릭 시 모달 닫기
     span.onclick = function() {
-        modal.style.display = "none";
+        closeWriteModal();
     }
 
     // 모달 외부 클릭 시 모달 닫기
     window.onclick = function(event) {
         if (event.target == modal) {
-            modal.style.display = "none";
+            closeWriteModal();
         }
     }
 
@@ -283,6 +327,119 @@
         });
     });
 
+    // 공지사항 리스트에서 클릭 이벤트 설정
+    function attachRowClickEvent() {
+        $('#notice-table tr').each(function() {
+            $(this).click(function() {
+                var noticeId = $(this).attr('data-notice-id');
+                console.log("click " + noticeId);
+                if (noticeId) {
+                    // 공지사항 상세정보 가져오기
+                    getNoticeDetail(noticeId);
+                }
+            });
+        });
+    }
+
+    // 공지사항 상세 정보 가져오기
+    function getNoticeDetail(noticeId) {
+        ajaxJsonCall('/find-by-id-notice-web?id='+noticeId, null, function(data) {
+            if (data.code === "0000") {
+                $('#detail-title').text(data.data.noticeTitle);
+                $('#detail-content').text(data.data.noticeContent);
+                if(data.data.createDate == null)
+                    $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
+                else
+                    $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
+                $('#detailModal').fadeIn();
+                selectedNoticeId = noticeId;
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    }
+
+    // 모달 관련 요소들
+    var detailModal = document.getElementById("detailModal");
+    var detailClose = document.getElementsByClassName("close-detail")[0];
+
+    // X 버튼 클릭 시 모달 닫기
+    detailClose.onclick = function() {
+        closeDetailModal();
+    }
+
+    // 모달 외부 클릭 시 모달 닫기
+    window.onclick = function(event) {
+        if (event.target == detailModal) {
+            closeDetailModal();
+        }
+    }
+
+    // 수정 버튼 클릭 시
+    $('#edit-btn').click(function () {
+        if (!isEditing) {
+            isEditing = true;
+
+            // 제목과 내용을 input과 textarea로 변경
+            var titleText = $('#detail-title').text();
+            var contentText = $('#detail-content').text();
+
+            $('#label-title').html('제목: <input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
+            $('#label-content').html('내용: <textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
+
+            // 저장 버튼 표시
+            $('#save-btn').show();
+            $('#edit-btn').hide();
+            $('#delete-btn').hide();
+        }
+    });
+
+    // 저장 버튼 클릭 시
+    $('#save-btn').click(function () {
+        var updatedTitle = $('#edit-title').val();
+        var updatedContent = $('#edit-content').val();
+
+        var noticeDto = {
+            noticeId: selectedNoticeId,
+            noticeTitle: updatedTitle,
+            noticeContent: updatedContent
+        };
+
+        // 서버로 수정된 데이터를 전송 (Ajax)
+        ajaxPostJsonCall('/modify-notice-web', JSON.stringify(noticeDto), function (data) {
+            if (data.code === "0000") {
+                alert("공지사항이 수정되었습니다.");
+                findNotice();
+
+                // 제목과 내용을 다시 label로 변경
+                $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
+                $('#label-content').html('내용: <span id="detail-content">' + updatedContent + '</span>');
+
+                // 수정 모드 해제
+                isEditing = false;
+                $('#save-btn').hide();
+                $('#edit-btn').show();
+            }
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 공지사항 삭제 버튼 클릭 시
+    $('#delete-btn').click(function () {
+        if (selectedNoticeId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
+            ajaxPostJsonCall('/delete-notice-web?id=' + selectedNoticeId, null, function (data) {
+                if (data.code === "0000") {
+                    alert("공지사항이 삭제되었습니다.");
+                    $('#detailModal').fadeOut();
+                    findNotice();
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
+    });
+
     function dateFormat(date) {
         var year = date.getFullYear();
         var month = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -296,7 +453,6 @@
     // 모든 공지사항 조회
     function findNotice() {
         ajaxJsonCall('/find-all-notice-web', null, function (data) {
-            console.log(data);
             // 테이블의 행 개수
             var rowCount = table.rows.length;
 
@@ -309,17 +465,56 @@
                 for (var i = 0; i < data.data.length; i++) {
                     var row = table.insertRow(-1);
 
+                    row.setAttribute('data-notice-id', data.data[i].noticeId);
+
                     var cell1 = row.insertCell(0);
                     var cell2 = row.insertCell(1);
 
                     cell1.innerHTML = data.data[i].noticeTitle;
-                    var date = new Date(data.data[i].createDate);
+                    var date = null;
+                    if(data.data[i].createDate == null)
+                        date = new Date(data.data[i].updateDate);
+                    else
+                        date = new Date(data.data[i].createDate);
                     cell2.innerHTML = dateFormat(date);
                 }
+                attachRowClickEvent();
             }
         }, function (error) {
             alert("An error occurred: " + error.message);
         });
+    }
+
+    // 공지사항 등록 모달 닫기 시 호출되는 함수 (입력란 초기화)
+    function closeWriteModal() {
+        // 입력란 초기화
+        $('#writeForm')[0].reset();
+
+        // 모달 닫기
+        modal.style.display = "none";
+    }
+
+    // 모달 닫기 시 호출되는 함수 (수정 상태 복구)
+    function closeDetailModal() {
+        // 수정 상태 초기화
+        if (isEditing) {
+            // 현재 입력 중이던 내용을 다시 label로 복구
+            var titleText = $('#edit-title').val();
+            var contentText = $('#edit-content').val();
+
+            $('#label-title').html('<h3 id="detail-title">' + titleText + '</h3>');
+            $('#label-content').html('<span id="detail-content">' + contentText + '</span>');
+
+            // 저장 버튼 숨기고 수정 버튼 보이기
+            $('#save-btn').hide();
+            $('#edit-btn').show();
+            $('#delete-btn').show();
+
+            isEditing = false;
+        }
+
+        // 모달 닫기
+        detailModal.style.display = "none";
     }
 
 </script>

@@ -218,4 +218,52 @@ public class WebController {
                 ResultEntity.class);
         return response.getBody();
     }
+
+    @RequestMapping("/find-by-id-notice-web")
+    @ResponseBody
+    public ResultEntity FindByIdNotice(@RequestParam("id") int id) {
+        String url = baseUrl + "/notice/find-by-id?id=" + id;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    @RequestMapping("/modify-notice-web")
+    @ResponseBody
+    public ResultEntity ModifyNotice(@RequestBody NoticeDto noticeDto) {
+        String url = baseUrl + "/notice/modify";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<NoticeDto> httpEntity = new HttpEntity<>(noticeDto, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    @RequestMapping("/delete-notice-web")
+    @ResponseBody
+    public ResultEntity DeleteNotice(@RequestParam("id") int id) {
+        String url = baseUrl + "/notice/delete?id=" + id;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<NoticeDto> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
 }
