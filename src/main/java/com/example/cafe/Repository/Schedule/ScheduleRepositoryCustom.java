@@ -1,4 +1,4 @@
-package com.example.cafe.Repository;
+package com.example.cafe.Repository.Schedule;
 
 import com.example.cafe.entity.Schedule;
 

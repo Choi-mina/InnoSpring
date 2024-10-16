@@ -1,6 +1,5 @@
-package com.example.cafe.Repository;
+package com.example.cafe.Repository.Schedule;
 
-import com.example.cafe.entity.Member;
 import com.example.cafe.entity.Schedule;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;

@@ -1,7 +1,6 @@
 package com.example.cafe.Service;
 
-import com.example.cafe.Repository.ScheduleRepository;
-import com.example.cafe.dto.MemberDto;
+import com.example.cafe.Repository.Schedule.ScheduleRepository;
 import com.example.cafe.dto.ScheduleDto;
 import com.example.cafe.entity.Schedule;
 import lombok.RequiredArgsConstructor;

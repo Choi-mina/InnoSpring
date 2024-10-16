@@ -1,9 +1,8 @@
 package com.example.cafe.Service;
 
-import com.example.cafe.Repository.MemberRepository;
+import com.example.cafe.Repository.Member.MemberRepository;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.Member;
-import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

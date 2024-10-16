@@ -1,11 +1,8 @@
 package com.example.cafe.Service;
 
-import com.example.cafe.Repository.NoticeRepository;
+import com.example.cafe.Repository.Notice.NoticeRepository;
 import com.example.cafe.dto.NoticeDto;
-import com.example.cafe.dto.ScheduleDto;
 import com.example.cafe.entity.Notice;
-import com.example.cafe.entity.Schedule;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

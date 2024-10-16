@@ -1,4 +1,4 @@
-package com.example.cafe.Repository;
+package com.example.cafe.Repository.Notice;
 
 import com.example.cafe.entity.Notice;
 

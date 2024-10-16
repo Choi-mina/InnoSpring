@@ -1,4 +1,4 @@
-package com.example.cafe.Repository;
+package com.example.cafe.Repository.Notice;
 
 import com.example.cafe.entity.Notice;
 import jakarta.persistence.EntityManager;
@@ -7,7 +7,6 @@ import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RequiredArgsConstructor
