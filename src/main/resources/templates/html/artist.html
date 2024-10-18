@@ -317,7 +317,6 @@
                                     artistId: artist.artistId,
                                     artistContent: updatedContent
                                 };
-                                console.log(artistDto);
 
                                 var formData = new FormData();
                                 formData.append("artistDto", new Blob([JSON.stringify(artistDto)], { type: "application/json" }));
@@ -361,7 +360,6 @@
                                             if (data.code === "0000") {
                                                 alert("삭제되었습니다.");
                                                 detailModal.style.display = "none"; // 모달 닫기
-                                                // TODO: 아티스트 그리드에서 삭제된 항목 제거
                                                 artistGrid.removeChild(gridItem); // 그리드에서 삭제
                                             } else {
                                                 console.error('Error deleting artist: ', data.message);
