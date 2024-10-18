@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -20,7 +21,7 @@ import java.util.List;
 public class ArtistService {
     private final ArtistRepository artistRepository;
 
-    public void save(ArtistDto artistDto) {
+    public void saveArtist(ArtistDto artistDto) {
         Artist artist = new Artist();
         artist.setArtistContent(artistDto.getArtistContent());
         artist.setArtistImage(artistDto.getArtistImage());
@@ -45,5 +46,33 @@ public class ArtistService {
             }
 
         return artistDtoList;
+    }
+
+    public ArtistDto getArtistById(int artistId) {
+        ArtistDto artistDto = new ArtistDto();
+        Optional<Artist> artist = artistRepository.findById(Long.valueOf(artistId));
+        if(artist != null) {
+            artistDto = ArtistDto.builder()
+                    .artistId(artist.get().getArtistId())
+                    .artistContent(artist.get().getArtistContent())
+                    .artistImage(artist.get().getArtistImage())
+                    .artistImagePath(artist.get().getArtistImagePath())
+                    .build();
+        }
+        return artistDto;
+    }
+
+    public void modifyArtist(ArtistDto artistDto) {
+        Artist artist = new Artist();
+        artist.setArtistId(artistDto.getArtistId());
+        artist.setArtistContent(artistDto.getArtistContent());
+        artist.setArtistImage(artistDto.getArtistImage());
+        artist.setArtistImagePath(artistDto.getArtistImagePath());
+
+        artistRepository.save(artist);
+    }
+
+    public void delete(int artistId) {
+        artistRepository.deleteById((long) artistId);
     }
 }
