@@ -176,6 +176,7 @@
 
                         // 그리드에 넣을 이미지 보여주기
                         const img = document.createElement('img');
+                        img.setAttribute('artist-id', artist.artistId);
                         if (artist.artistImage) {
                             img.src = 'data:image/jpeg;base64,' + artist.artistImage;
                             img.style.display = 'block';
@@ -232,6 +233,7 @@
         event.preventDefault();
 
         var content = document.getElementById("postContent").value;
+        content = content.replace(/\n/g, '<br>');
         var fileInput = document.getElementById("uploadPhoto");
         var file = fileInput.files[0];
 
