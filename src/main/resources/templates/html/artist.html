@@ -7,7 +7,7 @@
     <link href="../css/home.css" rel="stylesheet" type="text/css"/>
     <title>Artist</title>
     <style>
-        frame-container {
+        .frame-container {
             top: 100px;
             left: 0px;
             width: 100%;
@@ -15,16 +15,47 @@
             position: absolute;
             align-items: center;
         }
+
         .artist-div {
             left: 32%;
             top: 8%;
-            width: 35%;
+            width: 100%;
             height: 6%;
             position: relative;
             display: flex;
-            border: 1px solid rgba(232 , 217 , 255);
+            /*border: 1px solid rgba(232 , 217 , 255);*/
             border-radius: 5px;
         }
+
+        .grid-container {
+            display: flex; /* Flexbox로 변경 */
+            flex-wrap: wrap; /* 아이템이 컨테이너 너비를 초과하면 다음 줄로 이동 */
+            gap: 10px; /* 간격 조정 */
+            padding: 10px;
+        }
+
+        .grid-item {
+            border: 1px solid rgba(232, 217, 255);
+            border-radius: 5px;
+            overflow: hidden;
+            height: 150px; /* 고정된 높이 설정 */
+            width: 200px; /* 고정된 너비 설정 */
+            display: flex;
+            justify-content: center; /* 세로 중앙 정렬 */
+            align-items: center; /* 가로 중앙 정렬 */
+        }
+
+        .grid-item img {
+            width: 100%; /* 이미지의 너비를 100%로 설정 */
+            height: 100%; /* 이미지의 높이를 100%로 설정 */
+            object-fit: cover; /* 비율 유지하며 자르기 */
+        }
+
+        .caption {
+            text-align: center; /* 캡션 중앙 정렬 */
+            padding: 5px; /* 패딩 추가 */
+        }
+
         .write-btn {
             position: fixed;
             bottom: 20px;
@@ -64,7 +95,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        input,textarea {
+        textarea {
             border: 1px solid rgba(83 , 52 , 129);
             border-radius: 8px;
         }
@@ -101,7 +132,7 @@
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
 <div class="frame-container">
     <div class="artist-div">
-
+        <div class="grid-container" id="artistGrid"></div>
     </div>
     <button class="write-btn" id="write-btn">+</button>
 
@@ -110,20 +141,70 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>글 작성</h2>
-            <form id="postForm">
-                <textarea id="postContent" rows="4" style="width: 100%;" placeholder="내용을 입력하세요"></textarea>
+            <form id="postForm" enctype="multipart/form-data" method="post">
+                <textarea id="postContent" rows="4" style="width: 100%;" placeholder="내용을 입력하세요" name="artistContent"></textarea>
                 <br>
                 <label for="uploadPhoto">사진 추가:</label>
-                <input type="file" id="uploadPhoto" accept="image/*">
+                <input type="file" id="uploadPhoto" accept="image/*" name="artistImage">
                 <br>
                 <button type="submit" class="submit-btn">게시하기</button>
             </form>
+
         </div>
     </div>
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
 <script>
+
+    window.onload = function() {
+        fetch('/artist/find-all')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.code === "0000") {
+                    const artistGrid = document.getElementById('artistGrid');
+                    artistGrid.innerHTML = ''; // Clear existing content
+
+                    result.data.forEach(artist => {
+                        const gridItem = document.createElement('div');
+                        gridItem.className = 'grid-item';
+
+                        // 그리드에 넣을 이미지 보여주기
+                        const img = document.createElement('img');
+                        if (artist.artistImage) {
+                            img.src = 'data:image/jpeg;base64,' + artist.artistImage;
+                            img.style.display = 'block';
+                            gridItem.appendChild(img);
+                        } else {
+                            // 이미지가 없는 경우 내용 보여주기
+                            const contentDiv = document.createElement('div');
+                            contentDiv.className = 'caption';
+
+                            // 내용이 10글자 이상이면 뒷내용은 '...'으로 표시
+                            const contentText = artist.artistContent.length > 10
+                                ? artist.artistContent.substring(0, 10) + '...'
+                                : artist.artistContent;
+
+                            contentDiv.innerText = contentText;
+                            gridItem.appendChild(contentDiv);
+                        }
+
+                        artistGrid.appendChild(gridItem);
+                    });
+                } else {
+                    console.error('Error fetching artists: ', result.message);
+                }
+            })
+            .catch(error => console.error('Error fetching artists:', error));
+    };
+
+
+
     // 글쓰기 모달 관련 요소들
     var WriteModal = document.getElementById("myModal");
     var WriteBtn = document.getElementById("write-btn");
@@ -146,23 +227,51 @@
         }
     }
 
-    // Form submission (you can add your own handling logic here)
+    // '게시하기' 버튼 클릭 핸들러
     document.getElementById("postForm").onsubmit = function(event) {
         event.preventDefault();
+
         var content = document.getElementById("postContent").value;
         var fileInput = document.getElementById("uploadPhoto");
         var file = fileInput.files[0];
+
         var confirmPost = confirm("정말로 게시하시겠습니까?");
         if (confirmPost) {
-            // User confirmed, proceed with posting
-            console.log("Content: ", content);
-            if (file) {
-                console.log("Photo: ", file.name);
-            }
+            var artistDto = {
+                artistContent: content
+            };
 
-            // modal 닫기
-            modal.style.display = "none";
+            var formData = new FormData();
+            formData.append("artistDto", new Blob([JSON.stringify(artistDto)], { type: "application/json" }));
+            if (file) {
+                formData.append("artistImage", file);
+            } else
+                formData.append("artistImage", null);
+
+
+            fetch('/artist/save', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP status " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code === "0000") {
+                        WriteModal.style.display = "none";
+                        document.getElementById("postForm").reset();
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred: " + error.message);
+                });
         }
     }
+
+
+
 </script>
 </html>
