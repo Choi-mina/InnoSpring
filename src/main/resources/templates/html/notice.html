@@ -133,6 +133,8 @@
             border: transparent;
             width: 50%;
             border-radius: 10px;
+            max-height: 80%; /* Set a max height for the modal */
+            overflow-y: auto; /* Enable vertical scrolling */
         }
 
         input,textarea {
@@ -314,6 +316,7 @@
         e.preventDefault(); // 폼의 기본 제출 동작 방지
         var noticeTitle = $('#title').val();
         var noticeContent = $('#content').val();
+        noticeContent = noticeContent.replace(/\n/g, '<br>');
 
         var noticeDto = {
             noticeTitle: noticeTitle,
@@ -338,7 +341,6 @@
         $('#notice-table tr').each(function() {
             $(this).click(function() {
                 var noticeId = $(this).attr('data-notice-id');
-                console.log("click " + noticeId);
                 if (noticeId) {
                     // 공지사항 상세정보 가져오기
                     getNoticeDetail(noticeId);
@@ -347,18 +349,34 @@
         });
     }
 
+    // Adjust modal position
+    function adjustModalPosition() {
+        var modalContent = $('.modal-content');
+        var windowHeight = $(window).height();
+        var modalHeight = modalContent.outerHeight();
+
+        // Check if modal height exceeds window height
+        if (modalHeight > windowHeight * 0.8) { // Allow 80% of window height
+            modalContent.css('top', '10%'); // Center it vertically
+        } else {
+            var topOffset = (windowHeight - modalHeight) / 2;
+            modalContent.css('top', topOffset + 'px'); // Center it vertically
+        }
+    }
+
     // 공지사항 상세 정보 가져오기
     function getNoticeDetail(noticeId) {
         ajaxJsonCall('/find-by-id-notice-web?id='+noticeId, null, function(data) {
             if (data.code === "0000") {
                 $('#detail-title').text(data.data.noticeTitle);
-                $('#detail-content').text(data.data.noticeContent);
+                $('#detail-content').html(data.data.noticeContent);
                 if(data.data.createDate == null)
                     $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
                 else
                     $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
                 $('#detailModal').fadeIn();
                 selectedNoticeId = noticeId;
+                adjustModalPosition();
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -404,6 +422,7 @@
     $('#save-btn').click(function () {
         var updatedTitle = $('#edit-title').val();
         var updatedContent = $('#edit-content').val();
+        updatedContent = updatedContent.replace(/\n/g, '<br>');
 
         var noticeDto = {
             noticeId: selectedNoticeId,
@@ -469,11 +488,19 @@
         // 테이블의 행 개수
         var rowCount = table.rows.length;
 
-        if(data.code == "0000" && data.data.length > 0) {
+        if (data.code == "0000" && data.data.length > 0) {
+            // 최신 공지시항부터 나열
+            data.data.sort((a, b) => {
+                const dateA = a.createDate ? new Date(a.createDate) : new Date(a.updateDate);
+                const dateB = b.createDate ? new Date(b.createDate) : new Date(b.updateDate);
+                return dateB - dateA;
+            });
+
             // 헤더를 제외한 모든 행 삭제
             for (var i = rowCount - 1; i > 0; i--) {
                 table.deleteRow(i);
             }
+
             // 데이터 개수만큼 테이블에 추가
             for (var i = 0; i < data.data.length; i++) {
                 var row = table.insertRow(-1);
@@ -484,11 +511,13 @@
                 var cell2 = row.insertCell(1);
 
                 cell1.innerHTML = data.data[i].noticeTitle;
+
                 var date = null;
-                if(data.data[i].createDate == null)
+                if (data.data[i].createDate == null)
                     date = new Date(data.data[i].updateDate);
                 else
                     date = new Date(data.data[i].createDate);
+
                 cell2.innerHTML = dateFormat(date);
             }
             attachRowClickEvent();
@@ -499,6 +528,7 @@
             }
         }
     }
+
 
     // 공지사항 등록 모달 닫기 시 호출되는 함수 (입력란 초기화)
     function closeWriteModal() {
