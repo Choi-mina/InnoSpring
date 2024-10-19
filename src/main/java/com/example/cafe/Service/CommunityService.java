@@ -62,4 +62,17 @@ public class CommunityService {
 
         return communityDto;
     }
+
+    public void modifyCommunity(CommunityDto communityDto) {
+        Community community = new Community();
+        community.setCommunityId(communityDto.getCommunityId());
+        community.setCommunityTitle(communityDto.getCommunityTitle());
+        community.setCommunityContent(communityDto.getCommunityContent());
+        community.setCommunityAuthor(communityDto.getCommunityAuthor());
+        communityRepository.save(community);
+    }
+
+    public void deleteCommunity(int communityId) {
+        communityRepository.deleteById((long) communityId);
+    }
 }

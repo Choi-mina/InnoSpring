@@ -138,11 +138,11 @@
     </table>
     <button class="write-btn" id="write-btn">+</button>
 
-    <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
+    <!--글 추가 버튼 클릭 시 나타나는 modal-->
     <div id="writeModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>공지사항 등록</h2>
+            <h2>글 등록</h2>
             <form id="writeForm">
                 <label for="title">제목:</label><br>
                 <input type="text" id="title" name="title"><br><br>
@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <!-- 공지사항 상세 보기 모달 -->
+    <!-- 글 상세 보기 모달 -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <span class="close-detail">&times;</span>
@@ -161,6 +161,7 @@
             <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
             <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
 
+            <p id="detail-author">작성자: OOO</p>
             <p id="detail-date">등록일: YYYY-MM-DD</p>
 
             <!-- 수정 및 삭제 버튼 -->
@@ -235,7 +236,7 @@
         });
     });
 
-    // 공지사항 리스트에서 클릭 이벤트 설정
+    // community 리스트에서 클릭 이벤트 설정
     function attachRowClickEvent() {
         $('#community-table tr').each(function() {
             $(this).click(function() {
@@ -269,6 +270,7 @@
             if (data.code === "0000") {
                 $('#detail-title').text(data.data.communityTitle);
                 $('#detail-content').html(data.data.communityContent);
+                $('#detail-author').text("작성자: " + data.data.communityAuthor);
                 $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
                 $('#detailModal').fadeIn();
                 selectedCommunityId = communityId;
@@ -302,10 +304,11 @@
 
             // 제목과 내용을 input과 textarea로 변경
             var titleText = $('#detail-title').text();
-            var contentText = $('#detail-content').text();
+            var contentHtml = $('#detail-content').html();
+            var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n');
 
-            $('#label-title').html('제목: <input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
-            $('#label-content').html('내용: <textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
+            $('#label-title').html('<input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
+            $('#label-content').html('<textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
 
             // 저장 버튼 표시
             $('#save-btn').show();
@@ -319,39 +322,42 @@
         var updatedTitle = $('#edit-title').val();
         var updatedContent = $('#edit-content').val();
         updatedContent = updatedContent.replace(/\n/g, '<br>');
+        var author = $('#detail-author').val();
 
-        var noticeDto = {
-            noticeId: selectedCommunityId,
-            noticeTitle: updatedTitle,
-            noticeContent: updatedContent
+        var communityDto = {
+            communityId: selectedCommunityId,
+            communityTitle: updatedTitle,
+            communityContent: updatedContent,
+            communityAuthor: author
         };
 
         // 서버로 수정된 데이터를 전송 (Ajax)
-        ajaxPostJsonCall('/modify-notice-web', JSON.stringify(noticeDto), function (data) {
+        ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
             if (data.code === "0000") {
-                alert("공지사항이 수정되었습니다.");
+                alert("글이 수정되었습니다.");
                 findCommunity();
 
                 // 제목과 내용을 다시 label로 변경
-                $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
-                $('#label-content').html('내용: <span id="detail-content">' + updatedContent + '</span>');
+                $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
+                $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
 
                 // 수정 모드 해제
                 isEditing = false;
                 $('#save-btn').hide();
                 $('#edit-btn').show();
+                $('#delete-btn').show();
             }
         }, function (error) {
             alert("An error occurred: " + error.message);
         });
     });
 
-    // 공지사항 삭제 버튼 클릭 시
+    // 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
-        if (selectedCommunityId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
-            ajaxPostJsonCall('/delete-notice-web?id=' + selectedCommunityId, null, function (data) {
+        if (selectedCommunityId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
+            ajaxPostJsonCall('/community/delete?id=' + selectedCommunityId, null, function (data) {
                 if (data.code === "0000") {
-                    alert("공지사항이 삭제되었습니다.");
+                    alert("글이 삭제되었습니다.");
                     $('#detailModal').fadeOut();
                     findCommunity();
                 }
@@ -371,7 +377,7 @@
         return dateString;
     }
 
-    // 모든 공지사항 조회
+    // 모든 글 조회
     function findCommunity() {
         ajaxJsonCall('/community/find-all', null, function (data) {
             drawTable(data);

@@ -71,4 +71,40 @@ public class CommunityController {
 
         return result;
     }
+
+    @PostMapping("/modify")
+    public ResultEntity modifyCommunity(@RequestBody CommunityDto communityDto) {
+        ResultEntity result = new ResultEntity();
+        try {
+            communityService.modifyCommunity(communityDto);
+
+            // community modify success
+            result.setCode("0000");
+            result.setMessage("Community modify Success");
+            log.info("Community modify Success");
+        } catch (Exception e) {
+            log.error("Community-modify Fail");
+            return new ResultEntity(e);
+        }
+
+        return result;
+    }
+
+    @PostMapping("/delete")
+    public ResultEntity deleteCommunity(@RequestParam("id") Integer communityId) {
+        ResultEntity result = new ResultEntity();
+        try {
+            communityService.deleteCommunity(communityId);
+
+            // community delete success
+            result.setCode("0000");
+            result.setMessage("Community delete Success");
+            log.info("Community delete Success");
+        } catch (Exception e) {
+            log.error("Community-delete Fail");
+            return new ResultEntity(e);
+        }
+
+        return result;
+    }
 }

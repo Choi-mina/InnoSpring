@@ -245,7 +245,12 @@
                     const artistGrid = document.getElementById('artistGrid');
                     artistGrid.innerHTML = ''; // Clear existing content
 
-                    result.data.forEach(artist => {
+                    // 날짜 기준으로 최신 글 순서대로 정렬 (assuming artist has an updateDate property)
+                    const sortedArtists = result.data.sort((a, b) => {
+                        return new Date(b.updateDate) - new Date(a.updateDate); // 최신 순으로 정렬
+                    });
+
+                    sortedArtists.forEach(artist => {
                         const gridItem = document.createElement('div');
                         gridItem.className = 'grid-item';
 
@@ -262,11 +267,13 @@
                             contentDiv.className = 'caption';
 
                             // 내용이 10글자 이상이면 뒷내용은 '...'으로 표시
-                            const contentText = artist.artistContent.length > 10
-                                ? artist.artistContent.substring(0, 10) + '...'
-                                : artist.artistContent;
+                            const contentText = artist.artistContent.replace(/<br\s*\/?>/g, '\n'); // <br> 태그를 줄바꿈으로 변경
+                            const displayText = contentText.length > 10
+                                ? contentText.substring(0, 10) + '...'
+                                : contentText;
 
-                            contentDiv.innerText = contentText;
+                            // contentDiv의 텍스트를 innerText가 아닌 innerHTML로 설정
+                            contentDiv.innerHTML = displayText.replace(/\n/g, '<br>'); // 줄바꿈 문자를 <br>로 변경
                             gridItem.appendChild(contentDiv);
                         }
 
@@ -288,7 +295,7 @@
                                 document.getElementById("detailImage").src = img.src; // 클릭한 이미지의 src
                             }   else
                                 document.getElementById("detailImage").style.display = "none";
-                            document.getElementById("detailContent").innerText = artist.artistContent; // 해당 아티스트의 내용
+                            document.getElementById("detailContent").innerHTML = artist.artistContent.replace(/<br\s*\/?>/g, '<br>'); // 해당 아티스트의 내용
 
                             // 모달 열기
                             detailModal.style.display = "block";
@@ -298,7 +305,9 @@
                             editButton.onclick = function() {
                                 // 기존 내용 로드
                                 document.getElementById("detailContent").style.display = "none";
-                                editContent.value = detailContent.innerText; // 기존 내용
+                                var contentHtml = detailContent.innerHTML; // innerHTML로 변경하여 <br> 태그도 처리
+                                var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n'); // <br> 태그를 \n으로 변환
+                                editContent.value = contentText; // 기존 내용
                                 editContent.style.display = "block"; // textarea 표시
                                 saveButton.style.display = "block"; // 저장 버튼 표시
                                 editButton.style.display = "none"; // 수정 버튼 숨기기
@@ -310,7 +319,7 @@
 
                             // 수정 저장 버튼 클릭 핸들러
                             saveButton.onclick = function() {
-                                var updatedContent = editContent.value; // 수정된 내용 가져오기
+                                var updatedContent = editContent.value.replace(/\n/g, '<br>');
                                 var file = editPhoto.files[0]; // 수정된 이미지 가져오기
 
                                 var artistDto = {

@@ -406,7 +406,8 @@
 
             // 제목과 내용을 input과 textarea로 변경
             var titleText = $('#detail-title').text();
-            var contentText = $('#detail-content').text();
+            var contentHtml = $('#detail-content').html();
+            var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n');
 
             $('#label-title').html('제목: <input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
             $('#label-content').html('내용: <textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');

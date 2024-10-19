@@ -40,6 +40,8 @@ public class ArtistService {
                         .artistContent(a.getArtistContent())
                         .artistImage(a.getArtistImage())
                         .artistImagePath(a.getArtistImagePath())
+                        .createDate(a.getCreateDate())
+                        .updateDate(a.getUpdateDate())
                         .build();
 
                 artistDtoList.add(dto);  // 리스트에 추가
