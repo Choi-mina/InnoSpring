@@ -3,38 +3,455 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
-    <link href="../css/home.css" rel="stylesheet" type="text/css"/>
+    <meta charset="UTF-8">
     <title>Community</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-size: 14px;
-            overflow: scroll;
-        }
-        .name {
-            color: #fff;
-        }
-        .home-div {
-            width: 100%;
-            height: 100%;
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-size: cover;
-            padding: 10px 104px;
-            opacity: 1;
-            position: absolute;
+        .frame-container {
             top: 100px;
             left: 0px;
+            width: 100%;
+            height: 87%;
+            position: absolute;
+            align-items: center;
         }
+        .table-class {
+            top: 8%;
+            left: 10%;
+            width: 80%;
+            position: absolute;
+            border-radius: 8px;
+            border: 1px solid rgba(232 , 217 , 255);
+        }
+        tr {
+            height : 40px;
+            text-align: center;
+        }
+        .table-header-text-title {
+            width: 80%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .table-header-text-date {
+            width: 20%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .write-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(232 , 217 , 255);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .write-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+        /* 모달 기본 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
+        }
+
+        /* 모달 콘텐츠 */
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: transparent;
+            width: 50%;
+            border-radius: 10px;
+            max-height: 80%; /* Set a max height for the modal */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        input,textarea {
+            border: 1px solid rgba(83 , 52 , 129);
+            border-radius: 8px;
+        }
+
+        /* 닫기 버튼 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .detail-modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .edit-btn, .delete-btn, .save-btn {
+            background-color: rgba(232 , 217 , 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover, .save-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(255, 100, 100);
+        }
+
+
     </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
-<div class="home-div">
+
+<div class="frame-container">
+    <table class="table-class" id="community-table">
+        <td class="table-header-text-title">제목</td>
+        <td class="table-header-text-date">작성자</td>
+    </table>
+    <button class="write-btn" id="write-btn">+</button>
+
+    <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
+    <div id="writeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>공지사항 등록</h2>
+            <form id="writeForm">
+                <label for="title">제목:</label><br>
+                <input type="text" id="title" name="title"><br><br>
+                <label for="content">내용:</label><br>
+                <textarea id="content" name="content" rows="10" cols="50"></textarea><br><br>
+                <button type="submit" class="save-btn">등록</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 공지사항 상세 보기 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-detail">&times;</span>
+            <h3></h3>
+            <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
+            <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
+
+            <p id="detail-date">등록일: YYYY-MM-DD</p>
+
+            <!-- 수정 및 삭제 버튼 -->
+            <div class="detail-modal-buttons">
+                <button class="edit-btn" id="edit-btn">수정</button>
+                <button class="delete-btn" id="delete-btn">삭제</button>
+                <button class="save-btn" id="save-btn" style="display: none;">저장</button>
+            </div>
+        </div>
+    </div>
 </div>
+
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+
+<script th:src="@{/common/common.ajax.js}"></script>
+<script>
+    var table = document.getElementById("community-table");
+    var selectedCommunityId = null;
+    var isEditing = false;
+
+    // 페이지 로드
+    $(document).ready(function() {
+        findCommunity();
+    });
+
+    // 모달 관련 요소들 가져오기
+    var modal = document.getElementById("writeModal");
+    var btn = document.getElementById("write-btn");
+    var span = document.getElementsByClassName("close")[0];
+
+    // 글작성 버튼 클릭 시 모달 열기
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // X 버튼 클릭 시 모달 닫기
+    span.onclick = function() {
+        closeWriteModal();
+    }
+
+    // 모달 외부 클릭 시 모달 닫기
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeWriteModal();
+        }
+    }
+
+    // community 등록
+    $('#writeForm').on('submit', function(e) {
+        e.preventDefault(); // 폼의 기본 제출 동작 방지
+        var communityTitle = $('#title').val();
+        var communityContent = $('#content').val();
+        communityContent = communityContent.replace(/\n/g, '<br>');
+
+        var communityDto = {
+            communityTitle: communityTitle,
+            communityContent: communityContent,
+            communityAuthor: " "
+
+        };
+
+        // community 글 저장을 위한
+        ajaxPostJsonCall('/community/save', JSON.stringify(communityDto), function(data) {
+            if (data.code === "0000") {
+                // 모달 창 닫기 및 폼 초기화
+                $('#writeModal').fadeOut();
+                $('#writeForm')[0].reset(); // 폼 초기화
+                findCommunity();
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 공지사항 리스트에서 클릭 이벤트 설정
+    function attachRowClickEvent() {
+        $('#community-table tr').each(function() {
+            $(this).click(function() {
+                var communityId = $(this).attr('data-community-id');
+                if (communityId) {
+                    // community 글 상세정보 가져오기
+                    getCommunityDetail(communityId);
+                }
+            });
+        });
+    }
+
+    // Adjust modal position
+    function adjustModalPosition() {
+        var modalContent = $('.modal-content');
+        var windowHeight = $(window).height();
+        var modalHeight = modalContent.outerHeight();
+
+        // Check if modal height exceeds window height
+        if (modalHeight > windowHeight * 0.8) { // Allow 80% of window height
+            modalContent.css('top', '10%'); // Center it vertically
+        } else {
+            var topOffset = (windowHeight - modalHeight) / 2;
+            modalContent.css('top', topOffset + 'px'); // Center it vertically
+        }
+    }
+
+    // community 글 상세 정보 가져오기
+    function getCommunityDetail(communityId) {
+        ajaxJsonCall('/community/find-by-id?id='+communityId, null, function(data) {
+            if (data.code === "0000") {
+                $('#detail-title').text(data.data.communityTitle);
+                $('#detail-content').html(data.data.communityContent);
+                $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
+                $('#detailModal').fadeIn();
+                selectedCommunityId = communityId;
+                adjustModalPosition();
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    }
+
+    // 모달 관련 요소들
+    var detailModal = document.getElementById("detailModal");
+    var detailClose = document.getElementsByClassName("close-detail")[0];
+
+    // X 버튼 클릭 시 모달 닫기
+    detailClose.onclick = function() {
+        closeDetailModal();
+    }
+
+    // 모달 외부 클릭 시 모달 닫기
+    window.onclick = function(event) {
+        if (event.target == detailModal) {
+            closeDetailModal();
+        }
+    }
+
+    // 수정 버튼 클릭 시
+    $('#edit-btn').click(function () {
+        if (!isEditing) {
+            isEditing = true;
+
+            // 제목과 내용을 input과 textarea로 변경
+            var titleText = $('#detail-title').text();
+            var contentText = $('#detail-content').text();
+
+            $('#label-title').html('제목: <input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
+            $('#label-content').html('내용: <textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
+
+            // 저장 버튼 표시
+            $('#save-btn').show();
+            $('#edit-btn').hide();
+            $('#delete-btn').hide();
+        }
+    });
+
+    // 저장 버튼 클릭 시
+    $('#save-btn').click(function () {
+        var updatedTitle = $('#edit-title').val();
+        var updatedContent = $('#edit-content').val();
+        updatedContent = updatedContent.replace(/\n/g, '<br>');
+
+        var noticeDto = {
+            noticeId: selectedCommunityId,
+            noticeTitle: updatedTitle,
+            noticeContent: updatedContent
+        };
+
+        // 서버로 수정된 데이터를 전송 (Ajax)
+        ajaxPostJsonCall('/modify-notice-web', JSON.stringify(noticeDto), function (data) {
+            if (data.code === "0000") {
+                alert("공지사항이 수정되었습니다.");
+                findCommunity();
+
+                // 제목과 내용을 다시 label로 변경
+                $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
+                $('#label-content').html('내용: <span id="detail-content">' + updatedContent + '</span>');
+
+                // 수정 모드 해제
+                isEditing = false;
+                $('#save-btn').hide();
+                $('#edit-btn').show();
+            }
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 공지사항 삭제 버튼 클릭 시
+    $('#delete-btn').click(function () {
+        if (selectedCommunityId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
+            ajaxPostJsonCall('/delete-notice-web?id=' + selectedCommunityId, null, function (data) {
+                if (data.code === "0000") {
+                    alert("공지사항이 삭제되었습니다.");
+                    $('#detailModal').fadeOut();
+                    findCommunity();
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
+    });
+
+    function dateFormat(date) {
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+
+        var dateString = year + '-' + month  + '-' + day;
+
+        return dateString;
+    }
+
+    // 모든 공지사항 조회
+    function findCommunity() {
+        ajaxJsonCall('/community/find-all', null, function (data) {
+            drawTable(data);
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    }
+
+    function drawTable(data) {
+        // 테이블의 행 개수
+        var rowCount = table.rows.length;
+
+        if (data.code == "0000" && data.data.length > 0) {
+            // 최신 공지시항부터 나열
+            data.data.sort((a, b) => {
+                const dateA = a.createDate ? new Date(a.createDate) : new Date(a.updateDate);
+                const dateB = b.createDate ? new Date(b.createDate) : new Date(b.updateDate);
+                return dateB - dateA;
+            });
+
+            // 헤더를 제외한 모든 행 삭제
+            for (var i = rowCount - 1; i > 0; i--) {
+                table.deleteRow(i);
+            }
+
+            // 데이터 개수만큼 테이블에 추가
+            for (var i = 0; i < data.data.length; i++) {
+                var row = table.insertRow(-1);
+
+                row.setAttribute('data-community-id', data.data[i].communityId);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = data.data[i].communityTitle;
+                cell2.innerHTML = data.data[i].communityAuthor;
+            }
+            attachRowClickEvent();
+        } else {
+            // 헤더를 제외한 모든 행 삭제
+            for (var i = rowCount - 1; i > 0; i--) {
+                table.deleteRow(i);
+            }
+        }
+    }
+
+
+    // Community 글 등록 모달 닫기 시 호출되는 함수 (입력란 초기화)
+    function closeWriteModal() {
+        // 입력란 초기화
+        $('#writeForm')[0].reset();
+
+        // 모달 닫기
+        modal.style.display = "none";
+    }
+
+    // 모달 닫기 시 호출되는 함수 (수정 상태 복구)
+    function closeDetailModal() {
+        // 수정 상태 초기화
+        if (isEditing) {
+            // 현재 입력 중이던 내용을 다시 label로 복구
+            var titleText = $('#edit-title').val();
+            var contentText = $('#edit-content').val();
+
+            $('#label-title').html('<h3 id="detail-title">' + titleText + '</h3>');
+            $('#label-content').html('<span id="detail-content">' + contentText + '</span>');
+
+            // 저장 버튼 숨기고 수정 버튼 보이기
+            $('#save-btn').hide();
+            $('#edit-btn').show();
+            $('#delete-btn').show();
+
+            isEditing = false;
+        }
+
+        // 모달 닫기
+        detailModal.style.display = "none";
+    }
+
+</script>
 </body>
+
 </html>

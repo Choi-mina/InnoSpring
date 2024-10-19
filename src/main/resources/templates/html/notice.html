@@ -218,7 +218,7 @@
                 <input type="text" id="title" name="title"><br><br>
                 <label for="content">내용:</label><br>
                 <textarea id="content" name="content" rows="10" cols="50"></textarea><br><br>
-                <button type="submit" style="background-color: rgba(232 , 217 , 255); border-color: transparent">등록</button>
+                <button type="submit" class="save-btn">등록</button>
             </form>
         </div>
     </div>
@@ -323,7 +323,7 @@
             noticeContent: noticeContent
         };
 
-        // schedule 저장을 위한 API 호출
+        // 공지사항 저장을 위한 API 호출
         ajaxPostJsonCall('/save-notice-web', JSON.stringify(noticeDto), function(data) {
             if (data.code === "0000") {
                 // 모달 창 닫기 및 폼 초기화
