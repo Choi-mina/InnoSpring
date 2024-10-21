@@ -49,10 +49,12 @@ public class LoginController {
 
         if(LoginPassword != null){ // redis에 정보가 있는 경우
             if(LoginPassword.equals(password)){ // 비밀번호가 일치하는 경우 -> 로그인 성공
+                String flag = userService.getFlag(email);
                 response.setCode(ApiResult.SUCCESSS.getCode());
                 response.setMessage("Login Success");
                 HttpSession session = httpRequest.getSession();
                 session.setAttribute("email", email);
+                session.setAttribute("flag", flag);
                 session.setMaxInactiveInterval(3600);
             } else {    // 비밀번호가 일치하지 않는 경우 -> 로그인 실패
                 response.setCode(ApiResult.FAIL.getCode());
@@ -77,11 +79,12 @@ public class LoginController {
             if (result.getBody().getCode().equals("0000")) {    //  일치하는 회원O
                 // 세션 저장
                 session.setAttribute("email", email);
+                session.setAttribute("flag", (String) result.getBody().getData());
                 session.setMaxInactiveInterval(3600);
 
                 // Redis 저장
                 try {
-                    userService.saveUserData(email, password, sessionId);
+                    userService.saveUserData(email, password, sessionId, (String) result.getBody().getData());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

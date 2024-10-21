@@ -279,6 +279,9 @@
 
                         artistGrid.appendChild(gridItem);
 
+                        if(sessionFlag != null && sessionFlag == 'F')
+                            $('#write-btn').css('display', 'none');
+
                         // gridItem 클릭 시 상세 정보 모달 열기
                         gridItem.onclick = function() {
                             // 상태 초기화

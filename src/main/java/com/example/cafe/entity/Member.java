@@ -19,6 +19,7 @@ public class Member {
     public String password;
     public Timestamp createDate;
     public Timestamp updateDate;
+    public String flag;
 
 
     @PrePersist

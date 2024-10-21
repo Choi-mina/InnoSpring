@@ -22,6 +22,7 @@ public class MemberService {
         member.setPhoneNum(memberDto.getPhoneNum());
         member.setEmail(memberDto.getEmail());
         member.setPassword(memberDto.getPassword());
+        member.setFlag(memberDto.getFlag());
 
         memberRepository.save(member);
     }
@@ -38,6 +39,7 @@ public class MemberService {
                     .password(member.get().getPassword())
                     .createDate(member.get().getCreateDate())
                     .updateDate(member.get().getUpdateDate())
+                    .flag(member.get().getFlag())
                     .build();
         return memberDto;
     }
@@ -54,6 +56,7 @@ public class MemberService {
                     .password(member.getPassword())
                     .createDate(member.getCreateDate())
                     .updateDate(member.getUpdateDate())
+                    .flag(member.getFlag())
                     .build();
         }
         return memberDto;
@@ -71,6 +74,7 @@ public class MemberService {
                     .password(member.getPassword())
                     .createDate(member.getCreateDate())
                     .updateDate(member.getUpdateDate())
+                    .flag(member.getFlag())
                     .build();
         }
         return memberDto;

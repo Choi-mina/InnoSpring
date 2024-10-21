@@ -106,8 +106,6 @@
             const email = document.querySelector('input[name="email"]').value;
             const password = document.querySelector('input[name="userPassword"]').value;
 
-            console.log("email = " + email + " password = " + password);
-
             if (!email) {
                 alert("이메일을 입력해주세요.");
                 return false;
@@ -116,7 +114,6 @@
                 return false;
             } else {
                 ajaxJsonCall('/log-in-result?email=' + encodeURIComponent(email) + '&password=' + password, null, function (data) {
-                    console.log(data);
                     if (data.code === "0000") {
                         location.href = '/';
                     } else if (data.code === "9999") {

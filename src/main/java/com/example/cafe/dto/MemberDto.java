@@ -16,4 +16,5 @@ public class MemberDto {
     public String password;
     public Timestamp createDate;
     public Timestamp updateDate;
+    public String flag;
 }

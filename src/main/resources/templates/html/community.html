@@ -185,6 +185,8 @@
     // 페이지 로드
     $(document).ready(function() {
         findCommunity();
+        if(sessionFlag != null && sessionFlag == 'F')
+            $('#write-btn').css('display', 'none');
     });
 
     // 모달 관련 요소들 가져오기

@@ -254,6 +254,8 @@
     // 페이지 로드
     $(document).ready(function() {
         findNotice();
+        if(sessionFlag != null && sessionFlag == 'F')
+            $('#write-btn').css('display', 'none');
     });
 
     // select-search 옵션 값 가지고오기

@@ -20,6 +20,8 @@ public class MemberController {
     @PostMapping("/sign-up")
     public ResultEntity memSignUp(@RequestBody MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
+
+        memberDto.setFlag(memberDto.getFlag().equals("1") ? "F" : memberDto.getFlag().equals("2") ? "A" : "M" );
         try{
             if(!memValid(memberDto.getEmail())) {
                 memberService.memSignUp(memberDto);
@@ -42,8 +44,8 @@ public class MemberController {
     }
 
     @GetMapping("/login-in")
-    public ResultEntity<ApiResult> logIn(@RequestParam("email") String email, @RequestParam("password") String password) {
-        ResultEntity<ApiResult> result = new ResultEntity<ApiResult>();
+    public ResultEntity logIn(@RequestParam("email") String email, @RequestParam("password") String password) {
+        ResultEntity result = new ResultEntity<ApiResult>();
         try{
             // email로 회원 정보 조회
             MemberDto member = memberService.findByEmail(email);
@@ -52,6 +54,7 @@ public class MemberController {
                 if(member.getPassword().equals(password)) { // email과 password가 일치 -> 로그인 성공
                     result.setCode(ApiResult.SUCCESSS.getCode());
                     result.setMessage(ApiResult.SUCCESSS.getMessage());
+                    result.setData(member.getFlag());
                 } else {    // 로그인 실패
                     result.setCode(ApiResult.FAIL.getCode());
                     result.setMessage(ApiResult.FAIL.getMessage());
