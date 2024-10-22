@@ -15,7 +15,9 @@ public class Community {
     private int communityId;
     public String communityTitle;
     public String communityContent;
-    public String communityAuthor;
+    @ManyToOne
+    @JoinColumn(name = "community_author", referencedColumnName = "memId")
+    private Member communityAuthor;
     public Timestamp createDate;
     public Timestamp updateDate;
 

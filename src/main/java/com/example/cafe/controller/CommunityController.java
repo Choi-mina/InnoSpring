@@ -1,7 +1,10 @@
 package com.example.cafe.controller;
 
 import com.example.cafe.Service.CommunityService;
+import com.example.cafe.Service.MemberService;
 import com.example.cafe.dto.CommunityDto;
+import com.example.cafe.dto.MemberDto;
+import com.example.cafe.entity.Member;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +18,14 @@ import java.util.List;
 @RequestMapping("/community")
 public class CommunityController {
     private final CommunityService communityService;
+    private final MemberService memberService;
 
     @PostMapping("/save")
     public ResultEntity saveCommunity(@RequestBody CommunityDto communityDto) {
         ResultEntity result = new ResultEntity();
         try {
+            Member member = memberService.findByEmailEt(communityDto.getAuthor());
+            communityDto.setCommunityAuthor(member);
             communityService.saveCommunity(communityDto);
 
             // community save success
@@ -76,6 +82,8 @@ public class CommunityController {
     public ResultEntity modifyCommunity(@RequestBody CommunityDto communityDto) {
         ResultEntity result = new ResultEntity();
         try {
+            Member member = memberService.findByEmailEt(communityDto.getAuthor());
+            communityDto.setCommunityAuthor(member);
             communityService.modifyCommunity(communityDto);
 
             // community modify success

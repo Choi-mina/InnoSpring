@@ -28,39 +28,13 @@ public class CommunityService {
     }
 
     public List<CommunityDto> findAllCommunity() {
-        List<Community> communityList = communityRepository.findAll();
-        List<CommunityDto> communityDtoList = new ArrayList<>();
-        if(communityList != null)
-            for(Community community : communityList) {
-                CommunityDto communityDto = CommunityDto.builder()
-                        .communityId(community.getCommunityId())
-                        .communityTitle(community.getCommunityTitle())
-                        .communityContent(community.getCommunityContent())
-                        .communityAuthor(community.getCommunityAuthor())
-                        .createDate(community.getCreateDate())
-                        .updateDate(community.getUpdateDate())
-                        .build();
-
-                communityDtoList.add(communityDto);
-            }
+        List<CommunityDto> communityDtoList = communityRepository.findAllCommunity();
         return communityDtoList;
     }
 
     public CommunityDto findByIdCommunity(int communityId) {
-        Optional<Community> community = communityRepository.findById(Long.valueOf(communityId));
-        CommunityDto communityDto = new CommunityDto();
-        if(community != null) {
-            communityDto = CommunityDto.builder()
-                    .communityId(community.get().getCommunityId())
-                    .communityTitle(community.get().getCommunityTitle())
-                    .communityContent(community.get().getCommunityContent())
-                    .communityAuthor(community.get().getCommunityAuthor())
-                    .createDate(community.get().getCreateDate())
-                    .updateDate(community.get().getUpdateDate())
-                    .build();
-        }
-
-        return communityDto;
+        CommunityDto community = communityRepository.findCommunityById(communityId);
+        return community;
     }
 
     public void modifyCommunity(CommunityDto communityDto) {

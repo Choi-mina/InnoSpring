@@ -68,6 +68,7 @@ public class MemberService {
         MemberDto memberDto = null;
         if(member != null) {
             memberDto = MemberDto.builder()
+                    .memId(member.getMemId())
                     .userName(member.getUserName())
                     .email(member.getEmail())
                     .phoneNum(member.getPhoneNum())
@@ -78,6 +79,11 @@ public class MemberService {
                     .build();
         }
         return memberDto;
+    }
+
+    public Member findByEmailEt(String email) {
+        Member member = memberRepository.findByEmail(email);
+        return member;
     }
 
 }

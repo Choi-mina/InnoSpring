@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberDto {
+    private int memId;
     public String userName;
     public String phoneNum;
     public String email;

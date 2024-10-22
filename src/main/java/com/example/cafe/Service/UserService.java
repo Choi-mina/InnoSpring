@@ -43,11 +43,8 @@ public class UserService {
 
     public String getFlag(String email) throws Exception {
         String key = "user:session:" + email;
-        String encryptedPassword = hashOps.get(key, "flag");    // 비밀번호 복호화
-        if(encryptedPassword != null) { // redis에 key-value가 있는 경우
-            return EncryptionUtil.decrypt(encryptedPassword);
-        }
-        return null;
+        String flag = hashOps.get(key, "flag");
+        return flag;
     }
 
     public void deleteUserData(String email) {
