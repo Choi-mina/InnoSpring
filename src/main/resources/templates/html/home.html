@@ -7,32 +7,86 @@
     <link href="../css/home.css" rel="stylesheet" type="text/css"/>
     <title>Home</title>
     <style>
+        * {
+            box-sizing: border-box; /* 박스 모델 설정 */
+        }
+        body {
+            font-family: 'Cairo', sans-serif; /* 폰트 설정 */
+            background-color: #f9f9f9; /* 배경색 설정 */
+            margin: 0; /* 기본 마진 제거 */
+        }
         .home-div {
-            /*width: 100%;*/
-            /*height: 100%;*/
-            /*background-repeat: no-repeat;*/
-            /*background-position: center center;*/
-            /*background-size: cover;*/
-            /*padding: 10px 104px;*/
-            /*opacity: 1;*/
-            /*position: absolute;*/
-            /*top: 100px;*/
-            /*left: 0px;*/
             top: 100px;
-            left: 0px;
+            left: 0;
             width: 100%;
-            height: 87%;
+            height: calc(100% - 100px); /* 헤더 공간을 제외한 높이 */
             position: absolute;
-            align-items: center;
+            display: flex; /* 플렉스 박스 사용 */
+            flex-direction: column; /* 세로 방향 정렬 */
+            align-items: center; /* 중앙 정렬 */
+            justify-content: center; /* 수직 중앙 정렬 */
+        }
+        .menu-btn {
+            margin: 10px; /* 버튼 사이 여백 */
+            padding: 15px 30px; /* 버튼 패딩 */
+            font-size: 16px; /* 버튼 텍스트 크기 */
+            border: none; /* 테두리 제거 */
+            border-radius: 5px; /* 둥근 모서리 */
+            background-color: #6f42c1; /* 배경색 */
+            color: white; /* 글자색 */
+            cursor: pointer; /* 커서 포인터 변경 */
+            transition: background-color 0.3s; /* 배경색 전환 효과 */
+        }
+        .menu-btn:hover {
+            background-color: #5a31a1; /* 마우스 오버 시 색상 변화 */
+        }
+        .social-buttons {
+            margin-top: 20px; /* 소셜 버튼과 메뉴 버튼 사이 여백 */
+        }
+        .social-buttons {
+            margin: 5px; /* 소셜 버튼 사이 여백 */
+            padding: 10px 20px; /* 패딩 */
+            border: none; /* 테두리 제거 */
+            cursor: pointer; /* 커서 포인터 변경 */
+            transition: background-color 0.3s; /* 배경색 전환 효과 */
+        }
+        .social-image-button:hover {
+            background-color: #d5d8db; /* 마우스 오버 시 색상 변화 */
+        }
+        .social-image-button {
+            background: none; /* 배경 제거 */
+            border: none; /* 테두리 제거 */
+            cursor: pointer; /* 커서 포인터 변경 */
+            padding: 0; /* 패딩 제거 */
+        }
+        .social-image-button img {
+            width: 30px; /* 이미지 크기 설정 */
+            height: 30px; /* 이미지 크기 설정 */
         }
     </style>
 </head>
 <body>
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
 <div class="home-div">
-    <button onclick="location.href='/community-web'">Community</button>
-    <button onclick="location.href='/artist-web'">Artist</button>
-    <button onclick="location.href='/schedule-web'">Schedule</button>
+    <div>
+        <button onclick="location.href='/community-web'" class="menu-btn">Community</button>
+        <button onclick="location.href='/artist-web'" class="menu-btn">Artist</button>
+        <button onclick="location.href='/schedule-web'" class="menu-btn">Schedule</button>
+    </div>
+    <div class="social-buttons">
+        <button class="social-image-button" onclick="window.open('https://www.instagram.com/nakedxproud?igsh=aXVib2JvanNjYXJl', '_blank')">
+            <img src="/images/instagram.png" alt="Instagram" />
+        </button>
+        <button class="social-image-button" onclick="window.open('https://x.com/nakedxproud?s=21&t=GGbY2h5S3r0vacPcMSGrxA', '_blank')">
+            <img src="/images/twitter.png" alt="Twitter" />
+        </button>
+        <button class="social-image-button" onclick="window.open('https://weverse.io/kino/artistpedia?hl=ko', '_blank')">
+            <img src="/images/weverse.png" alt="Weverse" />
+        </button>
+        <button class="social-image-button" onclick="window.open('https://m.youtube.com/@official_kino', '_blank')">
+            <img src="/images/youtube.png" alt="Youtube" />
+        </button>
+    </div>
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
