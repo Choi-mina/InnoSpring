@@ -254,7 +254,7 @@
     // 페이지 로드
     $(document).ready(function() {
         findNotice();
-        if(sessionFlag != null && sessionFlag == 'F')
+        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
             $('#write-btn').css('display', 'none');
     });
 
@@ -379,6 +379,10 @@
                 $('#detailModal').fadeIn();
                 selectedNoticeId = noticeId;
                 adjustModalPosition();
+                if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F')) {
+                    $('#edit-btn').css('display', 'none');
+                    $('#delete-btn').css('display', 'none');
+                }
             }
         }, function(error) {
             alert("An error occurred: " + error.message);

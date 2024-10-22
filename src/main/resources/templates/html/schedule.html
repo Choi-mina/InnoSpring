@@ -402,7 +402,7 @@
             });
             $('#tbl-month').append($tr);
         }
-        if(sessionFlag != null && sessionFlag == 'F')
+        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
             $('.add-event').css('display', 'none');
     }
 

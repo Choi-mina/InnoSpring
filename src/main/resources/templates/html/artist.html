@@ -279,7 +279,7 @@
 
                         artistGrid.appendChild(gridItem);
 
-                        if(sessionFlag != null && sessionFlag == 'F')
+                        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
                             $('#write-btn').css('display', 'none');
 
                         // gridItem 클릭 시 상세 정보 모달 열기
