@@ -565,31 +565,32 @@
     });
 
     // 일정 클릭 시 수정 모달 띄우기
-    $(document).on('click', '#event-list li', function (e) {
-        e.preventDefault();
+    if(sessionFlag != null && sessionFlag != 'F')
+        $(document).on('click', '#event-list li', function (e) {
+            e.preventDefault();
 
-        // 일정확인 모델 닫기
-        $('#event-modal').fadeOut();
+            // 일정확인 모델 닫기
+            $('#event-modal').fadeOut();
 
-        // 일정 정보 가져오기
-        var scheduleText = $(this).text(); // 전체 텍스트 가져오기
-        var scheduleInfo = scheduleText.split(/\s+/, 1);
-        var scheduleTime = scheduleInfo[0]; // 시간
-        var scheduleName = scheduleText.substring(scheduleTime.length).trim(); // 시간 이후의 나머지 텍스트 가져오기 (앞뒤 공백 제거)
-        const scheduleId = $(this).data('schedule-id'); // 클릭한 리스트 항목의 scheduleId 가져오기
-        // 모달에 scheduleId를 저장
-        $('#edit-schedule-form').data('edit-schedule-id', scheduleId);
+            // 일정 정보 가져오기
+            var scheduleText = $(this).text(); // 전체 텍스트 가져오기
+            var scheduleInfo = scheduleText.split(/\s+/, 1);
+            var scheduleTime = scheduleInfo[0]; // 시간
+            var scheduleName = scheduleText.substring(scheduleTime.length).trim(); // 시간 이후의 나머지 텍스트 가져오기 (앞뒤 공백 제거)
+            const scheduleId = $(this).data('schedule-id'); // 클릭한 리스트 항목의 scheduleId 가져오기
+            // 모달에 scheduleId를 저장
+            $('#edit-schedule-form').data('edit-schedule-id', scheduleId);
 
 
-        // 수정 모달에 값 설정
-        $('#edit-schedule-modal-date').text($('#modal-date').text());
-        $('#edit-event-title').val(scheduleName);
-        $('#edit-event-time').val(scheduleTime);
-        $('#edit-schedule-id').val(scheduleId); // 숨겨진 ID 필드에 값 설정
+            // 수정 모달에 값 설정
+            $('#edit-schedule-modal-date').text($('#modal-date').text());
+            $('#edit-event-title').val(scheduleName);
+            $('#edit-event-time').val(scheduleTime);
+            $('#edit-schedule-id').val(scheduleId); // 숨겨진 ID 필드에 값 설정
 
-        // 수정 모달 열기
-        $('#edit-schedule-modal').fadeIn();
-    });
+            // 수정 모달 열기
+            $('#edit-schedule-modal').fadeIn();
+        });
 
     // 수정 모달 폼 제출 시
     $('#edit-schedule-form').on('submit', function (e) {

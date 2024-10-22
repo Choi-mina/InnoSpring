@@ -304,6 +304,11 @@
                             detailModal.style.display = "block";
                             document.body.classList.add('no-scroll'); // 스크롤 비활성화
 
+                            if(sessionFlag == null || sessionFlag == 'F') {
+                                editButton.style.display = "none";
+                                deleteButton.style.display = "none";
+                            }
+
                             // 수정버튼 클릭 핸들러
                             editButton.onclick = function() {
                                 // 기존 내용 로드

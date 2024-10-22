@@ -38,6 +38,10 @@
             border: 0;
             background-color: transparent;
         }
+        #date {
+            font-size: 20px;
+            vertical-align: middle;
+        }
         .notice {
             color: rgba(83 , 52 , 129);
             font-size: 20px;
@@ -79,7 +83,10 @@
 <body>
 <div class="header-navbar" id="header-navbar">
     <div class="navbar-div" id="navbar-div">
-        <button class="logo" onclick="location.href='/'"><span>KINO</span></button>
+        <button class="logo" onclick="location.href='/'">
+            <span>KINO</span>
+            <label id="date"></label>
+        </button>
         <div class="div1"> </div>
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
         <button class="mypage" id="mypage" onclick="location.href='/mypage'"><span>마이페이지</span></button>
@@ -101,6 +108,10 @@
             document.getElementById("login-btn-image").src = "/images/login.png";
             document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
             document.getElementById("mypage").style.display = "block";
+            if(session.flag == 'F') {
+                var date = calDate(session.date);
+                $('#date').text('ꯁ + ' + date);
+            }
         }
     }, function (error) {
         alert("An error occurred: " + error.message);
@@ -135,6 +146,24 @@
             }
         }
     });
+
+    function calDate(dateString) {
+        // 문자열을 Date 객체로 변환
+        const date = new Date(dateString);
+
+        // 오늘 날짜 가져오기 (시간 정보 제거)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // 입력된 날짜의 시간 정보 제거
+        const inputDate = new Date(date);
+        inputDate.setHours(0, 0, 0, 0);
+
+        // 날짜 차이 계산 (하루는 86400000 밀리초)
+        const timeDifference = today - inputDate;
+        const daysPassed = timeDifference / (1000 * 60 * 60 * 24);
+        return daysPassed;
+    }
 
 </script>
 </html>

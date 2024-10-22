@@ -46,6 +46,7 @@ public class WebController {
         Map<String, Object> sessionValues = new HashMap<>();
         sessionValues.put("email", session.getAttribute("email"));
         sessionValues.put("flag", session.getAttribute("flag"));
+        sessionValues.put("date", session.getAttribute("date"));
         return ResponseEntity.ok(sessionValues);
     }
 

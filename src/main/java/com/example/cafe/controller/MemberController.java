@@ -54,7 +54,7 @@ public class MemberController {
                 if(member.getPassword().equals(password)) { // email과 password가 일치 -> 로그인 성공
                     result.setCode(ApiResult.SUCCESSS.getCode());
                     result.setMessage(ApiResult.SUCCESSS.getMessage());
-                    result.setData(member.getFlag());
+                    result.setData(member);
                 } else {    // 로그인 실패
                     result.setCode(ApiResult.FAIL.getCode());
                     result.setMessage(ApiResult.FAIL.getMessage());
