@@ -467,13 +467,6 @@
         $('#schedule-modal').fadeOut(); // 모달 창 닫기
     });
 
-    // 모달 외부 클릭 시 닫기
-    $(window).on('click', function(e) {
-        if (e.target.id === 'schedule-modal') {
-            $('#schedule-modal').fadeOut();
-        }
-    });
-
     // 스케줄 저장 이벤트는 페이지가 로드될 때 한 번만 등록
     $('#schedule-form').on('submit', function(e) {
         e.preventDefault(); // 폼의 기본 제출 동작 방지
