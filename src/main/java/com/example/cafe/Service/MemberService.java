@@ -1,9 +1,8 @@
 package com.example.cafe.Service;
 
-import com.example.cafe.Repository.MemberRepository;
+import com.example.cafe.Repository.Member.MemberRepository;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.Member;
-import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,7 @@ public class MemberService {
         member.setPhoneNum(memberDto.getPhoneNum());
         member.setEmail(memberDto.getEmail());
         member.setPassword(memberDto.getPassword());
+        member.setFlag(memberDto.getFlag());
 
         memberRepository.save(member);
     }
@@ -39,6 +39,7 @@ public class MemberService {
                     .password(member.get().getPassword())
                     .createDate(member.get().getCreateDate())
                     .updateDate(member.get().getUpdateDate())
+                    .flag(member.get().getFlag())
                     .build();
         return memberDto;
     }
@@ -55,6 +56,7 @@ public class MemberService {
                     .password(member.getPassword())
                     .createDate(member.getCreateDate())
                     .updateDate(member.getUpdateDate())
+                    .flag(member.getFlag())
                     .build();
         }
         return memberDto;
@@ -66,15 +68,40 @@ public class MemberService {
         MemberDto memberDto = null;
         if(member != null) {
             memberDto = MemberDto.builder()
+                    .memId(member.getMemId())
                     .userName(member.getUserName())
                     .email(member.getEmail())
                     .phoneNum(member.getPhoneNum())
                     .password(member.getPassword())
                     .createDate(member.getCreateDate())
                     .updateDate(member.getUpdateDate())
+                    .flag(member.getFlag())
                     .build();
         }
         return memberDto;
+    }
+
+    public Member findByEmailEt(String email) {
+        Member member = memberRepository.findByEmail(email);
+        return member;
+    }
+
+    public void modifyMember(MemberDto memberDto) {
+        // Dto -> Entity
+        Member member = new Member();
+        member.setMemId(memberDto.getMemId());
+        member.setUserName(memberDto.getUserName());
+        member.setPhoneNum(memberDto.getPhoneNum());
+        member.setEmail(memberDto.getEmail());
+        member.setPassword(memberDto.getPassword());
+        member.setFlag(memberDto.getFlag());
+        member.setCreateDate(memberDto.getCreateDate());
+
+        memberRepository.save(member);
+    }
+
+    public void deleteMember(Long id) {
+        memberRepository.deleteById(id);
     }
 
 }

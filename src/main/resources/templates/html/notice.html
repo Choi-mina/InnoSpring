@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Notice</title>
+    <style>
+        .frame-container {
+            top: 100px;
+            left: 0px;
+            width: 100%;
+            height: 87%;
+            position: absolute;
+            align-items: center;
+        }
+        .table-class {
+            top: 20%;
+            left: 10%;
+            width: 80%;
+            position: absolute;
+            border-radius: 8px;
+            border: 1px solid rgba(232 , 217 , 255);
+        }
+        tr {
+            height : 40px;
+            text-align: center;
+        }
+        .table-header-text-title {
+            width: 80%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .table-header-text-date {
+            width: 20%;
+            text-align: center;
+            font-weight: bold;
+        }
+        .notice-div {
+            left: 32%;
+            top: 8%;
+            width: 35%;
+            height: 6%;
+            position: relative;
+            display: flex;
+            border: 1px solid rgba(232 , 217 , 255);
+            border-radius: 5px;
+        }
+        .select-search {
+            width: 25%;
+            height: 100%;
+            position: absolute;
+            text-align: center;
+            flex: 0.3;
+            border: 0px;
+            border-right: 1px solid rgba(232 , 217 , 255);
+        }
+        .search-box {
+            left: 28%;
+            width: 60%;
+            height: 90%;
+            flex: 1;
+            position: absolute;
+        }
+        .search-text-box {
+            width: 100%;
+            height: 100%;
+            text-align: right;
+            position: absolute;
+            border: 0px;
+        }
+        .search-text-box2 {
+            left: 60%;
+            width: 40%;
+            height: 100%;
+            text-align: right;
+            position: absolute;
+            border: 0px;
+        }
+        .search-btn {
+            left: 90%;
+            width: 10%;
+            height: 98%;
+            position: absolute;
+            flex: 0.2;
+            background-color: white;
+            border: 0px;
+        }
+        .search-image {
+            left: 10%;
+            top: 5%;
+            width: 65%;
+            height: 80%;
+            position: absolute;
+            background-color: white;
+        }
+        .write-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(232 , 217 , 255);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .write-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+        /* 모달 기본 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
+        }
+
+        /* 모달 콘텐츠 */
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: transparent;
+            width: 50%;
+            border-radius: 10px;
+            max-height: 80%; /* Set a max height for the modal */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+
+        input,textarea {
+            border: 1px solid rgba(83 , 52 , 129);
+            border-radius: 8px;
+        }
+
+        /* 닫기 버튼 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .close-detail {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-detail:hover,
+        .close-detail:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .detail-modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .edit-btn, .delete-btn, .save-btn {
+            background-color: rgba(232 , 217 , 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(255, 100, 100);
+        }
+
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+<th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
+
+<div class="frame-container">
+    <div class="notice-div">
+        <select class="select-search" id="select-search">
+            <option value="all" selected>전체</option>
+            <option value="title">제목</option>
+            <option value="date">기간</option>
+        </select>
+        <div class="search-box" id="search-box">
+            <input type="text" class="search-text-box" id="search-text-box">
+        </div>
+        <button class="search-btn" id="search-btn" type="button">
+            <img class = "search-image" src="images/search-icon.png"/>
+        </button>
+    </div>
+    <table class="table-class" id="notice-table">
+        <td class="table-header-text-title">제목</td>
+        <td class="table-header-text-date">날짜</td>
+    </table>
+    <button class="write-btn" id="write-btn">+</button>
+
+    <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
+    <div id="writeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>공지사항 등록</h2>
+            <form id="writeForm">
+                <label for="title">제목:</label><br>
+                <input type="text" id="title" name="title"><br><br>
+                <label for="content">내용:</label><br>
+                <textarea id="content" name="content" rows="10" cols="50"></textarea><br><br>
+                <button type="submit" class="save-btn">등록</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 공지사항 상세 보기 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-detail">&times;</span>
+            <h3></h3>
+            <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
+            <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
+
+            <p id="detail-date">등록일: YYYY-MM-DD</p>
+
+            <!-- 수정 및 삭제 버튼 -->
+            <div class="detail-modal-buttons">
+                <button class="edit-btn" id="edit-btn">수정</button>
+                <button class="delete-btn" id="delete-btn">삭제</button>
+                <button class="save-btn" id="save-btn" style="display: none;">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+
+<script th:src="@{/common/common.ajax.js}"></script>
+<script>
+    var table = document.getElementById("notice-table");
+    var selectedNoticeId = null;
+    var isEditing = false;
+
+    // 페이지 로드
+    $(document).ready(function() {
+        findNotice();
+        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
+            $('#write-btn').css('display', 'none');
+    });
+
+    // select-search 옵션 값 가지고오기
+    $("#select-search").change(function() {
+        $('#search-text-box').val('');
+        var selectedValue = $(this).val();
+
+        // select 박스 값에 따라 input type 변경
+        if(selectedValue === "date") {
+            var spanElement = $("<span id = \"dateHy\">-</span>");
+            var additionalInput = $("<input>", {
+                type: "date",
+                class: "search-text-box2",
+                id: "search-text-box2"
+            });
+            $(".search-box").append(spanElement);
+            $(".search-box").append(additionalInput);
+            $("#search-text-box").width("40%");
+            $("#search-text-box").attr("type", "date");
+            $("#search-text-box2").attr("type", "date");
+        } else {
+            // date가 아닌 경우 추가적인 input 요소 제거
+            $("#dateHy").remove();
+            $("#search-text-box2").remove();
+            $("#search-text-box").width("100%");
+            $("#search-text-box").attr("type", "text");
+        }
+    });
+
+    // 검색 버튼 이벤트
+    $("#search-btn").click(function() {
+        handleSearch();
+
+    });
+
+    // 모달 관련 요소들 가져오기
+    var modal = document.getElementById("writeModal");
+    var btn = document.getElementById("write-btn");
+    var span = document.getElementsByClassName("close")[0];
+
+    // 글작성 버튼 클릭 시 모달 열기
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // X 버튼 클릭 시 모달 닫기
+    span.onclick = function() {
+        closeWriteModal();
+    }
+
+    //  공지사항 등록
+    $('#writeForm').on('submit', function(e) {
+        e.preventDefault(); // 폼의 기본 제출 동작 방지
+        var noticeTitle = $('#title').val();
+        var noticeContent = $('#content').val();
+        noticeContent = noticeContent.replace(/\n/g, '<br>');
+
+        var noticeDto = {
+            noticeTitle: noticeTitle,
+            noticeContent: noticeContent
+        };
+
+        // 공지사항 저장을 위한 API 호출
+        ajaxPostJsonCall('/save-notice-web', JSON.stringify(noticeDto), function(data) {
+            if (data.code === "0000") {
+                // 모달 창 닫기 및 폼 초기화
+                $('#writeModal').fadeOut();
+                $('#writeForm')[0].reset(); // 폼 초기화
+                findNotice();
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 공지사항 리스트에서 클릭 이벤트 설정
+    function attachRowClickEvent() {
+        $('#notice-table tr').each(function() {
+            $(this).click(function() {
+                var noticeId = $(this).attr('data-notice-id');
+                if (noticeId) {
+                    // 공지사항 상세정보 가져오기
+                    getNoticeDetail(noticeId);
+                }
+            });
+        });
+    }
+
+    // Adjust modal position
+    function adjustModalPosition() {
+        var modalContent = $('.modal-content');
+        var windowHeight = $(window).height();
+        var modalHeight = modalContent.outerHeight();
+
+        // Check if modal height exceeds window height
+        if (modalHeight > windowHeight * 0.8) { // Allow 80% of window height
+            modalContent.css('top', '10%'); // Center it vertically
+        } else {
+            var topOffset = (windowHeight - modalHeight) / 2;
+            modalContent.css('top', topOffset + 'px'); // Center it vertically
+        }
+    }
+
+    // 공지사항 상세 정보 가져오기
+    function getNoticeDetail(noticeId) {
+        ajaxJsonCall('/find-by-id-notice-web?id='+noticeId, null, function(data) {
+            if (data.code === "0000") {
+                $('#detail-title').text(data.data.noticeTitle);
+                $('#detail-content').html(data.data.noticeContent);
+                if(data.data.createDate == null)
+                    $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
+                else
+                    $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
+                $('#detailModal').fadeIn();
+                selectedNoticeId = noticeId;
+                adjustModalPosition();
+                if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F')) {
+                    $('#edit-btn').css('display', 'none');
+                    $('#delete-btn').css('display', 'none');
+                }
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    }
+
+    // 모달 관련 요소들
+    var detailModal = document.getElementById("detailModal");
+    var detailClose = document.getElementsByClassName("close-detail")[0];
+
+    // X 버튼 클릭 시 모달 닫기
+    detailClose.onclick = function() {
+        closeDetailModal();
+    }
+
+    // 수정 버튼 클릭 시
+    $('#edit-btn').click(function () {
+        if (!isEditing) {
+            isEditing = true;
+
+            // 제목과 내용을 input과 textarea로 변경
+            var titleText = $('#detail-title').text();
+            var contentHtml = $('#detail-content').html();
+            var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n');
+
+            $('#label-title').html('제목: <input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
+            $('#label-content').html('내용: <textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
+
+            // 저장 버튼 표시
+            $('#save-btn').show();
+            $('#edit-btn').hide();
+            $('#delete-btn').hide();
+        }
+    });
+
+    // 저장 버튼 클릭 시
+    $('#save-btn').click(function () {
+        var updatedTitle = $('#edit-title').val();
+        var updatedContent = $('#edit-content').val();
+        updatedContent = updatedContent.replace(/\n/g, '<br>');
+
+        var noticeDto = {
+            noticeId: selectedNoticeId,
+            noticeTitle: updatedTitle,
+            noticeContent: updatedContent
+        };
+
+        // 서버로 수정된 데이터를 전송 (Ajax)
+        ajaxPostJsonCall('/modify-notice-web', JSON.stringify(noticeDto), function (data) {
+            if (data.code === "0000") {
+                alert("공지사항이 수정되었습니다.");
+                findNotice();
+
+                // 제목과 내용을 다시 label로 변경
+                $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
+                $('#label-content').html('내용: <span id="detail-content">' + updatedContent + '</span>');
+
+                // 수정 모드 해제
+                isEditing = false;
+                $('#save-btn').hide();
+                $('#edit-btn').show();
+            }
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 공지사항 삭제 버튼 클릭 시
+    $('#delete-btn').click(function () {
+        if (selectedNoticeId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
+            ajaxPostJsonCall('/delete-notice-web?id=' + selectedNoticeId, null, function (data) {
+                if (data.code === "0000") {
+                    alert("공지사항이 삭제되었습니다.");
+                    $('#detailModal').fadeOut();
+                    findNotice();
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
+    });
+
+    function dateFormat(date) {
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+
+        var dateString = year + '-' + month  + '-' + day;
+
+        return dateString;
+    }
+
+    // 모든 공지사항 조회
+    function findNotice() {
+        ajaxJsonCall('/find-all-notice-web', null, function (data) {
+            drawTable(data);
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    }
+
+    function drawTable(data) {
+        // 테이블의 행 개수
+        var rowCount = table.rows.length;
+
+        if (data.code == "0000" && data.data.length > 0) {
+            // 최신 공지시항부터 나열
+            data.data.sort((a, b) => {
+                const dateA = a.createDate ? new Date(a.createDate) : new Date(a.updateDate);
+                const dateB = b.createDate ? new Date(b.createDate) : new Date(b.updateDate);
+                return dateB - dateA;
+            });
+
+            // 헤더를 제외한 모든 행 삭제
+            for (var i = rowCount - 1; i > 0; i--) {
+                table.deleteRow(i);
+            }
+
+            // 데이터 개수만큼 테이블에 추가
+            for (var i = 0; i < data.data.length; i++) {
+                var row = table.insertRow(-1);
+
+                row.setAttribute('data-notice-id', data.data[i].noticeId);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = data.data[i].noticeTitle;
+
+                var date = null;
+                if (data.data[i].createDate == null)
+                    date = new Date(data.data[i].updateDate);
+                else
+                    date = new Date(data.data[i].createDate);
+
+                cell2.innerHTML = dateFormat(date);
+            }
+            attachRowClickEvent();
+        } else {
+            // 헤더를 제외한 모든 행 삭제
+            for (var i = rowCount - 1; i > 0; i--) {
+                table.deleteRow(i);
+            }
+        }
+    }
+
+
+    // 공지사항 등록 모달 닫기 시 호출되는 함수 (입력란 초기화)
+    function closeWriteModal() {
+        // 입력란 초기화
+        $('#writeForm')[0].reset();
+
+        // 모달 닫기
+        modal.style.display = "none";
+    }
+
+    // 모달 닫기 시 호출되는 함수 (수정 상태 복구)
+    function closeDetailModal() {
+        // 수정 상태 초기화
+        if (isEditing) {
+            // 현재 입력 중이던 내용을 다시 label로 복구
+            var titleText = $('#edit-title').val();
+            var contentText = $('#edit-content').val();
+
+            $('#label-title').html('<h3 id="detail-title">' + titleText + '</h3>');
+            $('#label-content').html('<span id="detail-content">' + contentText + '</span>');
+
+            // 저장 버튼 숨기고 수정 버튼 보이기
+            $('#save-btn').hide();
+            $('#edit-btn').show();
+            $('#delete-btn').show();
+
+            isEditing = false;
+        }
+
+        // 모달 닫기
+        detailModal.style.display = "none";
+    }
+
+    function handleSearch() {   // 검색 이벤트 함수
+        var searchType = $('#select-search').val();
+        var searchText = $('#search-text-box').val();
+
+        if(searchType=="title") {    // 제목으로 검색하는 경우
+            if(searchText == '' || searchText == null) {
+                alert('검색할 공지사항의 제목을 입력해주세요.');
+            } else {
+                const param = {};
+                param["title"] = searchText;
+                ajaxJsonCall('/find-by-title-notice-web', param, function(data) {
+                    drawTable(data);
+                });
+            }
+        } else if(searchType=="date") {   // 진료 날짜 검색하는 경우
+            var searchText2 = $('#search-text-box2').val();
+            if(searchText == '' || searchText == null || searchText2 == '' || searchText2 == null) {
+                alert('검색할 기간을 선택주세요.');
+            } else {
+                const params = {};
+                params["date1"] = searchText;
+                params["date2"] = searchText2;
+                ajaxJsonCall('/find-by-date-notice-web', params, function(data) {
+                    drawTable(data);
+                });
+            }
+
+        } else {    // 전체인 경우
+            findNotice();
+        }
+    }
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
+    <link href="../css/home.css" rel="stylesheet" type="text/css"/>
+    <title>Schedule</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-size: 16px;
+            overflow: scroll;
+        }
+        .schedule-div {
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            padding: 10px 104px;
+            position: absolute;
+            top: 100px;
+            left: 0;
+        }
+
+        .date-month {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        table.date-month {
+            width: 80%;
+            table-layout: fixed;
+            font-size: 20px;
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th, td {
+            width: 14.28%;
+            height: 80px;
+            text-align: center;
+            font-size: 20px;
+            padding: 10px;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        td .add-event {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(83 , 52 , 129);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 16px;
+            line-height: 24px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        td:hover .add-event {
+            display: block;
+        }
+
+
+        td a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            line-height: 60px;
+            font-size: 18px;
+        }
+
+        #month-prev {
+            background-color: transparent;
+            border-color: transparent;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        #today-btn {
+            background-color: transparent;
+            border: transparent;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        #month-next {
+            background-color: transparent;
+            border-color: transparent;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        #today-btn:hover {
+            border-color: #555;
+        }
+
+        td.sun {
+            color: red;
+        }
+
+        td.sat {
+            color: blue;
+        }
+
+        td.today a {
+            background-color: rgba(232, 217, 255, 1);
+            padding: 5px 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .modal {
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            top: 20%;
+            transform: translate(-50%, -20%);
+            width: 400px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .modal-content {
+            text-align: center;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #event-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+
+        .schedule-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* 모달 창 내용 */
+        .schedule-modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: transparent;
+            width: 500px;
+            text-align: left;
+        }
+
+        input {
+            border: 1px solid rgba(83 , 52 , 129);
+            border-radius: 8px;
+        }
+
+        /* 닫기 버튼 스타일 */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+<th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
+<div class="schedule-div">
+    <div class="date-wrap">
+        <div class="date-month">
+            <span id="month-this">2022.05</span>
+            <div class="button_wrap">
+                <button type="button" id="month-prev" class="month-move" data-ym="2022-04-01"> < </button>
+                <button type="button" id="today-btn">Today</button>
+                <button type="button" id="month-next" class="month-move" data-ym="2022-06-01"> > </button>
+            </div>
+        </div>
+        <table class="date-month">
+            <thead>
+            <tr>
+                <th>일</th>
+                <th>월</th>
+                <th>화</th>
+                <th>수</th>
+                <th>목</th>
+                <th>금</th>
+                <th>토</th>
+            </tr>
+            </thead>
+            <tbody id="tbl-month">
+            <tr>
+                <td class="sun"><a>1</a><button class="add-event">+</button></td>
+                <td class=""><a href="/news/schedule?date=2022-05-02">2</a><button class="add-event">+</button></td>
+                <td class=""><a>3</a><button class="add-event">+</button></td>
+                <td class=""><a>4</a><button class="add-event">+</button></td>
+                <td class="today"><a>5</a><button class="add-event">+</button></td>
+                <td class=""><a>6</a><button class="add-event">+</button></td>
+                <td class="sat"><a>7</a><button class="add-event">+</button></td>
+            </tr>
+            <!-- 행 반복 -->
+            <tr>
+                <td class="sun"><a>29</a><button class="add-event">+</button></td>
+                <td class=""><a>30</a><button class="add-event">+</button></td>
+                <td class=""><a>31</a><button class="add-event">+</button></td>
+                <td class=""><a></a><button class="add-event">+</button></td>
+                <td class=""><a></a><button class="add-event">+</button></td>
+                <td class=""><a></a><button class="add-event">+</button></td>
+                <td class="sat"></a><button class="add-event">+</button>/td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!--    일정 확인 모달창     -->
+    <div id="event-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-date"></h2>
+            <div id="event-list">
+                <!-- 여기에 해당 날짜의 일정을 표시 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 스케줄 추가 모달 -->
+    <div id="schedule-modal" class="schedule-modal" style="display:none;">
+        <div class="schedule-modal-content">
+            <span class="close">&times;</span>
+            <h2 id="schedule-modal-date"></h2>
+            <form id="schedule-form">
+                <label for="event-title">스케줄 제목:</label>
+                <input type="text" id="event-title" name="event-title" required><br><br>
+
+                <label for="event-time">시간:</label>
+                <input type="time" id="event-time" name="event-time"><br><br>
+
+<!--                <label for="event-desc">설명:</label><br>-->
+<!--                <textarea id="event-desc" name="event-desc" rows="4" cols="50"></textarea><br><br>-->
+
+                <button type="submit" style="background-color: rgba(232 , 217 , 255); border-color: transparent" >저장</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 일정 수정 모달 -->
+    <div id="edit-schedule-modal" class="schedule-modal" style="display:none;">
+        <div class="schedule-modal-content">
+            <span class="close">&times;</span>
+            <h2 id="edit-schedule-modal-date"></h2>
+            <form id="edit-schedule-form">
+                <input type="hidden" id="edit-schedule-id" name="edit-schedule-id" required> <!-- 숨겨진 ID 필드 -->
+                <label for="edit-event-title">스케줄 제목:</label>
+                <input type="text" id="edit-event-title" name="edit-event-title" required><br><br>
+
+                <label for="edit-event-time">시간:</label>
+                <input type="time" id="edit-event-time" name="edit-event-time"><br><br>
+
+                <button type="submit" style="background-color: rgba(232 , 217 , 255); border-color: transparent">저장</button>
+                <button type="button" id="delete-schedule-button" style="background-color: rgba(255, 100, 100); border-color: transparent; color: white; margin-left: 10px;">삭제</button> <!-- 삭제 버튼 -->
+            </form>
+        </div>
+    </div>
+
+</div>
+<th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
+</body>
+<script th:src="@{/common/common.ajax.js}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function prevMonth(date) {
+        var target = new Date(date);
+        target.setDate(1);
+        target.setMonth(target.getMonth() - 1);
+        return getYmd(target);
+    }
+
+    function nextMonth(date) {
+        var target = new Date(date);
+        target.setDate(1);
+        target.setMonth(target.getMonth() + 1);
+        return getYmd(target);
+    }
+
+    function getYmd(target) {
+        // IE에서 날짜 문자열에 0이 없으면 인식 못함
+        var month = ('0' + (target.getMonth() + 1)).slice(-2);
+        return [target.getFullYear(), month, '01'].join('-');
+    }
+
+    function fullDays(date) {
+        var target = new Date(date);
+        var year = target.getFullYear();
+        var month = target.getMonth();
+
+        var firstWeekDay = new Date(year, month, 1).getDay();
+        var thisDays = new Date(year, month + 1, 0).getDate();
+
+        // 월 표시 달력이 가지는 셀 갯수는 3가지 가운데 하나이다.
+        // var cell = [28, 35, 42].filter(n => n >= (firstWeekDay + thisDays)).shift();
+        var cell = [28, 35, 42].filter(function (n) {
+            return n >= (firstWeekDay + thisDays);
+        }).shift();
+
+        // 셀 초기화, IE에서 Array.fill()을 지원하지 않아서 변경
+        // var days = new Array(cell).fill({date: '', dayNum: '', today: false});
+        var days = []
+        for (var i = 0; i < cell; i++) {
+            days[i] = {
+                date: '',
+                dayNum: '',
+                today: false
+            };
+        }
+
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var inDate;
+        for (var index = firstWeekDay, i = 1; i <= thisDays; index++, i++) {
+            inDate = new Date(year, month, i);
+            days[index] = {
+                date: i,
+                dayNum: inDate.getDay(),
+                today: (inDate.getTime() === today.getTime())
+            };
+        }
+
+        return days;
+    }
+    function drawMonth(date) {
+        $('#month-this').text(date.substring(0, 7).replace('-', '.'));
+        $('#month-prev').data('ym', prevMonth(date));
+        $('#month-next').data('ym', nextMonth(date));
+
+        $('#tbl-month').empty();
+
+        var td = '<td class="__REST__ __TODAY__"><a __HREF__>__DATE__</a><button class="add-event">+</button></td>';
+        // var href = '/depart/schedule?date=' + date.substring(0, 8);
+        var hasEvent;
+        var tdClass;
+        var week = null;
+        var days = fullDays(date);
+        for (var i = 0, length = days.length; i < length; i += 7) {
+            // 전체 셀을 주단위로 잘라서 사용
+            week = days.slice(i, i + 7);
+
+            var $tr = $('<tr></tr>');
+            week.forEach(function (obj, index) {
+                hasEvent = (index === 3);
+                tdClass = (index === 0)? 'sun': '';
+                tdClass = (index === 6)? 'sat': tdClass;
+
+                $tr.append(td.replace('__REST__', tdClass)
+                    .replace('__TODAY__', (obj['today'])? 'today': '')
+                    // .replace('__HREF__', (hasEvent)? 'href="'+ href + ('0' + obj['date']).slice(-2) +'"': '')
+                    .replace('__DATE__', obj['date']));
+            });
+            $('#tbl-month').append($tr);
+        }
+        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
+            $('.add-event').css('display', 'none');
+    }
+
+    // scheduleDate를 hh:mm 형식으로 변환하는 함수
+    function formatTime(dateTimeStr) {
+        const date = new Date(dateTimeStr);
+        const hours = String(date.getHours()).padStart(2, '0'); // 두 자리 숫자 형식으로
+        const minutes = String(date.getMinutes()).padStart(2, '0'); // 두 자리 숫자 형식으로
+        return `${hours}:${minutes}`;
+    }
+
+    function convertDateFormat(dateString) {
+        // 'xxxx년 xx월 xx일' 형식의 문자열에서 연, 월, 일을 추출
+        const regex = /(\d{4})년 (\d{1,2})월 (\d{1,2})일/;
+        const match = dateString.match(regex);
+
+        if (match) {
+            const year = match[1];
+            const month = match[2].padStart(2, '0'); // 월을 두 자리로 맞추기
+            const day = match[3].padStart(2, '0'); // 일을 두 자리로 맞추기
+
+            return `${year}-${month}-${day}`; // 'yyyy-mm-dd' 형식으로 반환
+        } else {
+            throw new Error('Invalid date format'); // 잘못된 형식일 경우 예외 처리
+        }
+    }
+
+
+    $(function () {
+        var date = (new Date()).toISOString().substring(0, 10);
+        drawMonth(date);
+
+        $('.month-move').on('click', function (e) {
+            e.preventDefault();
+
+            drawMonth($(this).data('ym'));
+        });
+
+        // Today 버튼 클릭 시 오늘 날짜로 이동
+        $('#today-btn').on('click', function (e) {
+            e.preventDefault();
+            var today = new Date().toISOString().substring(0, 10);
+            drawMonth(today);  // 오늘 날짜로 달력 그리기
+        });
+    });
+
+    $(document).on('click', '.add-event', function(e) {
+        e.preventDefault(); // 기본 동작 방지
+        e.stopPropagation(); // 클릭 이벤트 전파 방지
+
+        var day = $(this).siblings('a').text(); // 클릭한 날짜의 일 가져오기
+        var yearMonth = $('#month-this').text().replace('.', '-'); // 현재 연도-월
+        var formattedDate = yearMonth + '-' + ('0' + day).slice(-2); // 'xxxx-xx-xx' 형식으로 만들기
+
+        // 모달의 날짜 설정
+        $('#modal-date').text(formattedDate);
+        $('#schedule-modal').fadeIn(); // 모달 창 열기
+    });
+
+    // 모달 창 닫기
+    $('.close').on('click', function() {
+        $('#schedule-modal').fadeOut(); // 모달 창 닫기
+    });
+
+    // 스케줄 저장 이벤트는 페이지가 로드될 때 한 번만 등록
+    $('#schedule-form').on('submit', function(e) {
+        e.preventDefault(); // 폼의 기본 제출 동작 방지
+
+        var scheduleName = $('#event-title').val();
+        var scheduleTime = $('#event-time').val();
+        var scheduleDate = $('#modal-date').text();
+
+        var scheduleDto = {
+            scheduleDate: scheduleDate,
+            scheduleTime: scheduleTime,
+            scheduleName: scheduleName
+        };
+
+        // schedule 저장을 위한 API 호출
+        ajaxPostJsonCall('/schedule-save-web', JSON.stringify(scheduleDto), function(data) {
+            if (data.code === "0000") {
+                // 모달 창 닫기 및 폼 초기화
+                $('#schedule-modal').fadeOut();
+                $('#schedule-form')[0].reset(); // 폼 초기화
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 날짜 버튼 클릭 시 일정 보여주는 모달
+    $(document).on('click', 'td a', function(e) {
+        e.preventDefault();  // 링크 기본 동작을 막음
+        var date = $(this).text();  // 클릭한 날짜를 가져옴
+
+        // 현재 보여지고 있는 연도와 월을 가져옴
+        var yearMonth = $('#month-this').text().replace('.', '-'); // 'xxxx.xx' 형식을 'xxxx-xx'로 변환
+
+        // 'xxxx년-xx월-xx일' 형식으로 변환
+        var formattedDate = yearMonth + '-' + ('0' + date).slice(-2);  // 날짜가 한 자리 수일 경우 앞에 '0'을 붙여줌
+        var finalDateText = formattedDate.replace('-', '년 ').replace('-', '월 ') + '일';
+
+        // 모달에 날짜 설정
+        $('#modal-date').text(finalDateText);
+
+        // 해당 날짜에 대한 일정을 불러와서 #event-list에 표시
+        ajaxJsonCall('/find-schedule-web?date=' + formattedDate, null, function(data) {
+            if (data.code === "0000") {
+                $('#event-list').empty();  // 기존 일정을 초기화
+
+                if (data.data.length > 0) {
+                    // scheduleDate를 기준으로 오름차순(빠른 순) 정렬
+                    data.data.sort(function(a, b) {
+                        // 문자열을 Date 객체로 변환하여 비교
+                        return new Date(a.scheduleDate) - new Date(b.scheduleDate);
+                    });
+
+                    // 리스트를 생성하고 일정들을 추가
+                    let eventList = '<ul>';
+                    data.data.forEach(function(event) {
+                        if (event && event.scheduleDate && event.scheduleName) {
+                            const formattedTime = formatTime(event.scheduleDate); // hh:mm 형식으로 변환
+                            eventList += '<li data-schedule-id="' + event.scheduleId + '">' + formattedTime + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + event.scheduleName + '</li>';
+                        }
+                    });
+                    eventList += '</ul>';
+
+                    // 생성한 리스트를 DOM에 추가
+                    $('#event-list').append(eventList);
+                } else {
+                    $('#event-list').append('<p>스케줄이 없습니다.</p>');
+                }
+            }
+        }, function(error) {
+            alert("An error occurred: " + error.message);
+        });
+
+
+        // 모달 창을 화면에 표시
+        $('#event-modal').fadeIn();
+    });
+
+    // 모달 닫기 버튼 클릭 시 모달 닫기
+    $('.close-btn').on('click', function() {
+        $('#event-modal').fadeOut();
+    });
+
+    // 모달 바깥 클릭 시 모달 닫기
+    $(window).on('click', function(event) {
+        if ($(event.target).is('#event-modal')) {
+            $('#event-modal').fadeOut();
+        }
+    });
+
+    // 일정 클릭 시 수정 모달 띄우기
+    if(sessionFlag != null && sessionFlag != 'F')
+        $(document).on('click', '#event-list li', function (e) {
+            e.preventDefault();
+
+            // 일정확인 모델 닫기
+            $('#event-modal').fadeOut();
+
+            // 일정 정보 가져오기
+            var scheduleText = $(this).text(); // 전체 텍스트 가져오기
+            var scheduleInfo = scheduleText.split(/\s+/, 1);
+            var scheduleTime = scheduleInfo[0]; // 시간
+            var scheduleName = scheduleText.substring(scheduleTime.length).trim(); // 시간 이후의 나머지 텍스트 가져오기 (앞뒤 공백 제거)
+            const scheduleId = $(this).data('schedule-id'); // 클릭한 리스트 항목의 scheduleId 가져오기
+            // 모달에 scheduleId를 저장
+            $('#edit-schedule-form').data('edit-schedule-id', scheduleId);
+
+
+            // 수정 모달에 값 설정
+            $('#edit-schedule-modal-date').text($('#modal-date').text());
+            $('#edit-event-title').val(scheduleName);
+            $('#edit-event-time').val(scheduleTime);
+            $('#edit-schedule-id').val(scheduleId); // 숨겨진 ID 필드에 값 설정
+
+            // 수정 모달 열기
+            $('#edit-schedule-modal').fadeIn();
+        });
+
+    // 수정 모달 폼 제출 시
+    $('#edit-schedule-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const scheduleId = $(this).data('edit-schedule-id');
+        var scheduleName = $('#edit-event-title').val();
+        var scheduleTime = $('#edit-event-time').val();
+        var scheduleDate = convertDateFormat($('#edit-schedule-modal-date').text());
+
+        var scheduleDto = {
+            scheduleId: scheduleId, // 수정할 일정의 ID
+            scheduleDate: scheduleDate,
+            scheduleTime: scheduleTime,
+            scheduleName: scheduleName
+        };
+
+        // schedule 수정 요청을 위한 API 호출
+        ajaxPostJsonCall('/modify-schedule-web', JSON.stringify(scheduleDto), function (data) {
+            if (data.code === "0000") {
+                // 모달 닫기 및 폼 초기화
+                $('#edit-schedule-modal').fadeOut();
+                $('#edit-schedule-form')[0].reset(); // 폼 초기화
+            }
+        }, function (error) {
+            alert("An error occurred: " + error.message);
+        });
+    });
+
+    // 수정 모달 닫기 버튼 클릭 시 모달 닫기
+    $('.close').on('click', function () {
+        $('#edit-schedule-modal').fadeOut();
+    });
+
+    // 모달 외부 클릭 시 닫기
+    $(window).on('click', function (e) {
+        if ($(e.target).is('#edit-schedule-modal')) {
+            $('#edit-schedule-modal').fadeOut();
+        }
+    });
+
+    // 삭제 버튼 클릭 시
+    $('#delete-schedule-button').on('click', function () {
+        const scheduleId = $('#edit-schedule-id').val(); // 숨겨진 ID 필드에서 ID 가져오기
+
+        if (scheduleId) {
+            // 삭제 요청을 위한 API 호출
+            if (confirm("정말로 스케줄을 삭제하시겠습니까?")) {
+                ajaxPostJsonCall('/delete-schedule-web?id=' + scheduleId, null, function (data) {
+                    if (data.code === "0000") {
+                        // 삭제 성공 시 모달 닫기 및 UI 업데이트
+                        $('#edit-schedule-modal').fadeOut();
+                        $('#edit-schedule-form')[0].reset(); // 폼 초기화
+                        alert("일정이 삭제되었습니다.");
+                        // 여기서 UI를 업데이트하여 삭제된 일정을 제거할 수 있습니다.
+                    }
+                }, function (error) {
+                    alert("An error occurred: " + error.message);
+                });
+            }
+        } else {
+            alert("일정 ID가 없습니다.");
+        }
+    });
+
+
+
+</script>
+</html>

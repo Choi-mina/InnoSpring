@@ -24,6 +24,9 @@ import org.springframework.web.client.RestTemplate;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import java.sql.Timestamp;
+import java.util.LinkedHashMap;
+
 @Slf4j
 @Controller
 public class LoginController {
@@ -49,10 +52,14 @@ public class LoginController {
 
         if(LoginPassword != null){ // redis에 정보가 있는 경우
             if(LoginPassword.equals(password)){ // 비밀번호가 일치하는 경우 -> 로그인 성공
+                String flag = userService.getFlag(email);
+                String date = userService.getDate(email);
                 response.setCode(ApiResult.SUCCESSS.getCode());
                 response.setMessage("Login Success");
                 HttpSession session = httpRequest.getSession();
                 session.setAttribute("email", email);
+                session.setAttribute("flag", flag);
+                session.setAttribute("date", date);
                 session.setMaxInactiveInterval(3600);
             } else {    // 비밀번호가 일치하지 않는 경우 -> 로그인 실패
                 response.setCode(ApiResult.FAIL.getCode());
@@ -75,13 +82,18 @@ public class LoginController {
             String sessionId = session.getId();
 
             if (result.getBody().getCode().equals("0000")) {    //  일치하는 회원O
+                Object resultEntity = result.getBody().getData();
+                String flag = (String) ((LinkedHashMap) resultEntity).get("flag");
+                String date = (String) ((LinkedHashMap) resultEntity).get("createDate");
                 // 세션 저장
                 session.setAttribute("email", email);
+                session.setAttribute("flag", flag);
+                session.setAttribute("date", date);
                 session.setMaxInactiveInterval(3600);
 
                 // Redis 저장
                 try {
-                    userService.saveUserData(email, password, sessionId);
+                    userService.saveUserData(email, password, sessionId, flag, date);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

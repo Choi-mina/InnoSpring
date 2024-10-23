@@ -9,17 +9,15 @@ import java.sql.Timestamp;
 @Entity
 @Getter
 @Setter
-public class Member {
+public class Schedule {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private int memId;
-    public String userName;
-    public String phoneNum;
-    public String email;
-    public String password;
+    private int scheduleId;
+    public Timestamp scheduleDate;
+    public String scheduleName;
+    public String scheduleDescription;
     public Timestamp createDate;
     public Timestamp updateDate;
-    public String flag;
 
 
     @PrePersist

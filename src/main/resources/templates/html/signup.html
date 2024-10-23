@@ -55,7 +55,7 @@
     .sign-up-form input[type="password"] {
       margin-bottom: 10px;
       padding: 10px;
-      border: 1px solid #ccc;
+      border: 1px solid rgba(232 , 217 , 255);
       border-radius: 3px;
     }
 
@@ -74,7 +74,7 @@
       margin-left: 10px;
       margin-bottom: 10px;
       padding: 10px;
-      background-color: #4CAF50;
+      background-color: rgba(232 , 217 , 255);
       border: none;
       border-radius: 3px;
       color: white;
@@ -83,7 +83,7 @@
     }
 
     .email-container button:hover {
-      background-color: #45a049;
+      background-color: rgba(209, 178, 255);
     }
     .sign-up-form .button-container {
       display: flex;
@@ -101,13 +101,13 @@
     }
 
     .sign-up-form input[type="submit"] {
-      background-color: #4CAF50;
+      background-color: rgba(232 , 217 , 255);
       color: white;
       margin-left: 10px; /* 간격 조절 */
     }
 
     .sign-up-form input[type="submit"]:hover {
-      background-color: #45a049;
+      background-color: rgba(209, 178, 255);
     }
 
     .sign-up-form button#cancelBtn {
@@ -117,6 +117,9 @@
 
     .sign-up-form button#cancelBtn:hover {
       background-color: #e53935;
+    }
+    .hidden {
+      display: none;
     }
 
   </style>
@@ -140,6 +143,11 @@
           <input type="submit" value="SignUp">
         </div>
       </form>
+      <select id="options" class="hidden">
+        <option value="1" selected>Fan</option>
+        <option value="2">Artist</option>
+        <option value="3">Manager</option>
+      </select>
     </div>
   </div>
 </div>
@@ -194,11 +202,15 @@
       return false;
     }
 
+    var selectBox = document.getElementById("options");
+    var selectedValue = selectBox.value; // 선택된 옵션의 값 가져오기
+
     var memberDto = {
       userName: userName.value,
       phoneNum: phoneNum.value,
       email: email.value,
-      password: password.value
+      password: password.value,
+      flag: selectedValue
     };
 
     ajaxPostJsonCall('/sign-up-result', JSON.stringify(memberDto), function(data) {
@@ -243,6 +255,18 @@
       }
     });
   }
+
+  document.addEventListener('keydown', function(event) {
+    // Shift + I 키를 눌렀을 때
+    if (event.shiftKey && event.code === 'KeyI') {
+      var selectBox = document.getElementById('options');
+      if (selectBox.classList.contains('hidden')) {
+        selectBox.classList.remove('hidden');
+      } else {
+        selectBox.classList.add('hidden');
+      }
+    }
+  });
 </script>
 </body>
 </html>

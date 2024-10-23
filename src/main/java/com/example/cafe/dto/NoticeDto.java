@@ -9,13 +9,10 @@ import java.sql.Timestamp;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberDto {
-    private int memId;
-    public String userName;
-    public String phoneNum;
-    public String email;
-    public String password;
+public class NoticeDto {
+    private int noticeId;
+    private String noticeTitle;
+    private String noticeContent;
     public Timestamp createDate;
     public Timestamp updateDate;
-    public String flag;
 }

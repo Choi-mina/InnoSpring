@@ -55,13 +55,13 @@
         .login-form input[type="password"] {
             margin-bottom: 10px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid rgba(232 , 217 , 255);
             border-radius: 3px;
         }
 
         .login-form input[type="submit"] {
             padding: 10px;
-            background-color: #4CAF50;
+            background-color: rgba(232 , 217 , 255);
             border: none;
             border-radius: 3px;
             color: white;
@@ -70,7 +70,7 @@
         }
 
         .login-form input[type="submit"]:hover {
-            background-color: #45a049;
+            background-color: rgba(209, 178, 255);
         }
         .sign-up {
             margin-top: 10px;
@@ -106,8 +106,6 @@
             const email = document.querySelector('input[name="email"]').value;
             const password = document.querySelector('input[name="userPassword"]').value;
 
-            console.log("email = " + email + " password = " + password);
-
             if (!email) {
                 alert("이메일을 입력해주세요.");
                 return false;
@@ -116,7 +114,6 @@
                 return false;
             } else {
                 ajaxJsonCall('/log-in-result?email=' + encodeURIComponent(email) + '&password=' + password, null, function (data) {
-                    console.log(data);
                     if (data.code === "0000") {
                         location.href = '/';
                     } else if (data.code === "9999") {
