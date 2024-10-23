@@ -72,6 +72,21 @@ public class CommunityRepositoryImpl implements CommunityRepositoryCustom{
             // 데이터가 없을 때
             return null;
         }
+    }
 
+    public List<Community> findByMemberId(Member member) {
+        try {
+            TypedQuery<Community> query = em.createQuery("SELECT c FROM Community c where c.communityAuthor = :communityAuthor", Community.class)
+                    .setParameter("communityAuthor", member);
+            List<Community> results = query.getResultList();
+
+            if(!results.isEmpty())
+                return results;
+
+        } catch (NoResultException e) {
+            // 데이터가 없을 때
+            return null;
+        }
+        return null;
     }
 }

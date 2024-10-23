@@ -86,4 +86,22 @@ public class MemberService {
         return member;
     }
 
+    public void modifyMember(MemberDto memberDto) {
+        // Dto -> Entity
+        Member member = new Member();
+        member.setMemId(memberDto.getMemId());
+        member.setUserName(memberDto.getUserName());
+        member.setPhoneNum(memberDto.getPhoneNum());
+        member.setEmail(memberDto.getEmail());
+        member.setPassword(memberDto.getPassword());
+        member.setFlag(memberDto.getFlag());
+        member.setCreateDate(memberDto.getCreateDate());
+
+        memberRepository.save(member);
+    }
+
+    public void deleteMember(Long id) {
+        memberRepository.deleteById(id);
+    }
+
 }

@@ -26,13 +26,15 @@
       display: flex; /* 플렉스 박스 사용 */
     }
     .menu-bar {
+      display: flex;
+      flex-direction: column; /* Arrange items in a column */
       width: 15%;
       height: 100%;
-      background-color: #fff; /* 배경색 추가 */
-      border: 2px solid rgba(232 , 217 , 255);
+      background-color: #fff;
+      border: 2px solid rgba(232, 217, 255);
       border-radius: 1em;
-      padding: 20px; /* 여백 추가 */
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
     .menu-bar h2 {
       margin-top: 0; /* 제목 마진 제거 */
@@ -47,6 +49,19 @@
     .menu-item:hover {
       background-color: rgba(232, 217, 255, 0.5); /* 마우스 오버 시 효과 */
     }
+    .delete-account {
+      font-size: 12px; /* Smaller font size */
+      color: #999; /* Light grey color */
+      margin-top: auto; /* Push the button to the bottom */
+      text-align: center;
+      cursor: pointer;
+    }
+
+
+    .delete-account:hover {
+      color: #dc3545; /* Change color to red on hover */
+    }
+
     .content {
       flex: 1; /* 남은 공간을 채우기 위해 설정 */
       padding: 20px; /* 여백 추가 */
@@ -55,6 +70,87 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
       margin-left: 20px; /* 메뉴와의 간격 */
     }
+    .submit-btn {
+      background-color: rgba(232 , 217 , 255);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin-top: 10px;
+      margin-left: 0px;
+      cursor: pointer;
+    }
+
+    .submit-btn:hover {
+      background-color: rgba(209, 178, 255);
+    }
+
+    .table-class {
+      top: 15%;
+      left: 20%;
+      width: 75%;
+      position: absolute;
+      border-radius: 8px;
+      border: 1px solid rgba(232 , 217 , 255);
+    }
+    tr {
+      height : 40px;
+      text-align: center;
+    }
+    .table-header-text-title {
+      width: 80%;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .table-header-text-date {
+      width: 20%;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* 어두운 배경 */
+    }
+
+    /* 모달 콘텐츠 */
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border: transparent;
+      width: 50%;
+      border-radius: 10px;
+      max-height: 80%; /* Set a max height for the modal */
+      overflow-y: auto; /* Enable vertical scrolling */
+    }
+
+    input {
+      border: 1px solid rgba(83 , 52 , 129);
+      border-radius: 8px;
+    }
+
+    .close-btn {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -62,18 +158,247 @@
 <div class="frame-container">
   <div class="menu-bar" id="login-div">
     <h2>Mypage</h2>
-    <div class="menu-item" th:href="@{/member/update}">회원정보 수정</div>
-    <div class="menu-item" th:href="@{/my-posts}">내 글</div>
+    <div class="menu-item" id="update-info-btn">회원정보 수정</div>
+    <div class="menu-item" id="my-posts-btn">내 글</div>
+    <div class="delete-account" id="delete-btn">회원탈퇴</div>
   </div>
-  <div class="content">
+  <div class="content" id="content">
     <h2>환영합니다!</h2>
     <p>여기에 회원 정보를 수정하거나 내 글을 확인할 수 있습니다.</p>
     <!-- 추가 콘텐츠가 필요하면 이곳에 작성 -->
   </div>
+
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h3></h3>
+      <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
+      <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
+
+      <p id="detail-author">작성자: OOO</p>
+      <p id="detail-date">등록일: YYYY-MM-DD</p>
+    </div>
+  </div>
+
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
 <script>
-  // JavaScript 코드는 필요에 따라 추가
+  document.getElementById("update-info-btn").addEventListener("click", function() {
+    document.getElementById("content").innerHTML = `
+      <h2>비밀번호를 입력해주세요.</h2>
+      <form id="pw-input">
+        <div>
+          <label for="email">이메일:</label>
+          <label id="email">${sessionEmail}</label>
+        </div>
+        <div>
+          <label for="password">비밀번호:</label>
+          <input type="password" id="password" name="password">
+        </div>
+        <button type="submit" class="submit-btn">확인</button>
+      </form>
+    `;
+
+
+    // 비밀번호 입력 버튼 클릭 이벤트
+    document.getElementById("pw-input").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const email = sessionEmail;
+      const password = document.getElementById("password").value;
+
+      // 비밀번호 일치 여부 조회 API 호출
+      ajaxJsonCall('/member/login-in?email=' + email + '&password=' + password, null, function(data) {
+        if (data.code === "0000") {
+          ajaxJsonCall('/member/find-by-email?email=' + email, null, function(d) {
+            console.log(d);
+            if (d.code === "0000") {
+              document.getElementById("content").innerHTML = `
+                <h2>회원정보 수정</h2>
+                <form id="info-modify">
+                  <div style="display: none">
+                     <label id="id">${d.data.memId}</label>
+                   </div>
+                  <div>
+                     <label for="name">이름:</label>
+                     <label id="name">${d.data.userName}</label>
+                   </div>
+                  <div>
+                    <label for="email">이메일:</label>
+                    <label id="email">${sessionEmail}</label>
+                  </div>
+                  <div>
+                    <label for="password">비밀번호:</label>
+                    <input type="password" id="password" name="password">
+                  </div>
+                  <div>
+                    <label for="number">전화번호:</label>
+                    <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" value="${d.data.phoneNum}">
+                  </div>
+                  <button type="submit" class="submit-btn">수정</button>
+                </form>
+              `;
+
+              document.getElementById("info-modify").addEventListener("submit", validateForm);
+            }
+          }, function(error) {
+            alert("An error occurred: " + error.message);
+          });
+        } else {
+          alert("비밀번호를 다시 확인해주세요.")
+        }
+      }, function(error) {
+        alert("An error occurred: " + error.message);
+      });
+    });
+  });
+
+  // 내 글 메뉴 클릭 시 내용 변경
+  document.getElementById("my-posts-btn").addEventListener("click", function() {
+    ajaxJsonCall('/member/find-my-community?email=' + sessionEmail, null, function(data) {
+      if (data.code === "0000") {
+        console.log(data);
+        document.getElementById("content").innerHTML = `
+        <h2>내 글</h2>
+        <table class="table-class" id="text-table">
+          <thead>
+            <tr>
+              <th class="table-header-text-title">제목</th>
+              <th class="table-header-text-date">날짜</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+          </tbody>
+        </table>
+      `;
+
+        var tableBody = document.getElementById("table-body");
+
+        data.data.forEach(function(post) {
+          var row = `
+          <tr id="post-${post.communityId}" class="post-row">
+            <td>${post.communityTitle}</td>
+            <td>${dateFormat(new Date(post.updateDate))}</td>
+          </tr>
+        `;
+
+          tableBody.innerHTML += row;
+        });
+      }
+      // 행 클릭 시 상세보기 모달 열기
+      tableBody.addEventListener("click", function(event) {
+        var targetRow = event.target.closest("tr");
+        if (targetRow) {
+          var communityId = targetRow.id.split('-')[1];
+          getCommunityDetail(communityId);
+        }
+      });
+    });
+  });
+
+  // 회원 탈퇴 이벤트
+  document.getElementById("delete-btn").addEventListener("click", function() {
+    confirm("정말로 탈퇴하시겠습니까?");
+    if(confirm) {
+      ajaxPostJsonCall('/logout', sessionEmail, function (data) {
+        if (data.code === "0000") {
+          ajaxPostJsonCall('/member/delete?email=' + sessionEmail, null, function(data) {
+            if (data.code === "0000") {
+              alert("탈퇴되었습니다.");
+              window.location.href = "/";
+            }
+          }, function(error) {
+            alert("An error occurred: " + error.message);
+          });
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  function oninputPhone(target) {
+    target.value = target.value
+            .replace(/[^0-9]/g, '')
+            .replace(/(^02.{0}|^01.{1}|[0-9]{3,4})([0-9]{3,4})([0-9]{4})/g, "$1-$2-$3");
+  }
+
+  function validateForm(event) {
+    event.preventDefault();
+
+    var form = document.getElementById("info-modify");
+    var id = document.getElementById("id").innerText;
+    var name = document.getElementById("name").innerText;
+    var email = document.getElementById("email").innerText;
+    var phoneNum = form.querySelector('[name="phoneNum"]');
+    var password = form.querySelector('[name="password"]');
+
+    if (!phoneNum || phoneNum.value === "" || phoneNum.value.length !== 13) {
+      alert("올바른 휴대폰 번호를 입력해주세요.");
+      return false;
+    }
+
+    if (!password || password.value === "" || password.value.length < 7) {
+      alert("7글자 이상의 비밀번호를 입력해주세요.");
+      return false;
+    }
+
+    var memberDto = {
+      memId: id,
+      userName: name,
+      phoneNum: phoneNum.value,
+      email: email,
+      password: password.value,
+      flag: sessionFlag,
+      createDate: sessionDate
+    };
+
+    ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
+      if (data.code === "0000") {
+        alert("회원정보가 수정되었습니다.");
+        window.location.href = "/mypage";
+      }
+    }, function(error) {
+      alert("An error occurred: " + error.message);
+    });
+  }
+
+  function dateFormat(date) {
+    var year = date.getFullYear();
+    var month = ('0' + (date.getMonth() + 1)).slice(-2);
+    var day = ('0' + date.getDate()).slice(-2);
+
+    var dateString = year + '-' + month  + '-' + day;
+
+    return dateString;
+  }
+
+  function getCommunityDetail(communityId) {
+    ajaxJsonCall('/community/find-by-id?id='+communityId, null, function(data) {
+      if (data.code === "0000") {
+        $('#detail-title').text(data.data.communityTitle);
+        $('#detail-content').html(data.data.communityContent);
+        $('#detail-author').text("작성자: " + data.data.author);
+        $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
+        $('#detailModal').fadeIn();
+        selectedCommunityId = communityId;
+        if(sessionEmail == null || (sessionFlag == 'F' && data.data.author != sessionEmail)) {
+          $('#edit-btn').css('display', 'none');
+          $('#delete-btn').css('display', 'none');
+        }
+      }
+    }, function(error) {
+      alert("An error occurred: " + error.message);
+    });
+  }
+
+  var detailClose = document.getElementsByClassName("close-btn")[0];
+
+  // X 버튼 클릭 시 모달 닫기
+  detailClose.onclick = function() {
+    detailModal.style.display = "none";
+  }
+
 </script>
 </html>
