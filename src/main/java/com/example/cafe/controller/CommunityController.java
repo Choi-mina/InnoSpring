@@ -8,6 +8,10 @@ import com.example.cafe.entity.Member;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,10 +45,10 @@ public class CommunityController {
     }
 
     @GetMapping("/find-all")
-    public ResultEntity findAllCommunity() {
+    public ResultEntity findAllCommunity(Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
-            List<CommunityDto> communityDtos = communityService.findAllCommunity();
+            Page<CommunityDto> communityDtos = communityService.findAllCommunity(pageable);
 
             // community findAll success
             result.setCode("0000");

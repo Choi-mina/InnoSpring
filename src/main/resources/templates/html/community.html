@@ -18,12 +18,13 @@
             top: 8%;
             left: 10%;
             width: 80%;
-            position: absolute;
+            position: relative; /* 테이블의 위치를 상대적으로 설정 */
             border-radius: 8px;
-            border: 1px solid rgba(232 , 217 , 255);
+            border: 1px solid rgba(232, 217, 255);
+            margin-bottom: 60px; /* 테이블과 버튼 사이의 간격 조정 */
         }
         tr {
-            height : 40px;
+            height: 40px;
             text-align: center;
         }
         .table-header-text-title {
@@ -44,7 +45,7 @@
             right: 20px;
             width: 50px;
             height: 50px;
-            background-color: rgba(232 , 217 , 255);
+            background-color: rgba(232, 217, 255);
             color: white;
             border-radius: 50%;
             border: none;
@@ -56,6 +57,27 @@
         .write-btn:hover {
             background-color: rgba(209, 178, 255);
         }
+
+        /* 이전, 다음 버튼 스타일 */
+        #pagination-container {
+            margin-top: 10px;
+            text-align: center; /* 중앙 정렬 */
+        }
+
+        #prev-page-btn, #next-page-btn {
+            background-color: rgba(232, 217, 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #prev-page-btn:hover, #next-page-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
         /* 모달 기본 스타일 */
         .modal {
             display: none;
@@ -80,13 +102,13 @@
             overflow-y: auto; /* Enable vertical scrolling */
         }
 
-        input,textarea {
-            border: 1px solid rgba(83 , 52 , 129);
+        input, textarea {
+            border: 1px solid rgba(83, 52, 129);
             border-radius: 8px;
         }
 
         /* 닫기 버튼 */
-        .close {
+        .close, .close-detail {
             color: #aaa;
             float: right;
             font-size: 28px;
@@ -94,18 +116,7 @@
         }
 
         .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .close-detail {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
+        .close:focus,
         .close-detail:hover,
         .close-detail:focus {
             color: black;
@@ -120,7 +131,7 @@
         }
 
         .edit-btn, .delete-btn, .save-btn {
-            background-color: rgba(232 , 217 , 255);
+            background-color: rgba(232, 217, 255);
             color: white;
             border: none;
             border-radius: 5px;
@@ -137,7 +148,6 @@
             background-color: rgba(255, 100, 100);
         }
 
-
     </style>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
@@ -146,9 +156,20 @@
 
 <div class="frame-container">
     <table class="table-class" id="community-table">
-        <td class="table-header-text-title">제목</td>
-        <td class="table-header-text-date">작성자</td>
+        <thead>
+        <tr>
+            <td class="table-header-text-title">제목</td>
+            <td class="table-header-text-date">작성자</td>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 데이터가 여기에 추가됩니다. -->
+        </tbody>
     </table>
+    <div id="pagination-container">
+        <button id="prev-page-btn" disabled><</button>
+        <button id="next-page-btn">></button>
+    </div>
     <button class="write-btn" id="write-btn">+</button>
 
     <!--글 추가 버튼 클릭 시 나타나는 modal-->
@@ -194,10 +215,24 @@
     var table = document.getElementById("community-table");
     var selectedCommunityId = null;
     var isEditing = false;
+    var currentPage = 0;
+    var pageSize = 10; // 페이지당 표시할 게시글 수
 
     // 페이지 로드
     $(document).ready(function() {
-        findCommunity();
+        findCommunity(currentPage);
+
+        $('#prev-page-btn').click(function() {
+            if (currentPage > 0) {
+                currentPage--;
+                findCommunity(currentPage);
+            }
+        });
+
+        $('#next-page-btn').click(function() {
+            currentPage++;
+            findCommunity(currentPage);
+        });
         if(sessionFlag == null)
             $('#write-btn').css('display', 'none');
     });
@@ -383,8 +418,8 @@
     }
 
     // 모든 글 조회
-    function findCommunity() {
-        ajaxJsonCall('/community/find-all', null, function (data) {
+    function findCommunity(page) {
+        ajaxJsonCall('/community-find-web?page=' + page + '&size=' + pageSize, null, function (data) {
             drawTable(data);
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -395,44 +430,46 @@
         // 테이블의 행 개수
         var rowCount = table.rows.length;
 
-        if (data.code == "0000" && data.data.length > 0) {
-            // 최신 공지시항부터 나열
-            data.data.sort((a, b) => {
-                const dateA = a.createDate ? new Date(a.createDate) : new Date(a.updateDate);
-                const dateB = b.createDate ? new Date(b.createDate) : new Date(b.updateDate);
-                return dateB - dateA;
-            });
-
+        if (data.code === "0000" && data.data.content.length > 0) {
             // 헤더를 제외한 모든 행 삭제
             for (var i = rowCount - 1; i > 0; i--) {
                 table.deleteRow(i);
             }
 
             // 데이터 개수만큼 테이블에 추가
-            for (var i = 0; i < data.data.length; i++) {
+            data.data.content.forEach(function(post) {
                 var row = table.insertRow(-1);
-
-                row.setAttribute('data-community-id', data.data[i].communityId);
+                row.setAttribute('data-community-id', post.communityId);
 
                 var cell1 = row.insertCell(0);
                 var cell2 = row.insertCell(1);
 
-                // @부터 지우기
-                var index = data.data[i].author.indexOf('@');
-                var text = data.data[i].author.substring(0, index);
+                // @ 이전의 author 표시
+                var index = post.author.indexOf('@');
+                var authorName = index > -1 ? post.author.substring(0, index) : post.author;
 
-                cell1.innerHTML = data.data[i].communityTitle;
-                cell2.innerHTML = text;
-            }
+                cell1.innerHTML = post.communityTitle;
+                cell2.innerHTML = authorName;
+            });
+
             attachRowClickEvent();
         } else {
-            // 헤더를 제외한 모든 행 삭제
+            // 게시글이 없는 경우 기존 행 삭제
             for (var i = rowCount - 1; i > 0; i--) {
                 table.deleteRow(i);
             }
         }
+        updatePaginationButtons(data.data.totalPages);
     }
 
+    // 페이지네이션 버튼 상태 업데이트 함수
+    function updatePaginationButtons(totalPages) {
+        // 이전 버튼은 첫 페이지일 때 비활성화
+        $('#prev-page-btn').prop('disabled', currentPage === 0);
+
+        // 다음 버튼은 마지막 페이지일 때 비활성화
+        $('#next-page-btn').prop('disabled', currentPage >= totalPages - 1);
+    }
 
     // Community 글 등록 모달 닫기 시 호출되는 함수 (입력란 초기화)
     function closeWriteModal() {

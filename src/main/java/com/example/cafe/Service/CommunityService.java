@@ -10,7 +10,9 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +31,8 @@ public class CommunityService {
         communityRepository.save(community);
     }
 
-    public List<CommunityDto> findAllCommunity() {
-        List<CommunityDto> communityDtoList = communityRepository.findAllCommunity();
-        return communityDtoList;
+    public Page<CommunityDto> findAllCommunity(Pageable pageable) {
+        return communityRepository.findAllCommunity(pageable);
     }
 
     public CommunityDto findByIdCommunity(int communityId) {
