@@ -271,7 +271,7 @@
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
                 $('#writeForm')[0].reset(); // 폼 초기화
-                findCommunity();
+                findCommunity(0);
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -375,7 +375,7 @@
         ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
             if (data.code === "0000") {
                 alert("글이 수정되었습니다.");
-                findCommunity();
+                findCommunity(0);
 
                 // 제목과 내용을 다시 label로 변경
                 $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
@@ -399,7 +399,7 @@
                 if (data.code === "0000") {
                     alert("글이 삭제되었습니다.");
                     $('#detailModal').fadeOut();
-                    findCommunity();
+                    findCommunity(0);
                 }
             }, function (error) {
                 alert("An error occurred: " + error.message);
@@ -464,6 +464,8 @@
 
     // 페이지네이션 버튼 상태 업데이트 함수
     function updatePaginationButtons(totalPages) {
+        if(totalPages == 1)
+            $('#pagination-container').css('display', 'none');
         // 이전 버튼은 첫 페이지일 때 비활성화
         $('#prev-page-btn').prop('disabled', currentPage === 0);
 
