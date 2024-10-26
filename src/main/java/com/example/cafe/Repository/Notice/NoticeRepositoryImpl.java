@@ -95,6 +95,10 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .setParameter("startDate", startDate)
                 .setParameter("endDate", endDate);
 
+        // 페이지 범위 설정
+        query.setFirstResult((int) pageable.getOffset()); // 시작 위치
+        query.setMaxResults(pageable.getPageSize()); // 페이지 크기 설정
+
         List<Notice> results = query.getResultList();
         List<NoticeDto> noticeDtos = new ArrayList<>();
 

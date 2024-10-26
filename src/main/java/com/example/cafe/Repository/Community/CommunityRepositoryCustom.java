@@ -12,5 +12,5 @@ import java.util.List;
 public interface CommunityRepositoryCustom {
     public Page<CommunityDto> findAllCommunity(Pageable pageable);
     public CommunityDto findCommunityById(int communityId);
-    public List<Community> findByMemberId(Member member);
+    public Page<Community> findByMemberId(Member member, Pageable pageable);
 }

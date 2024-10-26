@@ -84,19 +84,29 @@ public class CommunityRepositoryImpl implements CommunityRepositoryCustom{
         }
     }
 
-    public List<Community> findByMemberId(Member member) {
+    public Page<Community> findByMemberId(Member member, Pageable pageable) {
         try {
-            TypedQuery<Community> query = em.createQuery("SELECT c FROM Community c where c.communityAuthor = :communityAuthor", Community.class)
+            TypedQuery<Community> query = em.createQuery("SELECT c FROM Community c where c.communityAuthor = :communityAuthor ORDER BY c.updateDate DESC", Community.class)
                     .setParameter("communityAuthor", member);
+
+            // 페이지 범위 설정
+            query.setFirstResult((int) pageable.getOffset()); // 시작 위치
+            query.setMaxResults(pageable.getPageSize()); // 페이지 크기 설정
+
             List<Community> results = query.getResultList();
 
-            if(!results.isEmpty())
-                return results;
+            // 전체 개수 조회 (페이징 처리에 필요)
+            TypedQuery<Long> countQuery = em.createQuery(
+                    "SELECT COUNT(c) FROM Community c where c.communityAuthor = :communityAuthor", Long.class)
+                    .setParameter("communityAuthor", member);;
+            long total = countQuery.getSingleResult();
+
+            return new PageImpl<>(results, pageable, total);
 
         } catch (NoResultException e) {
             // 데이터가 없을 때
             return null;
         }
-        return null;
+
     }
 }

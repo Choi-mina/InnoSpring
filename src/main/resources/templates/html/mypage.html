@@ -86,10 +86,10 @@
     }
 
     .table-class {
-      top: 15%;
-      left: 20%;
+      /*top: 15%;*/
+      left: 12%;
       width: 75%;
-      position: absolute;
+      position: relative; /* 테이블의 위치를 상대적으로 설정 */
       border-radius: 8px;
       border: 1px solid rgba(232 , 217 , 255);
     }
@@ -107,6 +107,26 @@
       width: 20%;
       text-align: center;
       font-weight: bold;
+    }
+
+    /* 이전, 다음 버튼 스타일 */
+    #pagination-container {
+      margin-top: 10px;
+      text-align: center; /* 중앙 정렬 */
+    }
+
+    #prev-page-btn, #next-page-btn {
+      background-color: rgba(232, 217, 255);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #prev-page-btn:hover, #next-page-btn:hover {
+      background-color: rgba(209, 178, 255);
     }
 
     .modal {
@@ -254,10 +274,17 @@
     });
   });
 
+  var currentPage = 0;
+  var pageSize = 10; // 페이지당 표시할 게시글 수
+
   // 내 글 메뉴 클릭 시 내용 변경
   document.getElementById("my-posts-btn").addEventListener("click", function() {
-    ajaxJsonCall('/member/find-my-community?email=' + sessionEmail, null, function(data) {
-      if (data.code === "0000") {
+    drawTable(currentPage);
+  });
+
+  function drawTable(page) {
+    ajaxJsonCall('/member/find-my-community?email=' + sessionEmail + '&page=' + page + '&size=' + pageSize, null, function(data) {
+      if (data.code === "0000" && data.data.content.length > 0) {
         console.log(data);
         document.getElementById("content").innerHTML = `
         <h2>내 글</h2>
@@ -271,11 +298,15 @@
           <tbody id="table-body">
           </tbody>
         </table>
+        <div id="pagination-container">
+        <button id="prev-page-btn"><</button>
+        <button id="next-page-btn">></button>
+    </div>
       `;
 
         var tableBody = document.getElementById("table-body");
 
-        data.data.forEach(function(post) {
+        data.data.content.forEach(function (post) {
           var row = `
           <tr id="post-${post.communityId}" class="post-row">
             <td>${post.communityTitle}</td>
@@ -285,17 +316,43 @@
 
           tableBody.innerHTML += row;
         });
+
+        updatePaginationButtons(data.data.totalPages);
+
+        // 행 클릭 시 상세보기 모달 열기
+        tableBody.addEventListener("click", function (event) {
+          var targetRow = event.target.closest("tr");
+          if (targetRow) {
+            var communityId = targetRow.id.split('-')[1];
+            getCommunityDetail(communityId);
+          }
+        });
+
+        $('#prev-page-btn').click(function() {
+          if (currentPage > 0) {
+            currentPage--;
+            drawTable(currentPage);
+          }
+        });
+
+        $('#next-page-btn').click(function() {
+          currentPage++;
+          drawTable(currentPage);
+        });
       }
-      // 행 클릭 시 상세보기 모달 열기
-      tableBody.addEventListener("click", function(event) {
-        var targetRow = event.target.closest("tr");
-        if (targetRow) {
-          var communityId = targetRow.id.split('-')[1];
-          getCommunityDetail(communityId);
-        }
-      });
     });
-  });
+  }
+
+  // 페이지네이션 버튼 상태 업데이트 함수
+  function updatePaginationButtons(totalPages) {
+    if(totalPages == 1)
+      $('#pagination-container').css('display', 'none');
+    // 이전 버튼은 첫 페이지일 때 비활성화
+    $('#prev-page-btn').prop('disabled', currentPage === 0);
+
+    // 다음 버튼은 마지막 페이지일 때 비활성화
+    $('#next-page-btn').prop('disabled', currentPage >= totalPages - 1);
+  }
 
   // 회원 탈퇴 이벤트
   document.getElementById("delete-btn").addEventListener("click", function() {
