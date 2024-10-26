@@ -253,6 +253,10 @@
                     <input type="password" id="password" name="password">
                   </div>
                   <div>
+                    <label for="password">비밀번호 확인:</label>
+                    <input type="password" id="passwordConfirm" name="passwordConfirm">
+                  </div>
+                  <div>
                     <label for="number">전화번호:</label>
                     <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" value="${d.data.phoneNum}">
                   </div>
@@ -356,8 +360,8 @@
 
   // 회원 탈퇴 이벤트
   document.getElementById("delete-btn").addEventListener("click", function() {
-    confirm("정말로 탈퇴하시겠습니까?");
-    if(confirm) {
+    var confirmV = confirm("정말로 탈퇴하시겠습니까?");
+    if(confirmV) {
       ajaxPostJsonCall('/logout', sessionEmail, function (data) {
         if (data.code === "0000") {
           ajaxPostJsonCall('/member/delete?email=' + sessionEmail, null, function(data) {
@@ -382,43 +386,52 @@
   }
 
   function validateForm(event) {
-    event.preventDefault();
+    var confirmV = confirm("회원정보를 수정하시겠습니까?")
+    if(confirmV) {
+      event.preventDefault();
 
-    var form = document.getElementById("info-modify");
-    var id = document.getElementById("id").innerText;
-    var name = document.getElementById("name").innerText;
-    var email = document.getElementById("email").innerText;
-    var phoneNum = form.querySelector('[name="phoneNum"]');
-    var password = form.querySelector('[name="password"]');
+      var form = document.getElementById("info-modify");
+      var id = document.getElementById("id").innerText;
+      var name = document.getElementById("name").innerText;
+      var email = document.getElementById("email").innerText;
+      var phoneNum = form.querySelector('[name="phoneNum"]');
+      var password = form.querySelector('[name="password"]');
+      var passwordConfirm = form.querySelector('[name="passwordConfirm"]');
 
-    if (!phoneNum || phoneNum.value === "" || phoneNum.value.length !== 13) {
-      alert("올바른 휴대폰 번호를 입력해주세요.");
-      return false;
-    }
-
-    if (!password || password.value === "" || password.value.length < 7) {
-      alert("7글자 이상의 비밀번호를 입력해주세요.");
-      return false;
-    }
-
-    var memberDto = {
-      memId: id,
-      userName: name,
-      phoneNum: phoneNum.value,
-      email: email,
-      password: password.value,
-      flag: sessionFlag,
-      createDate: sessionDate
-    };
-
-    ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
-      if (data.code === "0000") {
-        alert("회원정보가 수정되었습니다.");
-        window.location.href = "/mypage";
+      if (!phoneNum || phoneNum.value === "" || phoneNum.value.length !== 13) {
+        alert("올바른 휴대폰 번호를 입력해주세요.");
+        return false;
       }
-    }, function(error) {
-      alert("An error occurred: " + error.message);
-    });
+
+      if (!password || password.value === "" || password.value.length < 7) {
+        alert("7글자 이상의 비밀번호를 입력해주세요.");
+        return false;
+      }
+
+      if(password.value != passwordConfirm.value) {
+        alert("비밀번호가 일치하지 않습니다.");
+        return false;
+      }
+
+      var memberDto = {
+        memId: id,
+        userName: name,
+        phoneNum: phoneNum.value,
+        email: email,
+        password: password.value,
+        flag: sessionFlag,
+        createDate: sessionDate
+      };
+
+      ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
+        if (data.code === "0000") {
+          alert("회원정보가 수정되었습니다.");
+          window.location.href = "/mypage";
+        }
+      }, function(error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
   }
 
   function dateFormat(date) {
