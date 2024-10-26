@@ -233,8 +233,14 @@
             currentPage++;
             findCommunity(currentPage);
         });
-        if(sessionFlag == null)
+        try{
+            if(sessionFlag == null)
+                $('#write-btn').css('display', 'none');
+            else
+                $('#write-btn').css('display', 'block');
+        } catch (e) {
             $('#write-btn').css('display', 'none');
+        }
     });
 
     // 모달 관련 요소들 가져오기
@@ -316,9 +322,14 @@
                 $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
                 $('#detailModal').fadeIn();
                 selectedCommunityId = communityId;
-                if(sessionEmail == null || (sessionFlag == 'F' && data.data.author != sessionEmail)) {
+                if(sessionEmail == null || (sessionFlag == 'F' && data.data.author != sessionEmail)) {  // Fan인 경우 다른사람 글을 수정, 삭제 불
                     $('#edit-btn').css('display', 'none');
                     $('#delete-btn').css('display', 'none');
+                } else if(sessionEmail != null && (sessionFlag == 'M' || sessionFlag == 'A') && data.data.author != sessionEmail) { // Artist와 Manager는 다른사람의 글을 삭제만 가능 (수정 불가)
+                    $('#edit-btn').css('display', 'none');
+                } else{ // 본인 글만 수정, 삭제 가능
+                    $('#edit-btn').css('display', 'block');
+                    $('#delete-btn').css('display', 'block');
                 }
                 adjustModalPosition();
             }
