@@ -343,6 +343,10 @@
           currentPage++;
           drawTable(currentPage);
         });
+      } if(data.data.content.length == 0) {
+        document.getElementById("content").innerHTML = `
+                <h2>작성한 글이 없습니다.</h2>
+                `;
       }
     });
   }

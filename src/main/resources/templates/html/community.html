@@ -288,28 +288,18 @@
     function attachRowClickEvent() {
         $('#community-table tr').each(function() {
             $(this).click(function() {
-                var communityId = $(this).attr('data-community-id');
-                if (communityId) {
-                    // community 글 상세정보 가져오기
-                    getCommunityDetail(communityId);
+                if(sessionEmail != null) {
+                    var communityId = $(this).attr('data-community-id');
+                    if (communityId) {
+                        // community 글 상세정보 가져오기
+                        getCommunityDetail(communityId);
+                    }
+                } else {
+                    alert("로그인을 해주세요.");
+                    location.href = '/login';
                 }
             });
         });
-    }
-
-    // Adjust modal position
-    function adjustModalPosition() {
-        var modalContent = $('.modal-content');
-        var windowHeight = $(window).height();
-        var modalHeight = modalContent.outerHeight();
-
-        // Check if modal height exceeds window height
-        if (modalHeight > windowHeight * 0.8) { // Allow 80% of window height
-            modalContent.css('top', '10%'); // Center it vertically
-        } else {
-            var topOffset = (windowHeight - modalHeight) / 2;
-            modalContent.css('top', topOffset + 'px'); // Center it vertically
-        }
     }
 
     // community 글 상세 정보 가져오기
@@ -331,7 +321,6 @@
                     $('#edit-btn').css('display', 'block');
                     $('#delete-btn').css('display', 'block');
                 }
-                adjustModalPosition();
             }
         }, function(error) {
             alert("An error occurred: " + error.message);

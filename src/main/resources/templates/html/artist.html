@@ -7,9 +7,6 @@
     <link href="../css/home.css" rel="stylesheet" type="text/css"/>
     <title>Artist</title>
     <style>
-        body.no-scroll {
-            overflow: hidden; /* 스크롤 비활성화 */
-        }
 
         .frame-container {
             top: 100px;
@@ -109,12 +106,11 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
-            overflow: auto; /* 모달이 화면을 넘어가면 스크롤 가능 */
         }
 
         .modal-content {
             background-color: white;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 20px;
             border-radius: 10px;
             width: 40%;
@@ -165,13 +161,17 @@
             background-color: rgba(185, 150, 225);
         }
 
-        /* 삭제 버튼 빨간색 */
         #deleteButton {
-            background-color: red; /* 삭제 버튼 빨간색 */
+            background-color: rgba(209, 178, 255);
+            border: none;
+            color: white;
+            padding: 10px 15px; /* 수평 패딩을 추가하여 버튼 크기 조절 */
+            border-radius: 5px;
+            cursor: pointer;
         }
 
         #deleteButton:hover {
-            background-color: darkred; /* 삭제 버튼 호버 시 색상 변경 */
+            background-color: rgba(255, 100, 100);
         }
 
     </style>
@@ -215,7 +215,7 @@
             <div id="actionButtons">
                 <button id="editButton" class="submit-btn">수정</button>
                 <button id="saveButton" class="submit-btn" style="display: none;">저장</button>
-                <button id="deleteButton" class="submit-btn" style="background-color: red;">삭제</button>
+                <button id="deleteButton" class="submit-btn">삭제</button>
             </div>
         </div>
     </div>
@@ -302,7 +302,6 @@
 
                             // 모달 열기
                             detailModal.style.display = "block";
-                            document.body.classList.add('no-scroll'); // 스크롤 비활성화
 
                             if(sessionFlag == null || sessionFlag == 'F') {
                                 editButton.style.display = "none";

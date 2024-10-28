@@ -150,7 +150,7 @@
         /* 모달 콘텐츠 */
         .modal-content {
             background-color: white;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 20px;
             border: transparent;
             width: 50%;
@@ -405,28 +405,18 @@
     function attachRowClickEvent() {
         $('#notice-table tr').each(function() {
             $(this).click(function() {
-                var noticeId = $(this).attr('data-notice-id');
-                if (noticeId) {
-                    // 공지사항 상세정보 가져오기
-                    getNoticeDetail(noticeId);
+                if(sessionEmail != null) {
+                    var noticeId = $(this).attr('data-notice-id');
+                    if (noticeId) {
+                        // 공지사항 상세정보 가져오기
+                        getNoticeDetail(noticeId);
+                    }
+                } else {
+                    alert("로그인을 해주세요.");
+                    location.href = '/login';
                 }
             });
         });
-    }
-
-    // Adjust modal position
-    function adjustModalPosition() {
-        var modalContent = $('.modal-content');
-        var windowHeight = $(window).height();
-        var modalHeight = modalContent.outerHeight();
-
-        // Check if modal height exceeds window height
-        if (modalHeight > windowHeight * 0.8) { // Allow 80% of window height
-            modalContent.css('top', '10%'); // Center it vertically
-        } else {
-            var topOffset = (windowHeight - modalHeight) / 2;
-            modalContent.css('top', topOffset + 'px'); // Center it vertically
-        }
     }
 
     // 공지사항 상세 정보 가져오기
@@ -441,7 +431,6 @@
                     $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
                 $('#detailModal').fadeIn();
                 selectedNoticeId = noticeId;
-                adjustModalPosition();
                 if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F')) {
                     $('#edit-btn').css('display', 'none');
                     $('#delete-btn').css('display', 'none');
