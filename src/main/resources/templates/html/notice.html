@@ -18,9 +18,10 @@
             top: 20%;
             left: 10%;
             width: 80%;
-            position: absolute;
+            position: relative; /* 테이블의 위치를 상대적으로 설정 */
             border-radius: 8px;
             border: 1px solid rgba(232 , 217 , 255);
+            margin-bottom: 140px; /* 테이블과 버튼 사이의 간격 조정 */
         }
         tr {
             height : 40px;
@@ -47,6 +48,27 @@
             border: 1px solid rgba(232 , 217 , 255);
             border-radius: 5px;
         }
+
+        /* 이전, 다음 버튼 스타일 */
+        #pagination-container {
+            margin-top: 10px;
+            text-align: center; /* 중앙 정렬 */
+        }
+
+        #prev-page-btn, #next-page-btn {
+            background-color: rgba(232, 217, 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #prev-page-btn:hover, #next-page-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
         .select-search {
             width: 25%;
             height: 100%;
@@ -128,7 +150,7 @@
         /* 모달 콘텐츠 */
         .modal-content {
             background-color: white;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 20px;
             border: transparent;
             width: 50%;
@@ -210,16 +232,27 @@
             <option value="date">기간</option>
         </select>
         <div class="search-box" id="search-box">
-            <input type="text" class="search-text-box" id="search-text-box">
+            <input type="text" class="search-text-box" id="search-text-box" style="display: none">
         </div>
         <button class="search-btn" id="search-btn" type="button">
             <img class = "search-image" src="images/search-icon.png"/>
         </button>
     </div>
     <table class="table-class" id="notice-table">
-        <td class="table-header-text-title">제목</td>
-        <td class="table-header-text-date">날짜</td>
+        <thead>
+        <tr>
+            <td class="table-header-text-title">제목</td>
+            <td class="table-header-text-date">날짜</td>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 데이터가 여기에 추가됩니다. -->
+        </tbody>
     </table>
+    <div id="pagination-container">
+        <button id="prev-page-btn" disabled><</button>
+        <button id="next-page-btn">></button>
+    </div>
     <button class="write-btn" id="write-btn">+</button>
 
     <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
@@ -264,10 +297,25 @@
     var table = document.getElementById("notice-table");
     var selectedNoticeId = null;
     var isEditing = false;
+    var currentPage = 0;
+    var pageSize = 5; // 페이지당 표시할 게시글 수
 
     // 페이지 로드
     $(document).ready(function() {
-        findNotice();
+        findNotice(currentPage);
+
+        $('#prev-page-btn').click(function() {
+            if (currentPage > 0) {
+                currentPage--;
+                findNotice(currentPage);
+            }
+        });
+
+        $('#next-page-btn').click(function() {
+            currentPage++;
+            findNotice(currentPage);
+        });
+
         if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
             $('#write-btn').css('display', 'none');
     });
@@ -279,7 +327,8 @@
 
         // select 박스 값에 따라 input type 변경
         if(selectedValue === "date") {
-            var spanElement = $("<span id = \"dateHy\">-</span>");
+            $("#search-text-box").css('display', 'block');
+            var spanElement = $("<span id = \"dateEl\">-</span>");
             var additionalInput = $("<input>", {
                 type: "date",
                 class: "search-text-box2",
@@ -290,18 +339,25 @@
             $("#search-text-box").width("40%");
             $("#search-text-box").attr("type", "date");
             $("#search-text-box2").attr("type", "date");
-        } else {
-            // date가 아닌 경우 추가적인 input 요소 제거
-            $("#dateHy").remove();
+        } else if(selectedValue === "title") {
+            // 타이틀로 검색
+            $("#search-text-box").css('display', 'block');
+            $("#dateEl").remove();
             $("#search-text-box2").remove();
             $("#search-text-box").width("100%");
             $("#search-text-box").attr("type", "text");
+        } else {
+            // 전체인 경우
+            $("#dateEl").remove();
+            $("#search-text-box2").remove();
+            $("#search-text-box").width("100%");
+            $("#search-text-box").css('display', 'none');
         }
     });
 
     // 검색 버튼 이벤트
     $("#search-btn").click(function() {
-        handleSearch();
+        handleSearch(currentPage);
 
     });
 
@@ -338,7 +394,7 @@
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
                 $('#writeForm')[0].reset(); // 폼 초기화
-                findNotice();
+                findNotice(0);
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -349,28 +405,18 @@
     function attachRowClickEvent() {
         $('#notice-table tr').each(function() {
             $(this).click(function() {
-                var noticeId = $(this).attr('data-notice-id');
-                if (noticeId) {
-                    // 공지사항 상세정보 가져오기
-                    getNoticeDetail(noticeId);
+                if(sessionEmail != null) {
+                    var noticeId = $(this).attr('data-notice-id');
+                    if (noticeId) {
+                        // 공지사항 상세정보 가져오기
+                        getNoticeDetail(noticeId);
+                    }
+                } else {
+                    alert("로그인을 해주세요.");
+                    location.href = '/login';
                 }
             });
         });
-    }
-
-    // Adjust modal position
-    function adjustModalPosition() {
-        var modalContent = $('.modal-content');
-        var windowHeight = $(window).height();
-        var modalHeight = modalContent.outerHeight();
-
-        // Check if modal height exceeds window height
-        if (modalHeight > windowHeight * 0.8) { // Allow 80% of window height
-            modalContent.css('top', '10%'); // Center it vertically
-        } else {
-            var topOffset = (windowHeight - modalHeight) / 2;
-            modalContent.css('top', topOffset + 'px'); // Center it vertically
-        }
     }
 
     // 공지사항 상세 정보 가져오기
@@ -385,7 +431,6 @@
                     $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
                 $('#detailModal').fadeIn();
                 selectedNoticeId = noticeId;
-                adjustModalPosition();
                 if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F')) {
                     $('#edit-btn').css('display', 'none');
                     $('#delete-btn').css('display', 'none');
@@ -441,7 +486,7 @@
         ajaxPostJsonCall('/modify-notice-web', JSON.stringify(noticeDto), function (data) {
             if (data.code === "0000") {
                 alert("공지사항이 수정되었습니다.");
-                findNotice();
+                findNotice(0);
 
                 // 제목과 내용을 다시 label로 변경
                 $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
@@ -464,7 +509,7 @@
                 if (data.code === "0000") {
                     alert("공지사항이 삭제되었습니다.");
                     $('#detailModal').fadeOut();
-                    findNotice();
+                    findNotice(0);
                 }
             }, function (error) {
                 alert("An error occurred: " + error.message);
@@ -483,8 +528,8 @@
     }
 
     // 모든 공지사항 조회
-    function findNotice() {
-        ajaxJsonCall('/find-all-notice-web', null, function (data) {
+    function findNotice(page) {
+        ajaxJsonCall('/find-all-notice-web?page=' + page + '&size=' + pageSize, null, function (data) {
             drawTable(data);
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -492,41 +537,34 @@
     }
 
     function drawTable(data) {
+        console.log(data);
         // 테이블의 행 개수
         var rowCount = table.rows.length;
 
-        if (data.code == "0000" && data.data.length > 0) {
-            // 최신 공지시항부터 나열
-            data.data.sort((a, b) => {
-                const dateA = a.createDate ? new Date(a.createDate) : new Date(a.updateDate);
-                const dateB = b.createDate ? new Date(b.createDate) : new Date(b.updateDate);
-                return dateB - dateA;
-            });
-
+        if (data.code == "0000" && data.data.content.length > 0) {
             // 헤더를 제외한 모든 행 삭제
             for (var i = rowCount - 1; i > 0; i--) {
                 table.deleteRow(i);
             }
 
             // 데이터 개수만큼 테이블에 추가
-            for (var i = 0; i < data.data.length; i++) {
+            data.data.content.forEach(function(post) {
                 var row = table.insertRow(-1);
-
-                row.setAttribute('data-notice-id', data.data[i].noticeId);
+                row.setAttribute('data-notice-id', post.noticeId);
 
                 var cell1 = row.insertCell(0);
                 var cell2 = row.insertCell(1);
 
-                cell1.innerHTML = data.data[i].noticeTitle;
+                cell1.innerHTML = post.noticeTitle;
 
                 var date = null;
-                if (data.data[i].createDate == null)
-                    date = new Date(data.data[i].updateDate);
+                if (post.createDate == null)
+                    date = new Date(post.updateDate);
                 else
-                    date = new Date(data.data[i].createDate);
+                    date = new Date(post.createDate);
 
                 cell2.innerHTML = dateFormat(date);
-            }
+            });
             attachRowClickEvent();
         } else {
             // 헤더를 제외한 모든 행 삭제
@@ -534,6 +572,18 @@
                 table.deleteRow(i);
             }
         }
+        updatePaginationButtons(data.data.totalPages);
+    }
+
+    // 페이지네이션 버튼 상태 업데이트 함수
+    function updatePaginationButtons(totalPages) {
+        if(totalPages == 1)
+            $('#pagination-container').css('display', 'none');
+        // 이전 버튼은 첫 페이지일 때 비활성화
+        $('#prev-page-btn').prop('disabled', currentPage === 0);
+
+        // 다음 버튼은 마지막 페이지일 때 비활성화
+        $('#next-page-btn').prop('disabled', currentPage >= totalPages - 1);
     }
 
 
@@ -569,7 +619,7 @@
         detailModal.style.display = "none";
     }
 
-    function handleSearch() {   // 검색 이벤트 함수
+    function handleSearch(page) {   // 검색 이벤트 함수
         var searchType = $('#select-search').val();
         var searchText = $('#search-text-box').val();
 
@@ -579,6 +629,8 @@
             } else {
                 const param = {};
                 param["title"] = searchText;
+                param["page"] = page;
+                param["size"] = pageSize;
                 ajaxJsonCall('/find-by-title-notice-web', param, function(data) {
                     drawTable(data);
                 });
@@ -591,13 +643,15 @@
                 const params = {};
                 params["date1"] = searchText;
                 params["date2"] = searchText2;
+                params["page"] = page;
+                params["size"] = pageSize;
                 ajaxJsonCall('/find-by-date-notice-web', params, function(data) {
                     drawTable(data);
                 });
             }
 
         } else {    // 전체인 경우
-            findNotice();
+            findNotice(0);
         }
     }
 

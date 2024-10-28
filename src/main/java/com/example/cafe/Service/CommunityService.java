@@ -10,10 +10,13 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 
 @Slf4j
 @Service
@@ -29,9 +32,8 @@ public class CommunityService {
         communityRepository.save(community);
     }
 
-    public List<CommunityDto> findAllCommunity() {
-        List<CommunityDto> communityDtoList = communityRepository.findAllCommunity();
-        return communityDtoList;
+    public Page<CommunityDto> findAllCommunity(Pageable pageable) {
+        return communityRepository.findAllCommunity(pageable);
     }
 
     public CommunityDto findByIdCommunity(int communityId) {
@@ -39,25 +41,25 @@ public class CommunityService {
         return community;
     }
 
-    public List<CommunityDto> findByMemberId(Member member) {
-        List<Community> community = communityRepository.findByMemberId(member);
+    public Page<CommunityDto> findByMemberId(Member member, Pageable pageable) {
+        Page<Community> community = communityRepository.findByMemberId(member, pageable);
         List<CommunityDto> communityDtos = new ArrayList<>();
 
         if(community != null) {
-            for(int i = community.size() - 1; i >= 0; i--) {
+            for(Community c : community) {
                 CommunityDto dto = CommunityDto.builder()
-                        .communityId(community.get(i).getCommunityId())
-                        .communityTitle(community.get(i).getCommunityTitle())
-                        .communityContent(community.get(i).getCommunityContent())
-                        .createDate(community.get(i).getCreateDate())
-                        .updateDate(community.get(i).getUpdateDate())
+                        .communityId(c.getCommunityId())
+                        .communityTitle(c.getCommunityTitle())
+                        .communityContent(c.getCommunityContent())
+                        .createDate(c.getCreateDate())
+                        .updateDate(c.getUpdateDate())
                         .build();
 
                 communityDtos.add(dto);  // 리스트에 추가
             }
         }
 
-        return communityDtos;
+        return new PageImpl<>(communityDtos, community.getPageable(), community.getTotalElements());
     }
 
     public void modifyCommunity(CommunityDto communityDto) {

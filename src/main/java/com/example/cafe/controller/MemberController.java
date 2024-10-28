@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -157,11 +159,11 @@ public class MemberController {
     }
 
     @GetMapping("/find-my-community")
-    public ResultEntity findMyCommunity(@RequestParam("email") String email) {
+    public ResultEntity findMyCommunity(@RequestParam("email") String email, Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
             Member member = memberService.findByEmailEt(email);
-            List<CommunityDto> communityDtos = communityService.findByMemberId(member);
+            Page<CommunityDto> communityDtos = communityService.findByMemberId(member,pageable);
 
             result.setCode("0000");
             result.setMessage("Find My Community Success");

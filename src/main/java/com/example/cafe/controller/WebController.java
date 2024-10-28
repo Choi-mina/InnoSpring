@@ -208,8 +208,11 @@ public class WebController {
     // 공지사항 전체 조회 Web API
     @RequestMapping("/find-all-notice-web")
     @ResponseBody
-    public ResultEntity FindAllNotice() {
-        String url = baseUrl + "/notice/find-all";
+    public ResultEntity FindAllNotice(
+            @RequestParam int page,  // 페이지 번호
+            @RequestParam int size // 페이지당 표시할 게시글 수
+    ) {
+        String url = baseUrl + "/notice/find-all?page=" + page + "&size=" + size;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
@@ -242,8 +245,11 @@ public class WebController {
     // 제목으로 공지사항 조회 Web API
     @RequestMapping("/find-by-title-notice-web")
     @ResponseBody
-    public ResultEntity FindByTitleNotice(@RequestParam String title) {
-        String url = baseUrl + "/notice/find-by-title?title=" + title;
+    public ResultEntity FindByTitleNotice(@RequestParam String title,
+                                          @RequestParam int page,  // 페이지 번호
+                                          @RequestParam int size // 페이지당 표시할 게시글 수
+                                          ) {
+        String url = baseUrl + "/notice/find-by-title?title=" + title + "&page=" + page + "&size=" + size;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
@@ -259,8 +265,11 @@ public class WebController {
     // 날짜로 공지사항 조회 Web API
     @RequestMapping("/find-by-date-notice-web")
     @ResponseBody
-    public ResultEntity FindByDateNotice(@RequestParam String date1, @RequestParam String date2) {
-        String url = baseUrl + "/notice/find-by-date?date1=" + date1 + "&date2=" + date2;
+    public ResultEntity FindByDateNotice(@RequestParam String date1, @RequestParam String date2,
+                                         @RequestParam int page,  // 페이지 번호
+                                         @RequestParam int size // 페이지당 표시할 게시글 수
+                                         ) {
+        String url = baseUrl + "/notice/find-by-date?date1=" + date1 + "&date2=" + date2 + "&page=" + page + "&size=" + size;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
@@ -302,6 +311,25 @@ public class WebController {
         ResponseEntity<ResultEntity> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
+                httpEntity,
+                ResultEntity.class);
+        return response.getBody();
+    }
+
+    // community 글 목록 불러오기
+    @RequestMapping("/community-find-web")
+    @ResponseBody
+    public ResultEntity CommunityFindWeb(@RequestParam int page,  // 페이지 번호
+                                         @RequestParam int size // 페이지당 표시할 게시글 수
+                                         ) {
+        String url = baseUrl + "/community/find-all?page=" + page + "&size=" + size;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<ResultEntity> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
                 httpEntity,
                 ResultEntity.class);
         return response.getBody();

@@ -5,8 +5,9 @@ import com.example.cafe.dto.NoticeDto;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @Slf4j
@@ -34,10 +35,10 @@ public class NoticeController {
     }
 
     @GetMapping("/find-all")
-    public ResultEntity findAllNotice() {
+    public ResultEntity findAllNotice(Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
-            List<NoticeDto> noticeDtoList = noticeService.getAllNotices();
+            Page<NoticeDto> noticeDtoList = noticeService.getAllNotices(pageable);
             // Find All Notice success
             result.setCode("0000");
             result.setMessage("Find All Notice Success");
@@ -68,10 +69,10 @@ public class NoticeController {
     }
 
     @GetMapping("/find-by-title")
-    public ResultEntity findByTitle(@RequestParam String title) {
+    public ResultEntity findByTitle(@RequestParam String title, Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
-            List<NoticeDto> noticeDtoList = noticeService.findByTitle(title);
+            Page<NoticeDto> noticeDtoList = noticeService.findByTitle(title, pageable);
             // Find By Title Notice Success
             result.setCode("0000");
             result.setMessage("Find By Title Notice Success");
@@ -85,10 +86,10 @@ public class NoticeController {
     }
 
     @GetMapping("/find-by-date")
-    public ResultEntity findByDate(@RequestParam String date1, @RequestParam String date2) {
+    public ResultEntity findByDate(@RequestParam String date1, @RequestParam String date2, Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
-            List<NoticeDto> noticeDtoList = noticeService.findByDate(date1, date2);
+            Page<NoticeDto> noticeDtoList = noticeService.findByDate(date1, date2, pageable);
             // Find By Date Notice Success
             result.setCode("0000");
             result.setMessage("Find By Date Notice Success");

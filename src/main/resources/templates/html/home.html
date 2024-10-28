@@ -4,7 +4,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
-    <link href="../css/home.css" rel="stylesheet" type="text/css"/>
     <title>Home</title>
     <style>
         * {
@@ -19,7 +18,7 @@
             top: 100px;
             left: 0;
             width: 100%;
-            height: calc(100% - 100px); /* 헤더 공간을 제외한 높이 */
+            height: 87%;
             position: absolute;
             display: flex; /* 플렉스 박스 사용 */
             flex-direction: column; /* 세로 방향 정렬 */
@@ -70,8 +69,8 @@
 <div class="home-div">
     <div>
         <button onclick="location.href='/community-web'" class="menu-btn">Community</button>
-        <button onclick="location.href='/artist-web'" class="menu-btn">Artist</button>
-        <button onclick="location.href='/schedule-web'" class="menu-btn">Schedule</button>
+        <button class="menu-btn" id="artist-btn">Artist</button>
+        <button class="menu-btn" id="schedule-btn">Schedule</button>
     </div>
     <div class="social-buttons">
         <button class="social-image-button" onclick="window.open('https://www.instagram.com/nakedxproud?igsh=aXVib2JvanNjYXJl', '_blank')">
@@ -90,4 +89,33 @@
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
+<script>
+    // artist 페이지는 로그인 되어있는 회원만 접근 가능
+    document.getElementById("artist-btn").addEventListener("click", function() {
+        try{
+            if(sessionEmail != null) {
+                location.href = '/artist-web';
+            } else {
+                alert("로그인을 해주세요.");
+                location.href = '/login';
+            }
+        } catch(e) {
+            alert("로그인을 해주세요.");
+        }
+    });
+
+    // schedule 페이지는 로그인 되어있는 회원만 접근 가능
+    document.getElementById("schedule-btn").addEventListener("click", function() {
+        try{
+            if(sessionEmail != null) {
+                location.href = '/schedule-web';
+            } else {
+                alert("로그인을 해주세요.");
+                location.href = '/login';
+            }
+        } catch(e) {
+            alert("로그인을 해주세요.");
+        }
+    });
+</script>
 </html>

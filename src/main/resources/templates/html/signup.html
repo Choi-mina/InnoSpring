@@ -138,6 +138,7 @@
           <button id="emailCheck" type="button">중복확인</button>
         </div>
         <input type="password" name="password" th:field="*{password}" placeholder="Password">
+        <input type="password" name="passwordConfirm" placeholder="Password Confirm">
         <div class="button-container">
           <button type="button" id="cancelBtn">취소</button>
           <input type="submit" value="SignUp">
@@ -172,6 +173,7 @@
     var phoneNum = form.querySelector('[name="phoneNum"]');
     var email = form.querySelector('[name="email"]');
     var password = form.querySelector('[name="password"]');
+    var passwordConfirm = form.querySelector('[name="passwordConfirm"]');
 
     if (!userName || userName.value === "") {
       alert("이름을 입력해주세요.");
@@ -191,6 +193,11 @@
 
     if (!password || password.value === "" || password.value.length < 7) {
       alert("7글자 이상의 비밀번호를 입력해주세요.");
+      return false;
+    }
+
+    if(password.value != passwordConfirm.value) {
+      alert("비밀번호가 일치하지 않습니다.");
       return false;
     }
 

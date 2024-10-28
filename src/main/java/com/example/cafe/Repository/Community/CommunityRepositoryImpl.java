@@ -9,6 +9,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,34 +20,41 @@ import java.util.List;
 public class CommunityRepositoryImpl implements CommunityRepositoryCustom{
     private final EntityManager em;
 
-    public List<CommunityDto> findAllCommunity() {
-        try {
-            TypedQuery<Object[]> query = em.createQuery(
-                    "SELECT c, m.email FROM Community c JOIN c.communityAuthor m", Object[].class
-            );
-            List<Object[]> results = query.getResultList();
+    public Page<CommunityDto> findAllCommunity(Pageable pageable) {
+        TypedQuery<Object[]> query = em.createQuery(
+                "SELECT c, m.email FROM Community c JOIN c.communityAuthor m ORDER BY c.updateDate DESC", Object[].class
+        );
 
-            List<CommunityDto> communityDtos = new ArrayList<>();
-            for (Object[] result : results) {
-                Community community = (Community) result[0];
-                String memberEmail = (String) result[1];
-                CommunityDto dto = CommunityDto.builder()
-                        .communityId(community.getCommunityId())
-                        .communityTitle(community.getCommunityTitle())
-                        .communityContent(community.getCommunityContent())
-                        .author(memberEmail)
-                        .createDate(community.getCreateDate())
-                        .updateDate(community.getUpdateDate())
-                        .build();
+        // 페이지 범위 설정
+        query.setFirstResult((int) pageable.getOffset()); // 시작 위치
+        query.setMaxResults(pageable.getPageSize()); // 페이지 크기 설정
 
-                communityDtos.add(dto);  // 리스트에 추가
-            }
+        List<Object[]> results = query.getResultList();
+        List<CommunityDto> communityDtos = new ArrayList<>();
 
-            return communityDtos;
-        } catch (NoResultException e) {
-            // 데이터가 없을 때
-            return null;
+        for (Object[] result : results) {
+            Community community = (Community) result[0];
+            String memberEmail = (String) result[1];
+
+            CommunityDto dto = CommunityDto.builder()
+                    .communityId(community.getCommunityId())
+                    .communityTitle(community.getCommunityTitle())
+                    .communityContent(community.getCommunityContent())
+                    .author(memberEmail)
+                    .createDate(community.getCreateDate())
+                    .updateDate(community.getUpdateDate())
+                    .build();
+
+            communityDtos.add(dto);
         }
+
+        // 전체 개수 조회 (페이징 처리에 필요)
+        TypedQuery<Long> countQuery = em.createQuery(
+                "SELECT COUNT(c) FROM Community c JOIN c.communityAuthor m", Long.class
+        );
+        long total = countQuery.getSingleResult();
+
+        return new PageImpl<>(communityDtos, pageable, total);
     }
 
     public CommunityDto findCommunityById(int communityId) {
@@ -74,19 +84,29 @@ public class CommunityRepositoryImpl implements CommunityRepositoryCustom{
         }
     }
 
-    public List<Community> findByMemberId(Member member) {
+    public Page<Community> findByMemberId(Member member, Pageable pageable) {
         try {
-            TypedQuery<Community> query = em.createQuery("SELECT c FROM Community c where c.communityAuthor = :communityAuthor", Community.class)
+            TypedQuery<Community> query = em.createQuery("SELECT c FROM Community c where c.communityAuthor = :communityAuthor ORDER BY c.updateDate DESC", Community.class)
                     .setParameter("communityAuthor", member);
+
+            // 페이지 범위 설정
+            query.setFirstResult((int) pageable.getOffset()); // 시작 위치
+            query.setMaxResults(pageable.getPageSize()); // 페이지 크기 설정
+
             List<Community> results = query.getResultList();
 
-            if(!results.isEmpty())
-                return results;
+            // 전체 개수 조회 (페이징 처리에 필요)
+            TypedQuery<Long> countQuery = em.createQuery(
+                    "SELECT COUNT(c) FROM Community c where c.communityAuthor = :communityAuthor", Long.class)
+                    .setParameter("communityAuthor", member);;
+            long total = countQuery.getSingleResult();
+
+            return new PageImpl<>(results, pageable, total);
 
         } catch (NoResultException e) {
             // 데이터가 없을 때
             return null;
         }
-        return null;
+
     }
 }

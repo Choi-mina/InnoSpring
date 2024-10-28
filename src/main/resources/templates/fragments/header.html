@@ -163,7 +163,7 @@
         // 날짜 차이 계산 (하루는 86400000 밀리초)
         const timeDifference = today - inputDate;
         const daysPassed = timeDifference / (1000 * 60 * 60 * 24);
-        return daysPassed;
+        return daysPassed + 1;
     }
 
 </script>

@@ -6,6 +6,8 @@ import com.example.cafe.entity.Notice;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,25 +29,8 @@ public class NoticeService {
         noticeRepository.save(notice);
     }
 
-    public List<NoticeDto> getAllNotices() {
-        List<Notice> notices = noticeRepository.findAll();
-        List<NoticeDto> noticeDtoList = new ArrayList<>();
-
-        if(notices != null)
-            // 내림차순으로 Entity -> Dto
-            for(int i = notices.size() - 1; i >= 0; i--) {
-                NoticeDto dto = NoticeDto.builder()
-                        .noticeId(notices.get(i).getNoticeId())
-                        .noticeTitle(notices.get(i).getNoticeTitle())
-                        .noticeContent(notices.get(i).getNoticeContent())
-                        .createDate(notices.get(i).getCreateDate())
-                        .updateDate(notices.get(i).getUpdateDate())
-                        .build();
-
-                noticeDtoList.add(dto);  // 리스트에 추가
-            }
-
-        return noticeDtoList;
+    public Page<NoticeDto> getAllNotices(Pageable pageable) {
+        return noticeRepository.findAllNotice(pageable);
     }
 
     public  NoticeDto getNoticeById(int noticeId) {
@@ -65,28 +50,11 @@ public class NoticeService {
         return noticeDto;
     }
 
-    public List<NoticeDto> findByTitle(String title) {
-        List<Notice> notices = noticeRepository.findByTitle(title);
-        List<NoticeDto> noticeDtoList = new ArrayList<>();
-
-        if(notices != null)
-            // 내림차순으로 Entity -> Dto
-            for(int i = notices.size() - 1; i >= 0; i--) {
-                NoticeDto dto = NoticeDto.builder()
-                        .noticeId(notices.get(i).getNoticeId())
-                        .noticeTitle(notices.get(i).getNoticeTitle())
-                        .noticeContent(notices.get(i).getNoticeContent())
-                        .createDate(notices.get(i).getCreateDate())
-                        .updateDate(notices.get(i).getUpdateDate())
-                        .build();
-
-                noticeDtoList.add(dto);  // 리스트에 추가
-            }
-
-        return noticeDtoList;
+    public Page<NoticeDto> findByTitle(String title, Pageable pageable) {
+        return noticeRepository.findByTitle(title, pageable);
     }
 
-    public List<NoticeDto> findByDate(String date1, String date2) {
+    public Page<NoticeDto> findByDate(String date1, String date2, Pageable pageable) {
         // DateTimeFormatter를 사용해 문자열을 LocalDate로 변환
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date1LocalDate = LocalDate.parse(date1, formatter);
@@ -104,24 +72,7 @@ public class NoticeService {
             endDate = date1LocalDate;
         }
 
-        List<Notice> notices = noticeRepository.findByDate(startDate, endDate);
-        List<NoticeDto> noticeDtoList = new ArrayList<>();
-
-        if(notices != null)
-            // 내림차순으로 Entity -> Dto
-            for(int i = notices.size() - 1; i >= 0; i--) {
-                NoticeDto dto = NoticeDto.builder()
-                        .noticeId(notices.get(i).getNoticeId())
-                        .noticeTitle(notices.get(i).getNoticeTitle())
-                        .noticeContent(notices.get(i).getNoticeContent())
-                        .createDate(notices.get(i).getCreateDate())
-                        .updateDate(notices.get(i).getUpdateDate())
-                        .build();
-
-                noticeDtoList.add(dto);  // 리스트에 추가
-            }
-
-        return noticeDtoList;
+        return noticeRepository.findByDate(startDate, endDate, pageable);
     }
 
     public void modifyNotice(NoticeDto noticeDto) {
