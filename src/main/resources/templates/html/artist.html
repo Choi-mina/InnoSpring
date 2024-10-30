@@ -4,7 +4,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
-    <link href="../css/home.css" rel="stylesheet" type="text/css"/>
     <title>Artist</title>
     <style>
 
@@ -291,10 +290,23 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
 <script>
-
     window.onload = function() {
         fetchAllArtists();
+        checkSessionFlag();
     };
+
+    // sessionFlag 확인 후 버튼 표시 여부 결정
+    function checkSessionFlag() {
+        if (typeof sessionFlag !== "undefined" && sessionFlag !== null) {
+            if (sessionFlag === 'F') {
+                document.getElementById('write-btn').style.display = 'none';
+            } else {
+                document.getElementById('write-btn').style.display = 'block';
+            }
+        } else {
+            document.getElementById('write-btn').style.display = 'none';
+        }
+    }
 
     // 전체 아티스트를 조회하는 함수
     function fetchAllArtists() {
@@ -356,7 +368,6 @@
             .then(result => {
                 if (result.code === "0000") {
                     const artist = result.data;
-                    console.log(artist);
                     // 모달에 데이터를 표시합니다
                     if(artist.artistImage != null) {
                         document.getElementById("detailImage").style.visibility="visible"
@@ -371,6 +382,28 @@
                     // 모달 보이기
                     document.getElementById("detailModal").style.display = "block";
                     configureModalButtons(artist);
+
+                    // 댓글 넣기
+                    if(artist.comments.length > 0) {
+                        document.getElementById("commentList").innerHTML = ""; // 기존 내용을 초기화
+                        const sortedComments = artist.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+                        sortedComments.forEach(function(post) {
+                            var index = post.commentsAuthor.email.indexOf('@');
+                            var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
+                            document.getElementById("commentList").insertAdjacentHTML("beforeend", `
+                            <div class="comment" id="${post.commentsId}">
+                                <p class="comment-author">${authorName}</p>
+                                <p class="comment-text">${post.commentsContent}</p>
+                            </div>
+                            <hr style="border: solid 0.5px lightgray;">
+                        `);
+                        });
+                    } else {    // 댓글이 없는 경우
+                        document.getElementById("commentList").innerHTML = `
+                      <label>댓글이 없습니다.</label>
+                    `;
+                    }
+
                 } else {
                     console.error('Error fetching artist detail: ', result.message);
                 }
@@ -385,6 +418,12 @@
         const deleteButton = document.getElementById("deleteButton");
         const editContent = document.getElementById("editContent");
         const editPhoto = document.getElementById("editPhoto");
+        const commentsSave = document.getElementById("submitComment");
+
+        if(sessionFlag == 'F' || sessionFlag == null) {
+            editButton.style.display = "none";
+            deleteButton.style.display = "none";
+        }
 
 
         editButton.onclick = function() {
@@ -452,8 +491,29 @@
                     .catch(error => console.error('Error deleting artist:', error));
             }
         };
-    }
 
+        // 댓글 작성 버튼 클릭 이벤트 핸들러
+        commentsSave.onclick = function() {
+            var commentsContent = $('#commentInput').val();
+            commentsContent = commentsContent.replace(/\n/g, '<br>');
+            if(commentsContent != "" || commentsContent != null) {
+                var commentsDto = {
+                    commentsContent: commentsContent,
+                    author: sessionEmail,
+                    flag: "A",
+                    artistId: artist.artistId
+                };
+                ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), function (data) {
+                    if (data.code === "0000") {
+                        openDetailModal(artist.artistId);
+                        $('#commentInput').val("");
+                    }
+                }, function (error) {
+                    alert("An error occurred: " + error.message);
+                });
+            }
+        }
+    }
 
     // 글쓰기 모달 관련 요소들
     var WriteModal = document.getElementById("myModal");
@@ -544,6 +604,7 @@
         detailImage.style.display = "block";
         detailContent.innerHTML = ""; // 기존 내용을 비움
         detailImage.src = ""; // 기존 이미지를 제거
+        $('#commentInput').val("");
     }
 
 </script>

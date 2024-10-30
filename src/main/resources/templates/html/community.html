@@ -392,7 +392,8 @@
                 // 댓글 넣기
                 if(data.data.comments.length > 0) {
                     document.getElementById("commentList").innerHTML = ""; // 기존 내용을 초기화
-                    data.data.comments.forEach(function(post) {
+                    const sortedComments = data.data.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+                    sortedComments.forEach(function(post) {
                         var index = post.commentsAuthor.email.indexOf('@');
                         var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
                         document.getElementById("commentList").insertAdjacentHTML("beforeend", `
