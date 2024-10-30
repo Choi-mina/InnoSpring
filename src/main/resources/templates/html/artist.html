@@ -174,6 +174,59 @@
             background-color: rgba(255, 100, 100);
         }
 
+        .comment-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .comment {
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comment-text {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        /* 댓글 작성 폼 스타일 */
+        .comment-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #commentInput {
+            width: 100%;
+            height: 50px;
+            resize: none;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #submitComment {
+            background-color: rgba(232, 217, 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font: 15px bold;
+        }
+
+        #submitComment:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
     </style>
 </head>
 <body>
@@ -217,6 +270,21 @@
                 <button id="saveButton" class="submit-btn" style="display: none;">저장</button>
                 <button id="deleteButton" class="submit-btn">삭제</button>
             </div>
+
+            <!-- 댓글창 -->
+            <div class="comments-section">
+                <h3>댓글</h3>
+
+                <!-- 기존 댓글 -->
+                <div class="comment-list" id="commentList">
+                </div>
+
+                <!-- 댓글 작성란 -->
+                <div class="comment-form">
+                    <textarea id="commentInput" placeholder="댓글을 입력하세요."></textarea>
+                    <button id="submitComment">↑</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -224,175 +292,167 @@
 </body>
 <script>
 
-    var detailModal = document.getElementById("detailModal");
-    var closeDetailModal = document.getElementById("closeDetailModal");
-    var editButton = document.getElementById("editButton");
-    var deleteButton = document.getElementById("deleteButton");
-    var saveButton = document.getElementById("saveButton");
-    var editContent = document.getElementById("editContent");
-    var detailContent = document.getElementById("detailContent");
-
     window.onload = function() {
+        fetchAllArtists();
+    };
+
+    // 전체 아티스트를 조회하는 함수
+    function fetchAllArtists() {
         fetch('/artist/find-all')
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
+                if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
                 return response.json();
             })
             .then(result => {
                 if (result.code === "0000") {
-                    const artistGrid = document.getElementById('artistGrid');
-                    artistGrid.innerHTML = ''; // Clear existing content
-
-                    // 날짜 기준으로 최신 글 순서대로 정렬 (assuming artist has an updateDate property)
-                    const sortedArtists = result.data.sort((a, b) => {
-                        return new Date(b.updateDate) - new Date(a.updateDate); // 최신 순으로 정렬
-                    });
-
-                    sortedArtists.forEach(artist => {
-                        const gridItem = document.createElement('div');
-                        gridItem.className = 'grid-item';
-
-                        // 그리드에 넣을 이미지 보여주기
-                        const img = document.createElement('img');
-                        img.setAttribute('artist-id', artist.artistId);
-                        if (artist.artistImage) {
-                            img.src = 'data:image/jpeg;base64,' + artist.artistImage;
-                            img.style.display = 'block';
-                            gridItem.appendChild(img);
-                        } else {
-                            // 이미지가 없는 경우 내용 보여주기
-                            const contentDiv = document.createElement('div');
-                            contentDiv.className = 'caption';
-
-                            // 내용이 10글자 이상이면 뒷내용은 '...'으로 표시
-                            const contentText = artist.artistContent.replace(/<br\s*\/?>/g, '\n'); // <br> 태그를 줄바꿈으로 변경
-                            const displayText = contentText.length > 10
-                                ? contentText.substring(0, 10) + '...'
-                                : contentText;
-
-                            // contentDiv의 텍스트를 innerText가 아닌 innerHTML로 설정
-                            contentDiv.innerHTML = displayText.replace(/\n/g, '<br>'); // 줄바꿈 문자를 <br>로 변경
-                            gridItem.appendChild(contentDiv);
-                        }
-
-                        artistGrid.appendChild(gridItem);
-
-                        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
-                            $('#write-btn').css('display', 'none');
-
-                        // gridItem 클릭 시 상세 정보 모달 열기
-                        gridItem.onclick = function() {
-                            // 상태 초기화
-                            editContent.style.display = "none"; // textarea 숨기기
-                            saveButton.style.display = "none"; // 저장 버튼 숨기기
-                            detailContent.style.display = "block"; // 기존 내용 다시 표시
-                            editButton.style.display = "block"; // 수정 버튼 다시 표시
-                            deleteButton.style.display = "block"; // 삭제 버튼 다시 표시
-                            editPhoto.style.display = "none";
-                            document.getElementById("detailContent").style.display = "block";
-                            // 상세 정보 업데이트
-                            if (artist.artistImage) {
-                                document.getElementById("detailImage").style.display = "block";
-                                document.getElementById("detailImage").src = img.src; // 클릭한 이미지의 src
-                            }   else
-                                document.getElementById("detailImage").style.display = "none";
-                            document.getElementById("detailContent").innerHTML = artist.artistContent.replace(/<br\s*\/?>/g, '<br>'); // 해당 아티스트의 내용
-
-                            // 모달 열기
-                            detailModal.style.display = "block";
-
-                            if(sessionFlag == null || sessionFlag == 'F') {
-                                editButton.style.display = "none";
-                                deleteButton.style.display = "none";
-                            }
-
-                            // 수정버튼 클릭 핸들러
-                            editButton.onclick = function() {
-                                // 기존 내용 로드
-                                document.getElementById("detailContent").style.display = "none";
-                                var contentHtml = detailContent.innerHTML; // innerHTML로 변경하여 <br> 태그도 처리
-                                var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n'); // <br> 태그를 \n으로 변환
-                                editContent.value = contentText; // 기존 내용
-                                editContent.style.display = "block"; // textarea 표시
-                                saveButton.style.display = "block"; // 저장 버튼 표시
-                                editButton.style.display = "none"; // 수정 버튼 숨기기
-                                deleteButton.style.display = "none"; // 삭제 버튼 숨기기
-
-                                // 사진 수정 가능하게 하기
-                                editPhoto.style.display = "block"; // 사진 수정 input 표시
-                            };
-
-                            // 수정 저장 버튼 클릭 핸들러
-                            saveButton.onclick = function() {
-                                var updatedContent = editContent.value.replace(/\n/g, '<br>');
-                                var file = editPhoto.files[0]; // 수정된 이미지 가져오기
-
-                                var artistDto = {
-                                    artistId: artist.artistId,
-                                    artistContent: updatedContent
-                                };
-
-                                var formData = new FormData();
-                                formData.append("artistDto", new Blob([JSON.stringify(artistDto)], { type: "application/json" }));
-                                if (file) {
-                                    formData.append("artistImage", file);
-                                } else
-                                    formData.append("artistImage", null);
-
-                                fetch(`/artist/modify`, {
-                                    method: 'POST',
-                                    body: formData
-                                })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            throw new Error("HTTP status " + response.status);
-                                        }
-                                        return response.json();
-                                    })
-                                    .then(data => {
-                                        if (data.code === "0000") {
-                                            alert("수정되었습니다.");
-                                            location.reload(); // 페이지를 새로고침하여 변경 사항 반영
-                                        }
-                                    })
-                                    .catch(error => console.error('Error updating artist:', error));
-                            };
-
-                            deleteButton.onclick = function() {
-                                var confirmDelete = confirm("정말로 삭제하시겠습니까?");
-                                if (confirmDelete) {
-                                    fetch(`/artist/delete?id=${artist.artistId}`, {
-                                        method: 'POST'
-                                    })
-                                        .then(response => {
-                                            if (!response.ok) {
-                                                throw new Error("HTTP status " + response.status);
-                                            }
-                                            return response.json();
-                                        })
-                                        .then(data => {
-                                            if (data.code === "0000") {
-                                                alert("삭제되었습니다.");
-                                                detailModal.style.display = "none"; // 모달 닫기
-                                                artistGrid.removeChild(gridItem); // 그리드에서 삭제
-                                            } else {
-                                                console.error('Error deleting artist: ', data.message);
-                                            }
-                                        })
-                                        .catch(error => console.error('Error deleting artist:', error));
-                                }
-                            }
-                        }
-                    });
+                    displayArtistGrid(result.data);
                 } else {
                     console.error('Error fetching artists: ', result.message);
                 }
             })
             .catch(error => console.error('Error fetching artists:', error));
-    };
+    }
 
+    // 아티스트 그리드를 표시하는 함수
+    function displayArtistGrid(artists) {
+        const artistGrid = document.getElementById('artistGrid');
+        artistGrid.innerHTML = ''; // Clear existing content
+
+        const sortedArtists = artists.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+
+        sortedArtists.forEach(artist => {
+            const gridItem = document.createElement('div');
+            gridItem.className = 'grid-item';
+
+            const img = document.createElement('img');
+            img.setAttribute('artist-id', artist.artistId);
+
+            if (artist.artistImage) {
+                img.src = 'data:image/jpeg;base64,' + artist.artistImage;
+                img.style.display = 'block';
+                gridItem.appendChild(img);
+            } else {
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'caption';
+                const contentText = artist.artistContent.replace(/<br\s*\/?>/g, '\n');
+                const displayText = contentText.length > 10 ? contentText.substring(0, 10) + '...' : contentText;
+                contentDiv.innerHTML = displayText.replace(/\n/g, '<br>');
+                gridItem.appendChild(contentDiv);
+            }
+
+            gridItem.onclick = () => openDetailModal(artist.artistId);
+            artistGrid.appendChild(gridItem);
+        });
+    }
+
+    // 상세 보기 모달을 여는 함수
+    function openDetailModal(artistId) {
+        resetModal();
+        fetch(`/artist/find-by-id?id=${artistId}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
+                return response.json();
+            })
+            .then(result => {
+                if (result.code === "0000") {
+                    const artist = result.data;
+                    console.log(artist);
+                    // 모달에 데이터를 표시합니다
+                    if(artist.artistImage != null) {
+                        document.getElementById("detailImage").style.visibility="visible"
+                        document.getElementById("detailImage").src = artist.artistImage
+                            ? 'data:image/jpeg;base64,' + artist.artistImage
+                            : '';
+                    }
+                    else
+                        document.getElementById("detailImage").style.visibility="hidden"
+                    document.getElementById("detailContent").innerHTML = artist.artistContent.replace(/<br\s*\/?>/g, '<br>');
+
+                    // 모달 보이기
+                    document.getElementById("detailModal").style.display = "block";
+                    configureModalButtons(artist);
+                } else {
+                    console.error('Error fetching artist detail: ', result.message);
+                }
+            })
+            .catch(error => console.error('Error fetching artist detail:', error));
+    }
+
+    // 모달 내 버튼을 설정하는 함수
+    function configureModalButtons(artist) {
+        const editButton = document.getElementById("editButton");
+        const saveButton = document.getElementById("saveButton");
+        const deleteButton = document.getElementById("deleteButton");
+        const editContent = document.getElementById("editContent");
+        const editPhoto = document.getElementById("editPhoto");
+
+
+        editButton.onclick = function() {
+            editButton.style.display = "none";
+            editContent.style.display = "block";
+            editContent.value = artist.artistContent.replace(/<br\s*\/?>/gi, '\n');
+            editPhoto.style.display = "block"; // 사진 수정 input 표시
+            saveButton.style.display = "block";
+            document.getElementById("detailContent").style.display = "none";
+        };
+
+        saveButton.onclick = function() {
+            var file = editPhoto.files[0];
+            const updatedContent = editContent.value.replace(/\n/g, '<br>');
+            if ((updatedContent == null || updatedContent == "") && (editPhoto == null || file == null))
+                alert("내용을 입력해주세요.");
+            else {
+                var artistDto = {
+                    artistId: artist.artistId,
+                    artistContent: updatedContent
+                };
+
+                var formData = new FormData();
+                formData.append("artistDto", new Blob([JSON.stringify(artistDto)], {type: "application/json"}));
+                if (file)
+                    formData.append("artistImage", file);
+                 else
+                    formData.append("artistImage", null);
+
+
+                fetch('/artist/modify', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("HTTP status " + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.code === "0000") {
+                            alert("수정되었습니다.");
+                            location.reload();
+                        }
+                    })
+                    .catch(error => console.error('Error updating artist:', error));
+            }
+        }
+
+        deleteButton.onclick = function() {
+            if (confirm("정말로 삭제하시겠습니까?")) {
+                fetch(`/artist/delete?id=${artist.artistId}`, { method: 'POST' })
+                    .then(response => {
+                        if (!response.ok) throw new Error("HTTP status " + response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.code === "0000") {
+                            alert("삭제되었습니다.");
+                            document.getElementById("detailModal").style.display = "none";
+                            fetchAllArtists();
+                        }
+                    })
+                    .catch(error => console.error('Error deleting artist:', error));
+            }
+        };
+    }
 
 
     // 글쓰기 모달 관련 요소들
@@ -462,13 +522,28 @@
     // 상세 모달 X 버튼 클릭 시 모달 닫기
     closeDetailModal.onclick = function() {
         detailModal.style.display = "none";
-        // 상태 초기화
-        editContent.value = detailContent.innerText; // 기존 내용
-        editContent.style.display = "none"; // textarea 숨기기
-        saveButton.style.display = "none"; // 저장 버튼 숨기기
-        editButton.style.display = "block"; // 수정 버튼 다시 표시
-        deleteButton.style.display = "block"; // 삭제 버튼 다시 표시
+        resetModal();
+    }
+
+    // 모달 초기화 함수
+    function resetModal() {
+        const editContent = document.getElementById("editContent");
+        const saveButton = document.getElementById("saveButton");
+        const editButton = document.getElementById("editButton");
+        const deleteButton = document.getElementById("deleteButton");
+        const detailContent = document.getElementById("detailContent");
+        const detailImage = document.getElementById("detailImage");
+        const editPhoto = document.getElementById("editPhoto");
+
+        editContent.style.display = "none";
         editPhoto.style.display = "none";
+        saveButton.style.display = "none";
+        editButton.style.display = "block";
+        deleteButton.style.display = "block";
+        detailContent.style.display = "block";
+        detailImage.style.display = "block";
+        detailContent.innerHTML = ""; // 기존 내용을 비움
+        detailImage.src = ""; // 기존 이미지를 제거
     }
 
 </script>
