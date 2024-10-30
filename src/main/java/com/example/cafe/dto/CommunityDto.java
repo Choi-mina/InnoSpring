@@ -5,6 +5,7 @@ import com.example.cafe.entity.Member;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,4 +20,5 @@ public class CommunityDto {
     private Member communityAuthor;
     private Timestamp createDate;
     private Timestamp updateDate;
+    private List<CommentsDto> comments;
 }

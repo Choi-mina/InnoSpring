@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,6 +20,9 @@ public class Artist {
     public String artistContent;
     public Timestamp createDate;
     public Timestamp updateDate;
+
+    @OneToMany(mappedBy = "parentApost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments = new ArrayList<>();
 
 
     @PrePersist
