@@ -46,4 +46,42 @@ public class CommentsService {
 
         commentsRepository.save(comments);
     }
+
+    public void modifyComments(CommentsDto commentsDto) {
+        // Dto -> Entity
+        Comments comments = new Comments();
+        comments.setCommentsId(commentsDto.getCommentsId());
+        comments.setCommentsContent(commentsDto.getCommentsContent());
+        comments.setCommentsAuthor(commentsDto.getCommentsAuthor());
+        if(commentsDto.getParentCpost() != null) {
+            // Community Dto -> Entity
+            Community community = new Community();
+            community.setCommunityId(commentsDto.getParentCpost().getCommunityId());
+            community.setCommunityTitle(commentsDto.getParentCpost().getCommunityTitle());
+            community.setCommunityContent(commentsDto.getParentCpost().getCommunityContent());
+            community.setCommunityAuthor(commentsDto.getParentCpost().getCommunityAuthor());
+            community.setCreateDate(commentsDto.getParentCpost().getCreateDate());
+            community.setUpdateDate(commentsDto.getParentCpost().getUpdateDate());
+
+            comments.setParentCpost(community);
+        } else {
+            // Artist Dto -> Entity
+            Artist artist = new Artist();
+            artist.setArtistId(commentsDto.getParentApost().getArtistId());
+            artist.setArtistImage(commentsDto.getParentApost().getArtistImage());
+            artist.setArtistImagePath(commentsDto.getParentApost().getArtistImagePath());
+            artist.setArtistContent(commentsDto.getParentApost().getArtistContent());
+            artist.setCreateDate(commentsDto.getParentApost().getCreateDate());
+            artist.setUpdateDate(commentsDto.getParentApost().getUpdateDate());
+
+            comments.setParentApost(artist);
+        }
+
+        commentsRepository.save(comments);
+    }
+
+
+    public void deleteComments(Long commentsId) {
+        commentsRepository.deleteById(commentsId);
+    }
 }
