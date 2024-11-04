@@ -115,7 +115,7 @@
       text-align: center; /* 중앙 정렬 */
     }
 
-    #prev-page-btn, #next-page-btn {
+    #prev-page-btn, #next-page-btn, #cnext-page-btn, #cprev-page-btn {
       background-color: rgba(232, 217, 255);
       color: white;
       border: none;
@@ -125,7 +125,7 @@
       cursor: pointer;
     }
 
-    #prev-page-btn:hover, #next-page-btn:hover {
+    #prev-page-btn:hover, #next-page-btn:hover, #cnext-page-btn:hover, #cprev-page-btn:hover {
       background-color: rgba(209, 178, 255);
     }
 
@@ -180,6 +180,7 @@
     <h2>Mypage</h2>
     <div class="menu-item" id="update-info-btn">회원정보 수정</div>
     <div class="menu-item" id="my-posts-btn">내 글</div>
+    <div class="menu-item" id="my-comment-btn">내 댓글</div>
     <div class="delete-account" id="delete-btn">회원탈퇴</div>
   </div>
   <div class="content" id="content">
@@ -197,6 +198,39 @@
 
       <p id="detail-author">작성자: OOO</p>
       <p id="detail-date">등록일: YYYY-MM-DD</p>
+    </div>
+  </div>
+
+  <!-- 글 상세 보기 모달 -->
+  <div id="detailCModal" class="modal">
+    <div class="modal-content">
+      <span class="close-detail">&times;</span>
+      <h3></h3>
+      <h3 for="edit-title" id="label-Ctitle"><span id="detail-Ctitle"></span></h3><br>
+
+      <p id="detail-Cauthor">작성자: OOO</p>
+      <p id="detail-Cdate">등록일: YYYY-MM-DD</p>
+
+      <!-- 수정 및 삭제 버튼 -->
+<!--      <div class="detail-modal-buttons">-->
+<!--        <button class="edit-btn" id="edit-btn">수정</button>-->
+<!--        <button class="delete-btn" id="delete-btn">삭제</button>-->
+<!--        <button class="save-btn" id="save-btn" style="display: none;">저장</button>-->
+<!--      </div>-->
+      <!-- 댓글창 -->
+      <div class="comments-section">
+        <h3>댓글</h3>
+
+        <!-- 기존 댓글 -->
+        <div class="comment-list" id="commentList">
+        </div>
+
+        <!-- 댓글 작성란 -->
+<!--        <div class="comment-form">-->
+<!--          <textarea id="commentInput" placeholder="댓글을 입력하세요."></textarea>-->
+<!--          <button id="submitComment">↑</button>-->
+<!--        </div>-->
+      </div>
     </div>
   </div>
 
@@ -279,14 +313,23 @@
   });
 
   var currentPage = 0;
-  var pageSize = 10; // 페이지당 표시할 게시글 수
+  var pageSize = 10; // 내 글 페이지당 표시할 게시글 수
+  var commentPageSize = 7;  // 내 댓글 페이지당 표시할 게시글 수
+  var currentcPage = 0;
+  var type;
 
   // 내 글 메뉴 클릭 시 내용 변경
   document.getElementById("my-posts-btn").addEventListener("click", function() {
-    drawTable(currentPage);
+    drawMyPostTable(currentPage);
   });
 
-  function drawTable(page) {
+  // 내 댓글 메뉴 클릭 시 내용 변경
+  document.getElementById("my-comment-btn").addEventListener("click", function() {
+    drawCommentTabs();
+  });
+
+  // 내 글 보기의 테이블을 그리는 함수
+  function drawMyPostTable(page) {
     ajaxJsonCall('/member/find-my-community?email=' + sessionEmail + '&page=' + page + '&size=' + pageSize, null, function(data) {
       if (data.code === "0000" && data.data.content.length > 0) {
         console.log(data);
@@ -335,13 +378,13 @@
         $('#prev-page-btn').click(function() {
           if (currentPage > 0) {
             currentPage--;
-            drawTable(currentPage);
+            drawMyPostTable(currentPage);
           }
         });
 
         $('#next-page-btn').click(function() {
           currentPage++;
-          drawTable(currentPage);
+          drawMyPostTable(currentPage);
         });
       } if(data.data.content.length == 0) {
         document.getElementById("content").innerHTML = `
@@ -351,15 +394,117 @@
     });
   }
 
+  // 내 댓글 클릭시 화면 바뀌는 함수
+  function drawCommentTabs() {
+    document.getElementById("content").innerHTML = `
+      <h2>내 댓글</h2>
+      <div>
+        <button id="community-comments-btn" class="submit-btn">내 커뮤니티 댓글</button>
+        <button id="artist-comments-btn" class="submit-btn">내 아티스트 댓글</button>
+      </div>
+      <div id="comments-content">
+        <p>댓글 목록을 보려면 상단 버튼을 클릭하세요.</p>
+      </div>
+    `;
+
+    // 탭 버튼 이벤트 등록
+    document.getElementById("community-comments-btn").addEventListener("click", function() {
+      type = "C";
+      currentcPage = 0;
+      drawMyCommentsTable(type, currentcPage);
+    });
+
+    document.getElementById("artist-comments-btn").addEventListener("click", function() {
+      type = "A";
+      currentcPage = 0;
+      drawMyCommentsTable(type, currentcPage);
+    });
+  }
+
+  // 내 댓글 테이블 그리기 함수
+  function drawMyCommentsTable(type, page) {
+    ajaxJsonCall('/member/find-my-comment?email=' + sessionEmail + '&type=' + type + '&page=' + page + '&size=' + commentPageSize, null, function(data) {
+      if (data.code === "0000" && data.data.content.length > 0) {
+        document.getElementById("comments-content").innerHTML = `
+          <h3>${type === "C" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
+          <table class="table-class" id="comments-table">
+            <thead>
+              <tr>
+                <th class="table-header-text-title">내용</th>
+                <th class="table-header-text-date">날짜</th>
+              </tr>
+            </thead>
+            <tbody id="comments-table-body">
+            </tbody>
+          </table>
+          <div id="pagination-container">
+            <button id="cprev-page-btn"><</button>
+            <button id="cnext-page-btn">></button>
+          </div>
+        `;
+
+        const commentsTableBody = document.getElementById("comments-table-body");
+
+        data.data.content.forEach(function (comment) {
+          const row = `
+            <tr id="comment-${comment.commentsId}" class="comment-row">
+              <td>${comment.commentsContent}</td>
+              <td>${dateFormat(new Date(comment.updateDate))}</td>
+            </tr>
+          `;
+
+          commentsTableBody.innerHTML += row;
+        });
+
+        updatePaginationButtons(data.data.totalPages);
+
+        // 행 클릭 시 댓글 상세보기 모달 열기
+        commentsTableBody.addEventListener("click", function (event) {
+          var targetRow = event.target.closest("tr");
+          if (targetRow) {
+            var commentsId = targetRow.id.split('-')[1];
+            console.log(type + " " + commentsId);
+            if(type == 'C') {
+              communityDetailComment(commentsId);
+            } else {
+              artistDetailComment(commentsId);
+            }
+          }
+        });
+
+        $('#cprev-page-btn').click(function() {
+          if (currentcPage > 0) {
+            currentcPage--;
+            drawMyCommentsTable(type, currentcPage);
+          }
+        });
+
+        $('#cnext-page-btn').click(function() {
+          currentcPage++;
+          drawMyCommentsTable(type, currentcPage);
+        });
+      } else {
+        document.getElementById("comments-content").innerHTML = `
+          <h3>${type === "community" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
+          <p>작성한 댓글이 없습니다.</p>
+        `;
+      }
+    }, function(error) {
+      alert("An error occurred: " + error.message);
+    });
+  }
+
   // 페이지네이션 버튼 상태 업데이트 함수
   function updatePaginationButtons(totalPages) {
     if(totalPages == 1)
       $('#pagination-container').css('display', 'none');
     // 이전 버튼은 첫 페이지일 때 비활성화
     $('#prev-page-btn').prop('disabled', currentPage === 0);
+    $('#cprev-page-btn').prop('disabled', currentcPage === 0);
 
     // 다음 버튼은 마지막 페이지일 때 비활성화
     $('#next-page-btn').prop('disabled', currentPage >= totalPages - 1);
+    $('#cnext-page-btn').prop('disabled', currentcPage >= totalPages - 1);
   }
 
   // 회원 탈퇴 이벤트
@@ -465,6 +610,16 @@
     }, function(error) {
       alert("An error occurred: " + error.message);
     });
+  }
+
+  // 커뮤니티 글 댓글 상세보기 모달
+  function communityDetailComment(commentsId) {
+    
+  }
+
+  // 아티스트 글 댓글 상세보기 모달
+  function artistDetailComment(commentsId) {
+
   }
 
   var detailClose = document.getElementsByClassName("close-btn")[0];

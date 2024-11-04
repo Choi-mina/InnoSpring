@@ -1,7 +1,9 @@
 package com.example.cafe.controller;
 
+import com.example.cafe.Service.CommentsService;
 import com.example.cafe.Service.CommunityService;
 import com.example.cafe.Service.MemberService;
+import com.example.cafe.dto.CommentsDto;
 import com.example.cafe.dto.CommunityDto;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.ApiResult;
@@ -23,6 +25,7 @@ import java.util.List;
 public class MemberController {
     private final MemberService memberService;
     private final CommunityService communityService;
+    private final CommentsService commentsService;
 
     @PostMapping("/sign-up")
     public ResultEntity memSignUp(@RequestBody MemberDto memberDto) {
@@ -158,6 +161,7 @@ public class MemberController {
         return result;
     }
 
+    // 내 글 조회 API
     @GetMapping("/find-my-community")
     public ResultEntity findMyCommunity(@RequestParam("email") String email, Pageable pageable) {
         ResultEntity result = new ResultEntity();
@@ -177,7 +181,25 @@ public class MemberController {
         return result;
     }
 
+    // 내 댓글 조회 API
+    @GetMapping("/find-my-comment")
+    public ResultEntity findMyCommment(@RequestParam("email") String email, @RequestParam("type") String postType, Pageable pageable) {
+        ResultEntity result = new ResultEntity();
+        try {
+            Member member = memberService.findByEmailEt(email);
+            Page<CommentsDto> commentsDtos = commentsService.findByMemberId(member, postType, pageable);
 
+            result.setCode("0000");
+            result.setMessage("Find My Comment Success");
+            result.setData(commentsDtos);
+
+            log.info("Find My Comment Success");
+        } catch (Exception e) {
+            log.error("Find My Comment Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
 
     // 회원이 존재하는지 validation
     public Boolean memValid(String email) {

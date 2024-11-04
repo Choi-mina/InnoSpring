@@ -1,13 +1,22 @@
 package com.example.cafe.Service;
 
 import com.example.cafe.Repository.Comments.CommentsRepository;
+import com.example.cafe.dto.ArtistDto;
 import com.example.cafe.dto.CommentsDto;
+import com.example.cafe.dto.CommunityDto;
 import com.example.cafe.entity.Artist;
 import com.example.cafe.entity.Comments;
 import com.example.cafe.entity.Community;
+import com.example.cafe.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -83,5 +92,64 @@ public class CommentsService {
 
     public void deleteComments(Long commentsId) {
         commentsRepository.deleteById(commentsId);
+    }
+
+    public Page<CommentsDto> findByMemberId(Member member, String postType, Pageable pageable) {
+        List<CommentsDto> commentsDtos = new ArrayList<>();
+        if(postType.equals("C")) {  // Community 댓글만 가져오기
+            Page<Comments> comments = commentsRepository.findCByMemberId(member, pageable);
+
+            if(comments != null) {
+                for(Comments c : comments) {
+                    CommunityDto communityDto = CommunityDto.builder()
+                            .communityId(c.getParentCpost().getCommunityId())
+                            .communityTitle(c.getParentCpost().getCommunityTitle())
+                            .communityContent(c.getParentCpost().getCommunityContent())
+                            .communityAuthor(c.getParentCpost().getCommunityAuthor())
+                            .createDate(c.getCreateDate())
+                            .updateDate(c.getUpdateDate())
+                            .build();
+
+                    CommentsDto dto = CommentsDto.builder()
+                            .commentsId(c.getCommentsId())
+                            .commentsContent(c.getCommentsContent())
+                            .commentsAuthor(c.getCommentsAuthor())
+                            .parentCpost(communityDto)
+                            .createDate(c.getCreateDate())
+                            .updateDate(c.getUpdateDate())
+                            .build();
+
+                    commentsDtos.add(dto);  // 리스트에 추가
+                }
+            }
+            return new PageImpl<>(commentsDtos, comments.getPageable(), comments.getTotalElements());
+        } else {    // Artist 댓글만 가져오기
+            Page<Comments> comments = commentsRepository.findAByMemberId(member, pageable);
+
+            if(comments != null) {
+                for(Comments c : comments) {
+                    ArtistDto artist = ArtistDto.builder()
+                            .artistId(c.getParentApost().getArtistId())
+                            .artistContent(c.getParentApost().getArtistContent())
+                            .artistImage(c.getParentApost().getArtistImage())
+                            .artistImagePath(c.getParentApost().getArtistImagePath())
+                            .createDate(c.getCreateDate())
+                            .updateDate(c.getUpdateDate())
+                            .build();
+
+                    CommentsDto dto = CommentsDto.builder()
+                            .commentsId(c.getCommentsId())
+                            .commentsContent(c.getCommentsContent())
+                            .commentsAuthor(c.getCommentsAuthor())
+                            .parentApost(artist)
+                            .createDate(c.getCreateDate())
+                            .updateDate(c.getUpdateDate())
+                            .build();
+
+                    commentsDtos.add(dto);  // 리스트에 추가
+                }
+            }
+            return new PageImpl<>(commentsDtos, comments.getPageable(), comments.getTotalElements());
+        }
     }
 }
