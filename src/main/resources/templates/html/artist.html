@@ -226,6 +226,34 @@
             background-color: rgba(209, 178, 255);
         }
 
+        .comment-btn-div {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .comment-btn {
+            margin-top: 10px;
+            border: none;
+            background-color: white;
+            color: darkgray;
+        }
+
+        #commentEdit:hover {
+            color: black;
+        }
+
+        #commentEditCancel:hover {
+            color: black;
+        }
+
+        #commentEditSave:hover {
+            color: black;
+        }
+
+        #commentDelete:hover {
+            color: red;
+        }
+
     </style>
 </head>
 <body>
@@ -391,12 +419,29 @@
                             var index = post.commentsAuthor.email.indexOf('@');
                             var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
                             document.getElementById("commentList").insertAdjacentHTML("beforeend", `
-                            <div class="comment" id="${post.commentsId}">
+                            <div class="comment" id="comment-${post.commentsId}">
                                 <p class="comment-author">${authorName}</p>
                                 <p class="comment-text">${post.commentsContent}</p>
+                                <div class="comment-btn-div">
+                                    <button class="comment-btn commentEdit" id="commentEdit" style="display: none">수정</button>
+                                    <button class="comment-btn deleteBtn" id="commentDelete" style="display: none">삭제</button>
+                                    <button class="comment-btn" id="commentEditCancel" style="display: none">취소</button>
+                                    <button class="comment-btn" id="commentEditSave" style="display: none">저장</button>
+                                </div>
                             </div>
                             <hr style="border: solid 0.5px lightgray;">
-                        `);
+                            `);
+
+                            // 본인 댓글일 경우 수정, 삭제 버튼 보임
+                            if(sessionEmail === post.commentsAuthor.email) {
+                                document.querySelector(`#comment-${post.commentsId} .commentEdit`).style.display = 'block';
+                                document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
+                            }
+
+                            // Manager, Artist는 삭제 버튼만 보임
+                            if(sessionFlag === 'M' || sessionFlag === 'A') {
+                                document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
+                            }
                         });
                     } else {    // 댓글이 없는 경우
                         document.getElementById("commentList").innerHTML = `

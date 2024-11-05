@@ -98,4 +98,30 @@ public class CommentsController {
 
         return result;
     }
+
+    @GetMapping("find-by-id")
+    public ResultEntity findByCommentsId(@RequestParam("id") Long id, @RequestParam("type") String type) {
+        ResultEntity result = new ResultEntity();
+        try {
+            CommentsDto commentsDto = commentsService.findByCommentsId(id, type);
+            if(type.equals("C")) {
+                CommunityDto communityDto = communityService.findByIdCommunity(commentsDto.getParentCpost().getCommunityId());
+                result.setData(communityDto);
+            } else {
+                ArtistDto artistDto = artistService.getArtistById(commentsDto.getParentApost().getArtistId());
+                result.setData(artistDto);
+            }
+
+            // Comments findByCommentsId success
+            result.setCode("0000");
+            result.setMessage("Comments findByCommentsId Success");
+
+            log.info("Comments findByCommentsId Success");
+        } catch (Exception e) {
+            log.error("Comments-findByCommentsId Fail");
+            return new ResultEntity(e);
+        }
+
+        return result;
+    }
 }

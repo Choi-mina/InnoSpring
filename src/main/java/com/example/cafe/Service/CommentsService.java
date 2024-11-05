@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -151,5 +152,50 @@ public class CommentsService {
             }
             return new PageImpl<>(commentsDtos, comments.getPageable(), comments.getTotalElements());
         }
+    }
+
+    public CommentsDto findByCommentsId(Long commentsId, String type) {
+        Optional<Comments> comments = commentsRepository.findById(commentsId);
+        CommentsDto commentsDto = new CommentsDto();
+        if(comments.isPresent()) {
+            if(type.equals("C")) {
+                CommunityDto communityDto = new CommunityDto().builder()
+                        .communityId(comments.get().getParentCpost().getCommunityId())
+                        .communityTitle(comments.get().getParentCpost().getCommunityTitle())
+                        .communityContent(comments.get().getParentCpost().getCommunityContent())
+                        .communityAuthor(comments.get().getParentCpost().getCommunityAuthor())
+                        .createDate(comments.get().getCreateDate())
+                        .updateDate(comments.get().getUpdateDate())
+                        .build();
+
+                commentsDto = new CommentsDto().builder()
+                        .commentsId(comments.get().getCommentsId())
+                        .commentsContent(comments.get().getCommentsContent())
+                        .parentCpost(communityDto)
+                        .commentsAuthor(comments.get().getCommentsAuthor())
+                        .createDate(comments.get().getCreateDate())
+                        .updateDate(comments.get().getUpdateDate())
+                        .build();
+            } else {
+                ArtistDto artistDto = new ArtistDto().builder()
+                        .artistId(comments.get().getParentApost().getArtistId())
+                        .artistContent(comments.get().getParentApost().getArtistContent())
+                        .artistImage(comments.get().getParentApost().getArtistImage())
+                        .artistImagePath(comments.get().getParentApost().getArtistImagePath())
+                        .createDate(comments.get().getCreateDate())
+                        .updateDate(comments.get().getUpdateDate())
+                        .build();
+
+                commentsDto = new CommentsDto().builder()
+                        .commentsId(comments.get().getCommentsId())
+                        .commentsContent(comments.get().getCommentsContent())
+                        .parentApost(artistDto)
+                        .commentsAuthor(comments.get().getCommentsAuthor())
+                        .createDate(comments.get().getCreateDate())
+                        .updateDate(comments.get().getUpdateDate())
+                        .build();
+            }
+        }
+        return commentsDto;
     }
 }
