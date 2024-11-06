@@ -4,7 +4,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
   <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
-  <link href="../css/home.css" rel="stylesheet" type="text/css"/>
   <title>Mypage</title>
   <style>
     * {
@@ -17,6 +16,12 @@
       background-color: #f9f9f9; /* 배경색 추가 */
       margin: 0; /* 기본 마진 제거 */
     }
+
+    textarea {
+      border: 1px solid rgba(83 , 52 , 129);
+      border-radius: 8px;
+    }
+
     .frame-container {
       top: 100px;
       left: 0;
@@ -674,11 +679,15 @@
     });
   }
 
+  // 다른 댓글이 수정중 상태인지 확인
+  var editingState = false;
+
+  var selectedCommunityId;
   // 커뮤니티 글 댓글 상세보기 모달
   function communityDetailComment(commentsId, type) {
     ajaxJsonCall('/comments/find-by-id?id='+commentsId+'&type='+type, null, function(data) {
       if (data.code === "0000") {
-        console.log(data);
+        selectedCommunityId = data.data.communityId;
         $('#detail-Ctitle').text(data.data.communityTitle);
         $('#detail-Ccontent').html(data.data.communityContent);
         $('#detail-Cauthor').text("작성자: " + data.data.author);
@@ -708,16 +717,7 @@
             if(post.commentsId == commentsId) { // 해당 댓글에 배경색 설정
               $('#detailCComment-' + commentsId).css('background-color', 'rgba(232, 217, 255)');
               $('#detailCComment-' + commentsId).find('.comment-btn').css('background-color', 'rgba(232, 217, 255)');
-            }
-
-            // 본인 댓글일 경우 수정, 삭제 버튼 보임
-            if(sessionEmail === post.commentsAuthor.email) {
               document.querySelector(`#detailCComment-${post.commentsId} .commentEdit`).style.display = 'block';
-              document.querySelector(`#detailCComment-${post.commentsId} .deleteBtn`).style.display = 'block';
-            }
-
-            // Manager, Artist는 삭제 버튼만 보임
-            if(sessionFlag === 'M' || sessionFlag === 'A') {
               document.querySelector(`#detailCComment-${post.commentsId} .deleteBtn`).style.display = 'block';
             }
           });
@@ -732,6 +732,87 @@
     });
   }
 
+  // 이벤트 위임으로 cCommentList 요소의 수정 버튼 클릭 시 처리
+  $('#cCommentList').on('click', '#cCommentEdit', function () {
+    if(editingState == false) {
+      editingState = true;
+      var commentElement = $(this).closest('.comment');
+      var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+      $('#detailCComment-' + commentId).css('background-color', 'transparent');
+      $('#detailCComment-' + commentId).find('.comment-btn').css('background-color', 'transparent');
+      var commentElement = $(this).closest('.comment');
+      var originalContent = commentElement.find('.comment-text').html().replace(/<br\s*\/?>/gi, '\n'); // <br>을 줄바꿈으로 변환
+
+      // 댓글 내용을 textarea로 변경
+      commentElement.find('.comment-text').html(`<textarea id="cEditCommentText" style="width:100%;">${originalContent}</textarea>`);
+
+      // 수정, 삭제 버튼 숨기고 저장, 취소 버튼 표시
+      commentElement.find('#cCommentEdit, #cCommentDelete').hide();
+      commentElement.find('#cCommentEditCancel, #cCommentEditSave').show();
+    }
+  });
+
+  // community 댓글 수정 -> 취소 버튼 클릭
+  $('#cCommentList').on('click', '#cCommentEditCancel', function() {
+    editingState = false;
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+    communityDetailComment(commentId, "C");
+  });
+
+  // community 댓글 수정 -> 저장 버튼 클릭
+  $('#cCommentList').on('click', '#cCommentEditSave', function() {
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+
+    // 댓글 입력 값 가져오기 및 개행 처리
+    var commentsContent = $('#cEditCommentText').val();
+    commentsContent = commentsContent.replace(/\n/g, '<br>');
+
+    if(commentsContent != "" || commentsContent != null) {
+      var commentsDto = {
+        commentsId: commentId,
+        commentsContent: commentsContent,
+        author: sessionEmail,
+        flag: "C",
+        communityId: selectedCommunityId
+      };
+      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+        if (data.code === "0000") {
+          alert("댓글이 수정되었습니다.");
+          editingState = false;
+          drawMyCommentsTable("C", currentcPage);
+          communityDetailComment(commentId, "C");
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  // community 댓글 삭제 버튼 클릭 이벤트
+  $('#cCommentList').on('click', '#cCommentDelete', function () {
+    var confirmC = confirm("정말로 댓글을 삭제하시겠습니까?");
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+    if(confirmC) {
+      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+        if (data.code === "0000") {
+          detailCModal.style.display = "none";
+          alert("댓글이 삭제되었습니다.");
+          drawMyCommentsTable("C", currentcPage);
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  var selectedArtistId;
+
   // 아티스트 글 댓글 상세보기 모달
   function artistDetailComment(commentsId, type) {
     fetch(`/comments/find-by-id?id=${commentsId}&type=${type}`)
@@ -742,6 +823,7 @@
             .then(result => {
               if (result.code === "0000") {
                 const artist = result.data;
+                selectedArtistId = artist.artistId;
                 // 모달에 데이터를 표시합니다
                 if(artist.artistImage != null) {
                   document.getElementById("detailImage").style.visibility="visible"
@@ -780,16 +862,7 @@
                     if(post.commentsId == commentsId) { // 해당 댓글에 배경색 설정
                       $('#detailAComment-' + commentsId).css('background-color', 'rgba(232, 217, 255)');
                       $('#detailAComment-' + commentsId).find('.comment-btn').css('background-color', 'rgba(232, 217, 255)');
-                    }
-
-                    // 본인 댓글일 경우 수정, 삭제 버튼 보임
-                    if(sessionEmail === post.commentsAuthor.email) {
                       document.querySelector(`#detailAComment-${post.commentsId} .commentEdit`).style.display = 'block';
-                      document.querySelector(`#detailAComment-${post.commentsId} .deleteBtn`).style.display = 'block';
-                    }
-
-                    // Manager, Artist는 삭제 버튼만 보임
-                    if(sessionFlag === 'M' || sessionFlag === 'A') {
                       document.querySelector(`#detailAComment-${post.commentsId} .deleteBtn`).style.display = 'block';
                     }
                   });
@@ -806,6 +879,85 @@
             .catch(error => console.error('Error fetching artist detail:', error));
   }
 
+  // 이벤트 위임으로 aCommentList 요소의 수정 버튼 클릭 시 처리
+  $('#aCommentList').on('click', '#aCommentEdit', function () {
+    if(editingState == false) {
+      editingState = true;
+      var commentElement = $(this).closest('.comment');
+      var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+      $('#detailAComment-' + commentId).css('background-color', 'transparent');
+      $('#detailAComment-' + commentId).find('.comment-btn').css('background-color', 'transparent');
+
+      var commentElement = $(this).closest('.comment');
+      var originalContent = commentElement.find('.comment-text').html().replace(/<br\s*\/?>/gi, '\n'); // <br>을 줄바꿈으로 변환
+
+      // 댓글 내용을 textarea로 변경
+      commentElement.find('.comment-text').html(`<textarea id="aEditCommentText" style="width:100%;">${originalContent}</textarea>`);
+
+      // 수정, 삭제 버튼 숨기고 저장, 취소 버튼 표시
+      commentElement.find('#aCommentEdit, #aCommentDelete').hide();
+      commentElement.find('#aCommentEditCancel, #aCommentEditSave').show();
+    }
+  });
+
+  // artist 댓글 수정 -> 취소 버튼 클릭
+  $('#aCommentList').on('click', '#aCommentEditCancel', function() {
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+    editingState = false;
+    artistDetailComment(commentId, "A");
+  });
+
+  // artist 댓글 수정 -> 저장 버튼 클릭
+  $('#aCommentList').on('click', '#aCommentEditSave', function() {
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+    // artist 댓글 입력 값 가져오기 및 개행 처리
+    var commentsContent = $('#aEditCommentText').val();
+    commentsContent = commentsContent.replace(/\n/g, '<br>');
+
+    if(commentsContent != "" || commentsContent != null) {
+      var commentsDto = {
+        commentsId: commentId,
+        commentsContent: commentsContent,
+        author: sessionEmail,
+        flag: "A",
+        artistId: selectedArtistId
+      };
+      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+        if (data.code === "0000") {
+          alert("댓글이 수정되었습니다.");
+          editingState = false;
+          drawMyCommentsTable("A", currentcPage);
+          artistDetailComment(commentId, "A");
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  // artist 댓글 삭제 버튼 클릭 이벤트
+  $('#aCommentList').on('click', '#aCommentDelete', function () {
+    var confirmC = confirm("정말로 댓글을 삭제하시겠습니까?");
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+    if(confirmC) {
+      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+        if (data.code === "0000") {
+          detailAModal.style.display = "none";
+          alert("댓글이 삭제되었습니다.");
+          drawMyCommentsTable("A", currentcPage);
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
   var detailClose = document.getElementById("detailModalClose");
   var detailCCommentClose = document.getElementById("detailCModalClose");
   var detailACommentClose = document.getElementById("detailAModalClose");
@@ -817,10 +969,12 @@
 
   detailCCommentClose.onclick = function() {
     detailCModal.style.display = "none";
+    editingState = false;
   }
 
   detailACommentClose.onclick = function() {
     detailAModal.style.display = "none";
+    editingState = false;
   }
 
 
