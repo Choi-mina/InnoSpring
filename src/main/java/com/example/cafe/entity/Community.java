@@ -23,7 +23,7 @@ public class Community {
     public Timestamp createDate;
     public Timestamp updateDate;
 
-    @OneToMany(mappedBy = "parentCpost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parentCpost", cascade = CascadeType.ALL)
     private List<Comments> comments = new ArrayList<>();
 
 

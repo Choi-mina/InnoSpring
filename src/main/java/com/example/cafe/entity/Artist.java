@@ -21,7 +21,7 @@ public class Artist {
     public Timestamp createDate;
     public Timestamp updateDate;
 
-    @OneToMany(mappedBy = "parentApost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parentApost", cascade = CascadeType.ALL)
     private List<Comments> comments = new ArrayList<>();
 
 
