@@ -4,7 +4,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
   <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
-  <link href="../css/home.css" rel="stylesheet" type="text/css"/>
   <title>Mypage</title>
   <style>
     * {
@@ -17,11 +16,17 @@
       background-color: #f9f9f9; /* 배경색 추가 */
       margin: 0; /* 기본 마진 제거 */
     }
+
+    textarea {
+      border: 1px solid rgba(83 , 52 , 129);
+      border-radius: 8px;
+    }
+
     .frame-container {
       top: 100px;
       left: 0;
       width: 100%;
-      height: calc(100% - 100px); /* 헤더 공간 제외 */
+      height: calc(100% - 110px); /* 헤더 공간 제외 */
       position: absolute;
       display: flex; /* 플렉스 박스 사용 */
     }
@@ -115,7 +120,7 @@
       text-align: center; /* 중앙 정렬 */
     }
 
-    #prev-page-btn, #next-page-btn {
+    #prev-page-btn, #next-page-btn, #cnext-page-btn, #cprev-page-btn {
       background-color: rgba(232, 217, 255);
       color: white;
       border: none;
@@ -125,7 +130,7 @@
       cursor: pointer;
     }
 
-    #prev-page-btn:hover, #next-page-btn:hover {
+    #prev-page-btn:hover, #next-page-btn:hover, #cnext-page-btn:hover, #cprev-page-btn:hover {
       background-color: rgba(209, 178, 255);
     }
 
@@ -143,7 +148,7 @@
     /* 모달 콘텐츠 */
     .modal-content {
       background-color: white;
-      margin: 15% auto;
+      margin: 5% auto;
       padding: 20px;
       border: transparent;
       width: 50%;
@@ -157,18 +162,96 @@
       border-radius: 8px;
     }
 
-    .close-btn {
+    .comment-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+
+    .comment {
+      margin-bottom: 10px;
+    }
+
+    .comment-author {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .comment-text {
+      margin: 5px 0;
+      color: #555;
+    }
+
+    .close-modal {
       color: #aaa;
       float: right;
       font-size: 28px;
       font-weight: bold;
     }
 
-    .close-btn:hover,
-    .close-btn:focus {
+    .close-modal:hover,
+    .close-modal:focus {
       color: black;
       text-decoration: none;
       cursor: pointer;
+    }
+
+    .commu-detail-btn-div {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .commu-detail-btn {
+      background-color: rgba(232, 217, 255);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    #commu-detail-edit-btn:hover, #commu-detail-save-btn:hover {
+      background-color: rgba(209, 178, 255);
+    }
+
+    #commu-detail-delete-btn:hover {
+      background-color: rgba(255, 100, 100);
+    }
+
+    .comment-btn-div {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .comment-btn {
+      margin-top: 10px;
+      border: none;
+      background-color: white;
+      color: darkgray;
+    }
+
+    #cCommentEdit:hover,
+    #aCommentEdit:hover {
+      color: black;
+    }
+
+    #cCommentEditCancel:hover,
+    #aCommentEditCancel:hover {
+      color: black;
+    }
+
+    #cCommentEditSave:hover,
+    #aCommentEditSave:hover {
+      color: black;
+    }
+
+    #cCommentDelete:hover,
+    #aCommentDelete:hover {
+      color: red;
     }
 
   </style>
@@ -180,6 +263,7 @@
     <h2>Mypage</h2>
     <div class="menu-item" id="update-info-btn">회원정보 수정</div>
     <div class="menu-item" id="my-posts-btn">내 글</div>
+    <div class="menu-item" id="my-comment-btn">내 댓글</div>
     <div class="delete-account" id="delete-btn">회원탈퇴</div>
   </div>
   <div class="content" id="content">
@@ -190,13 +274,73 @@
 
   <div id="detailModal" class="modal">
     <div class="modal-content">
-      <span class="close-btn">&times;</span>
+      <span class="close-modal" id="detailModalClose">&times;</span>
       <h3></h3>
       <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
       <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
 
       <p id="detail-author">작성자: OOO</p>
       <p id="detail-date">등록일: YYYY-MM-DD</p>
+
+      <!-- 수정 및 삭제 버튼 -->
+      <div class="commu-detail-btn-div">
+        <button class="commu-detail-btn" id="commu-detail-edit-btn">수정</button>
+        <button class="commu-detail-btn" id="commu-detail-delete-btn">삭제</button>
+        <button class="commu-detail-btn" id="commu-detail-save-btn" style="display: none;">저장</button>
+      </div>
+
+      <!-- 댓글창 -->
+      <div class="comments-section">
+        <h3>댓글</h3>
+
+        <!-- 기존 댓글 -->
+        <div class="comment-list" id="commentList">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community 글 댓글 상세 보기 모달 -->
+  <div id="detailCModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="detailCModalClose">&times;</span>
+      <h3></h3>
+      <h3 for="edit-title" id="label-Ctitle"><span id="detail-Ctitle"></span></h3><br>
+      <label for="edit-content" id="label-Ccontent"><span id="detail-Ccontent"></span></label><br><br>
+
+      <p id="detail-Cauthor">작성자: OOO</p>
+      <p id="detail-Cdate">등록일: YYYY-MM-DD</p>
+
+      <!-- 댓글창 -->
+      <div class="comments-section">
+        <h3>댓글</h3>
+
+        <!-- 기존 댓글 -->
+        <div class="comment-list" id="cCommentList">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Artist 글 댓글 상세 보기 모달 -->
+  <div id="detailAModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="detailAModalClose">&times;</span>
+      <h2></h2>
+      <img id="detailImage" src="" alt="상세 이미지" style="width: 100%; height: auto;"/>
+      <p id="detailContent"></p>
+      <textarea id="editContent" style="width: 100%; display: none;" placeholder="수정 내용을 입력하세요"></textarea>
+      <br>
+      <input type="file" id="editPhoto" accept="image/*" style="display: none;" />
+
+      <!-- 댓글창 -->
+      <div class="comments-section">
+        <h3>댓글</h3>
+
+        <!-- 기존 댓글 -->
+        <div class="comment-list" id="aCommentList">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -232,7 +376,6 @@
       ajaxJsonCall('/member/login-in?email=' + email + '&password=' + password, null, function(data) {
         if (data.code === "0000") {
           ajaxJsonCall('/member/find-by-email?email=' + email, null, function(d) {
-            console.log(d);
             if (d.code === "0000") {
               document.getElementById("content").innerHTML = `
                 <h2>회원정보 수정</h2>
@@ -279,17 +422,27 @@
   });
 
   var currentPage = 0;
-  var pageSize = 10; // 페이지당 표시할 게시글 수
+  var pageSize = 10; // 내 글 페이지당 표시할 게시글 수
+  var commentPageSize = 7;  // 내 댓글 페이지당 표시할 게시글 수
+  var currentcPage = 0;
+  var type;
+  var selectedDetailCommunityId;
+  var myPostIsEditing = false
 
   // 내 글 메뉴 클릭 시 내용 변경
   document.getElementById("my-posts-btn").addEventListener("click", function() {
-    drawTable(currentPage);
+    drawMyPostTable(currentPage);
   });
 
-  function drawTable(page) {
+  // 내 댓글 메뉴 클릭 시 내용 변경
+  document.getElementById("my-comment-btn").addEventListener("click", function() {
+    drawCommentTabs();
+  });
+
+  // 내 글 보기의 테이블을 그리는 함수
+  function drawMyPostTable(page) {
     ajaxJsonCall('/member/find-my-community?email=' + sessionEmail + '&page=' + page + '&size=' + pageSize, null, function(data) {
       if (data.code === "0000" && data.data.content.length > 0) {
-        console.log(data);
         document.getElementById("content").innerHTML = `
         <h2>내 글</h2>
         <table class="table-class" id="text-table">
@@ -335,13 +488,13 @@
         $('#prev-page-btn').click(function() {
           if (currentPage > 0) {
             currentPage--;
-            drawTable(currentPage);
+            drawMyPostTable(currentPage);
           }
         });
 
         $('#next-page-btn').click(function() {
           currentPage++;
-          drawTable(currentPage);
+          drawMyPostTable(currentPage);
         });
       } if(data.data.content.length == 0) {
         document.getElementById("content").innerHTML = `
@@ -351,15 +504,116 @@
     });
   }
 
+  // 내 댓글 클릭시 화면 바뀌는 함수
+  function drawCommentTabs() {
+    document.getElementById("content").innerHTML = `
+      <h2>내 댓글</h2>
+      <div>
+        <button id="community-comments-btn" class="submit-btn">내 커뮤니티 댓글</button>
+        <button id="artist-comments-btn" class="submit-btn">내 아티스트 댓글</button>
+      </div>
+      <div id="comments-content">
+        <p>댓글 목록을 보려면 상단 버튼을 클릭하세요.</p>
+      </div>
+    `;
+
+    // 탭 버튼 이벤트 등록
+    document.getElementById("community-comments-btn").addEventListener("click", function() {
+      type = "C";
+      currentcPage = 0;
+      drawMyCommentsTable(type, currentcPage);
+    });
+
+    document.getElementById("artist-comments-btn").addEventListener("click", function() {
+      type = "A";
+      currentcPage = 0;
+      drawMyCommentsTable(type, currentcPage);
+    });
+  }
+
+  // 내 댓글 테이블 그리기 함수
+  function drawMyCommentsTable(type, page) {
+    ajaxJsonCall('/member/find-my-comment?email=' + sessionEmail + '&type=' + type + '&page=' + page + '&size=' + commentPageSize, null, function(data) {
+      if (data.code === "0000" && data.data.content.length > 0) {
+        document.getElementById("comments-content").innerHTML = `
+          <h3>${type === "C" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
+          <table class="table-class" id="comments-table">
+            <thead>
+              <tr>
+                <th class="table-header-text-title">내용</th>
+                <th class="table-header-text-date">날짜</th>
+              </tr>
+            </thead>
+            <tbody id="comments-table-body">
+            </tbody>
+          </table>
+          <div id="pagination-container">
+            <button id="cprev-page-btn"><</button>
+            <button id="cnext-page-btn">></button>
+          </div>
+        `;
+
+        const commentsTableBody = document.getElementById("comments-table-body");
+
+        data.data.content.forEach(function (comment) {
+          const row = `
+            <tr id="comment-${comment.commentsId}" class="comment-row">
+              <td>${comment.commentsContent}</td>
+              <td>${dateFormat(new Date(comment.updateDate))}</td>
+            </tr>
+          `;
+
+          commentsTableBody.innerHTML += row;
+        });
+
+        updatePaginationButtons(data.data.totalPages);
+
+        // 행 클릭 시 댓글 상세보기 모달 열기
+        commentsTableBody.addEventListener("click", function (event) {
+          var targetRow = event.target.closest("tr");
+          if (targetRow) {
+            var commentsId = targetRow.id.split('-')[1];
+            if(type == 'C') {
+              communityDetailComment(commentsId, type);
+            } else {
+              artistDetailComment(commentsId, type);
+            }
+          }
+        });
+
+        $('#cprev-page-btn').click(function() {
+          if (currentcPage > 0) {
+            currentcPage--;
+            drawMyCommentsTable(type, currentcPage);
+          }
+        });
+
+        $('#cnext-page-btn').click(function() {
+          currentcPage++;
+          drawMyCommentsTable(type, currentcPage);
+        });
+      } else {
+        document.getElementById("comments-content").innerHTML = `
+          <h3>${type === "community" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
+          <p>작성한 댓글이 없습니다.</p>
+        `;
+      }
+    }, function(error) {
+      alert("An error occurred: " + error.message);
+    });
+  }
+
   // 페이지네이션 버튼 상태 업데이트 함수
   function updatePaginationButtons(totalPages) {
     if(totalPages == 1)
       $('#pagination-container').css('display', 'none');
     // 이전 버튼은 첫 페이지일 때 비활성화
     $('#prev-page-btn').prop('disabled', currentPage === 0);
+    $('#cprev-page-btn').prop('disabled', currentcPage === 0);
 
     // 다음 버튼은 마지막 페이지일 때 비활성화
     $('#next-page-btn').prop('disabled', currentPage >= totalPages - 1);
+    $('#cnext-page-btn').prop('disabled', currentcPage >= totalPages - 1);
   }
 
   // 회원 탈퇴 이벤트
@@ -448,6 +702,7 @@
     return dateString;
   }
 
+  // 내 글 상세보기
   function getCommunityDetail(communityId) {
     ajaxJsonCall('/community/find-by-id?id='+communityId, null, function(data) {
       if (data.code === "0000") {
@@ -456,10 +711,31 @@
         $('#detail-author').text("작성자: " + data.data.author);
         $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
         $('#detailModal').fadeIn();
-        selectedCommunityId = communityId;
+        selectedDetailCommunityId = communityId;
         if(sessionEmail == null || (sessionFlag == 'F' && data.data.author != sessionEmail)) {
           $('#edit-btn').css('display', 'none');
           $('#delete-btn').css('display', 'none');
+        }
+
+        // 댓글 넣기
+        if(data.data.comments.length > 0) {
+          document.getElementById("commentList").innerHTML = ""; // 기존 내용을 초기화
+          const sortedComments = data.data.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+          sortedComments.forEach(function(post) {
+            var index = post.commentsAuthor.email.indexOf('@');
+            var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
+            document.getElementById("commentList").insertAdjacentHTML("beforeend", `
+                            <div class="comment" id="detailCComment-${post.commentsId}">
+                                <p class="comment-author">${authorName}</p>
+                                <p class="comment-text">${post.commentsContent}</p>
+                            </div>
+                            <hr style="border: solid 0.5px lightgray;">
+                        `);
+          });
+        } else {    // 댓글이 없는 경우
+          document.getElementById("commentList").innerHTML = `
+                      <label>댓글이 없습니다.</label>
+                    `;
         }
       }
     }, function(error) {
@@ -467,12 +743,391 @@
     });
   }
 
-  var detailClose = document.getElementsByClassName("close-btn")[0];
+  // 내 글 상세보기 수정 버튼 클릭 시
+  $('#commu-detail-edit-btn').click(function () {
+    if (!myPostIsEditing) {
+      myPostIsEditing = true;
+
+      // 제목과 내용을 input과 textarea로 변경
+      var titleText = $('#detail-title').text();
+      var contentHtml = $('#detail-content').html();
+      var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n');
+
+      $('#label-title').html('<input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
+      $('#label-content').html('<textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
+
+      // 저장 버튼 표시
+      $('#commu-detail-save-btn').show();
+      $('#commu-detail-edit-btn').hide();
+      $('#commu-detail-delete-btn').hide();
+    }
+  });
+
+  // 내 글 상세보기 저장 버튼 클릭 시
+  $('#commu-detail-save-btn').click(function () {
+    var updatedTitle = $('#edit-title').val();
+    var updatedContent = $('#edit-content').val();
+    updatedContent = updatedContent.replace(/\n/g, '<br>');
+    var author = $('#detail-author').text();
+    author = author.substring(5,author.length);
+
+    var communityDto = {
+      communityId: selectedDetailCommunityId,
+      communityTitle: updatedTitle,
+      communityContent: updatedContent,
+      author: author
+    };
+
+    // 서버로 수정된 데이터를 전송 (Ajax)
+    ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
+      if (data.code === "0000") {
+        alert("글이 수정되었습니다.");
+        drawMyPostTable(currentPage);
+
+        // 제목과 내용을 다시 label로 변경
+        $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
+        $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
+
+        // 수정 모드 해제
+        isEditing = false;
+        $('#commu-detail-save-btn').hide();
+        $('#commu-detail-edit-btn').show();
+        $('#commu-detail-delete-btn').show();
+      }
+    }, function (error) {
+      alert("An error occurred: " + error.message);
+    });
+  });
+
+  // 내 글 상세보기 삭제 버튼 클릭 시
+  $('#commu-detail-delete-btn').click(function () {
+    if (selectedDetailCommunityId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
+      ajaxPostJsonCall('/community/delete?id=' + selectedDetailCommunityId, null, function (data) {
+        if (data.code === "0000") {
+          alert("글이 삭제되었습니다.");
+          $('#detailModal').fadeOut();
+          drawMyPostTable(currentPage);
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  // 다른 댓글이 수정중 상태인지 확인
+  var editingState = false;
+
+  var selectedCommunityId;
+  // 커뮤니티 글 댓글 상세보기 모달
+  function communityDetailComment(commentsId, type) {
+    ajaxJsonCall('/comments/find-by-id?id='+commentsId+'&type='+type, null, function(data) {
+      if (data.code === "0000") {
+        selectedCommunityId = data.data.communityId;
+        $('#detail-Ctitle').text(data.data.communityTitle);
+        $('#detail-Ccontent').html(data.data.communityContent);
+        $('#detail-Cauthor').text("작성자: " + data.data.author);
+        $('#detail-Cdate').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
+        $('#detailCModal').fadeIn();
+
+        // 댓글 넣기
+        if(data.data.comments.length > 0) {
+          document.getElementById("cCommentList").innerHTML = ""; // 기존 내용을 초기화
+          const sortedComments = data.data.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+          sortedComments.forEach(function(post) {
+            var index = post.commentsAuthor.email.indexOf('@');
+            var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
+            document.getElementById("cCommentList").insertAdjacentHTML("beforeend", `
+                            <div class="comment" id="detailCComment-${post.commentsId}">
+                                <p class="comment-author">${authorName}</p>
+                                <p class="comment-text">${post.commentsContent}</p>
+                                <div class="comment-btn-div">
+                                    <button class="comment-btn commentEdit" id="cCommentEdit" style="display: none">수정</button>
+                                    <button class="comment-btn deleteBtn" id="cCommentDelete" style="display: none">삭제</button>
+                                    <button class="comment-btn" id="cCommentEditCancel" style="display: none">취소</button>
+                                    <button class="comment-btn" id="cCommentEditSave" style="display: none">저장</button>
+                                </div>
+                            </div>
+                            <hr style="border: solid 0.5px lightgray;">
+                        `);
+            if(post.commentsId == commentsId) { // 해당 댓글에 배경색 설정
+              $('#detailCComment-' + commentsId).css('background-color', 'rgba(232, 217, 255)');
+              $('#detailCComment-' + commentsId).find('.comment-btn').css('background-color', 'rgba(232, 217, 255)');
+              document.querySelector(`#detailCComment-${post.commentsId} .commentEdit`).style.display = 'block';
+              document.querySelector(`#detailCComment-${post.commentsId} .deleteBtn`).style.display = 'block';
+            }
+          });
+        } else {    // 댓글이 없는 경우
+          document.getElementById("cCommentList").innerHTML = `
+                      <label>댓글이 없습니다.</label>
+                    `;
+        }
+      }
+    }, function(error) {
+      alert("An error occurred: " + error.message);
+    });
+  }
+
+  // 이벤트 위임으로 cCommentList 요소의 수정 버튼 클릭 시 처리
+  $('#cCommentList').on('click', '#cCommentEdit', function () {
+    if(editingState == false) {
+      editingState = true;
+      var commentElement = $(this).closest('.comment');
+      var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+      $('#detailCComment-' + commentId).css('background-color', 'transparent');
+      $('#detailCComment-' + commentId).find('.comment-btn').css('background-color', 'transparent');
+      var commentElement = $(this).closest('.comment');
+      var originalContent = commentElement.find('.comment-text').html().replace(/<br\s*\/?>/gi, '\n'); // <br>을 줄바꿈으로 변환
+
+      // 댓글 내용을 textarea로 변경
+      commentElement.find('.comment-text').html(`<textarea id="cEditCommentText" style="width:100%;">${originalContent}</textarea>`);
+
+      // 수정, 삭제 버튼 숨기고 저장, 취소 버튼 표시
+      commentElement.find('#cCommentEdit, #cCommentDelete').hide();
+      commentElement.find('#cCommentEditCancel, #cCommentEditSave').show();
+    }
+  });
+
+  // community 댓글 수정 -> 취소 버튼 클릭
+  $('#cCommentList').on('click', '#cCommentEditCancel', function() {
+    editingState = false;
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+    communityDetailComment(commentId, "C");
+  });
+
+  // community 댓글 수정 -> 저장 버튼 클릭
+  $('#cCommentList').on('click', '#cCommentEditSave', function() {
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+
+    // 댓글 입력 값 가져오기 및 개행 처리
+    var commentsContent = $('#cEditCommentText').val();
+    commentsContent = commentsContent.replace(/\n/g, '<br>');
+
+    if(commentsContent != "" || commentsContent != null) {
+      var commentsDto = {
+        commentsId: commentId,
+        commentsContent: commentsContent,
+        author: sessionEmail,
+        flag: "C",
+        communityId: selectedCommunityId
+      };
+      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+        if (data.code === "0000") {
+          alert("댓글이 수정되었습니다.");
+          editingState = false;
+          drawMyCommentsTable("C", currentcPage);
+          communityDetailComment(commentId, "C");
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  // community 댓글 삭제 버튼 클릭 이벤트
+  $('#cCommentList').on('click', '#cCommentDelete', function () {
+    var confirmC = confirm("정말로 댓글을 삭제하시겠습니까?");
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
+    if(confirmC) {
+      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+        if (data.code === "0000") {
+          detailCModal.style.display = "none";
+          alert("댓글이 삭제되었습니다.");
+          drawMyCommentsTable("C", currentcPage);
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  var selectedArtistId;
+
+  // 아티스트 글 댓글 상세보기 모달
+  function artistDetailComment(commentsId, type) {
+    fetch(`/comments/find-by-id?id=${commentsId}&type=${type}`)
+            .then(response => {
+              if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
+              return response.json();
+            })
+            .then(result => {
+              if (result.code === "0000") {
+                const artist = result.data;
+                selectedArtistId = artist.artistId;
+                // 모달에 데이터를 표시합니다
+                if(artist.artistImage != null) {
+                  document.getElementById("detailImage").style.visibility="visible"
+                  document.getElementById("detailImage").src = artist.artistImage
+                          ? 'data:image/jpeg;base64,' + artist.artistImage
+                          : '';
+                }
+                else
+                  document.getElementById("detailImage").style.visibility="hidden"
+                document.getElementById("detailContent").innerHTML = artist.artistContent.replace(/<br\s*\/?>/g, '<br>');
+
+                // 모달 보이기
+                document.getElementById("detailAModal").style.display = "block";
+
+                // 댓글 넣기
+                if(artist.comments.length > 0) {
+                  document.getElementById("aCommentList").innerHTML = ""; // 기존 내용을 초기화
+                  const sortedComments = artist.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+                  sortedComments.forEach(function(post) {
+                    var index = post.commentsAuthor.email.indexOf('@');
+                    var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
+                    document.getElementById("aCommentList").insertAdjacentHTML("beforeend", `
+                            <div class="comment" id="detailAComment-${post.commentsId}">
+                                <p class="comment-author">${authorName}</p>
+                                <p class="comment-text">${post.commentsContent}</p>
+                                <div class="comment-btn-div">
+                                    <button class="comment-btn commentEdit" id="aCommentEdit" style="display: none">수정</button>
+                                    <button class="comment-btn deleteBtn" id="aCommentDelete" style="display: none">삭제</button>
+                                    <button class="comment-btn" id="aCommentEditCancel" style="display: none">취소</button>
+                                    <button class="comment-btn" id="aCommentEditSave" style="display: none">저장</button>
+                                </div>
+                            </div>
+                            <hr style="border: solid 0.5px lightgray;">
+                        `);
+
+                    if(post.commentsId == commentsId) { // 해당 댓글에 배경색 설정
+                      $('#detailAComment-' + commentsId).css('background-color', 'rgba(232, 217, 255)');
+                      $('#detailAComment-' + commentsId).find('.comment-btn').css('background-color', 'rgba(232, 217, 255)');
+                      document.querySelector(`#detailAComment-${post.commentsId} .commentEdit`).style.display = 'block';
+                      document.querySelector(`#detailAComment-${post.commentsId} .deleteBtn`).style.display = 'block';
+                    }
+                  });
+                } else {    // 댓글이 없는 경우
+                  document.getElementById("aCommentList").innerHTML = `
+                      <label>댓글이 없습니다.</label>
+                    `;
+                }
+
+              } else {
+                console.error('Error fetching artist detail: ', result.message);
+              }
+            })
+            .catch(error => console.error('Error fetching artist detail:', error));
+  }
+
+  // 이벤트 위임으로 aCommentList 요소의 수정 버튼 클릭 시 처리
+  $('#aCommentList').on('click', '#aCommentEdit', function () {
+    if(editingState == false) {
+      editingState = true;
+      var commentElement = $(this).closest('.comment');
+      var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+      $('#detailAComment-' + commentId).css('background-color', 'transparent');
+      $('#detailAComment-' + commentId).find('.comment-btn').css('background-color', 'transparent');
+
+      var commentElement = $(this).closest('.comment');
+      var originalContent = commentElement.find('.comment-text').html().replace(/<br\s*\/?>/gi, '\n'); // <br>을 줄바꿈으로 변환
+
+      // 댓글 내용을 textarea로 변경
+      commentElement.find('.comment-text').html(`<textarea id="aEditCommentText" style="width:100%;">${originalContent}</textarea>`);
+
+      // 수정, 삭제 버튼 숨기고 저장, 취소 버튼 표시
+      commentElement.find('#aCommentEdit, #aCommentDelete').hide();
+      commentElement.find('#aCommentEditCancel, #aCommentEditSave').show();
+    }
+  });
+
+  // artist 댓글 수정 -> 취소 버튼 클릭
+  $('#aCommentList').on('click', '#aCommentEditCancel', function() {
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+    editingState = false;
+    artistDetailComment(commentId, "A");
+});
+
+  // artist 댓글 수정 -> 저장 버튼 클릭
+  $('#aCommentList').on('click', '#aCommentEditSave', function() {
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+    // artist 댓글 입력 값 가져오기 및 개행 처리
+    var commentsContent = $('#aEditCommentText').val();
+    commentsContent = commentsContent.replace(/\n/g, '<br>');
+
+    if(commentsContent != "" || commentsContent != null) {
+      var commentsDto = {
+        commentsId: commentId,
+        commentsContent: commentsContent,
+        author: sessionEmail,
+        flag: "A",
+        artistId: selectedArtistId
+      };
+      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+        if (data.code === "0000") {
+          alert("댓글이 수정되었습니다.");
+          editingState = false;
+          drawMyCommentsTable("A", currentcPage);
+          artistDetailComment(commentId, "A");
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  // artist 댓글 삭제 버튼 클릭 이벤트
+  $('#aCommentList').on('click', '#aCommentDelete', function () {
+    var confirmC = confirm("정말로 댓글을 삭제하시겠습니까?");
+    // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+    var commentElement = $(this).closest('.comment');
+    var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
+    if(confirmC) {
+      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+        if (data.code === "0000") {
+          detailAModal.style.display = "none";
+          alert("댓글이 삭제되었습니다.");
+          drawMyCommentsTable("A", currentcPage);
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+  var detailClose = document.getElementById("detailModalClose");
+  var detailCCommentClose = document.getElementById("detailCModalClose");
+  var detailACommentClose = document.getElementById("detailAModalClose");
 
   // X 버튼 클릭 시 모달 닫기
   detailClose.onclick = function() {
     detailModal.style.display = "none";
+    if (myPostIsEditing) {
+      // 현재 입력 중이던 내용을 다시 label로 복구
+      var titleText = $('#edit-title').val();
+      var contentText = $('#edit-content').val();
+
+      $('#label-title').html('<h3 id="detail-title">' + titleText + '</h3>');
+      $('#label-content').html('<span id="detail-content">' + contentText + '</span>');
+
+      // 저장 버튼 숨기고 수정 버튼 보이기
+      $('#commu-detail-save-btn').hide();
+      $('#commu-detail-edit-btn').show();
+      $('#commu-detail-delete-btn').show();
+
+      myPostIsEditing = false;
+    }
   }
+
+  detailCCommentClose.onclick = function() {
+    detailCModal.style.display = "none";
+    editingState = false;
+  }
+
+  detailACommentClose.onclick = function() {
+    detailAModal.style.display = "none";
+    editingState = false;
+  }
+
+
 
 </script>
 </html>

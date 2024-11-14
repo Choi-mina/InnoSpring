@@ -93,7 +93,7 @@
         /* 모달 콘텐츠 */
         .modal-content {
             background-color: white;
-            margin: 15% auto;
+            margin: 5% auto;
             padding: 20px;
             border: transparent;
             width: 50%;
@@ -146,6 +146,87 @@
 
         .delete-btn:hover {
             background-color: rgba(255, 100, 100);
+        }
+
+        .comment-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .comment {
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comment-text {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        /* 댓글 작성 폼 스타일 */
+        .comment-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #commentInput {
+            width: 100%;
+            height: 50px;
+            resize: none;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #submitComment {
+            background-color: rgba(232, 217, 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font: 15px bold;
+        }
+
+        #submitComment:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
+        .comment-btn-div {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .comment-btn {
+            margin-top: 10px;
+            border: none;
+            background-color: white;
+            color: darkgray;
+        }
+
+        #commentEdit:hover {
+            color: black;
+        }
+
+        #commentEditCancel:hover {
+            color: black;
+        }
+
+        #commentEditSave:hover {
+            color: black;
+        }
+
+        #commentDelete:hover {
+            color: red;
         }
 
     </style>
@@ -203,6 +284,20 @@
                 <button class="edit-btn" id="edit-btn">수정</button>
                 <button class="delete-btn" id="delete-btn">삭제</button>
                 <button class="save-btn" id="save-btn" style="display: none;">저장</button>
+            </div>
+            <!-- 댓글창 -->
+            <div class="comments-section">
+                <h3>댓글</h3>
+
+                <!-- 기존 댓글 -->
+                <div class="comment-list" id="commentList">
+                </div>
+
+                <!-- 댓글 작성란 -->
+                <div class="comment-form">
+                    <textarea id="commentInput" placeholder="댓글을 입력하세요."></textarea>
+                    <button id="submitComment">↑</button>
+                </div>
             </div>
         </div>
     </div>
@@ -321,6 +416,44 @@
                     $('#edit-btn').css('display', 'block');
                     $('#delete-btn').css('display', 'block');
                 }
+
+                // 댓글 넣기
+                if(data.data.comments.length > 0) {
+                    document.getElementById("commentList").innerHTML = ""; // 기존 내용을 초기화
+                    const sortedComments = data.data.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
+                    sortedComments.forEach(function(post) {
+                        var index = post.commentsAuthor.email.indexOf('@');
+                        var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
+                        document.getElementById("commentList").insertAdjacentHTML("beforeend", `
+                            <div class="comment" id="comment-${post.commentsId}">
+                                <p class="comment-author">${authorName}</p>
+                                <p class="comment-text">${post.commentsContent}</p>
+                                <div class="comment-btn-div">
+                                    <button class="comment-btn commentEdit" id="commentEdit" style="display: none">수정</button>
+                                    <button class="comment-btn deleteBtn" id="commentDelete" style="display: none">삭제</button>
+                                    <button class="comment-btn" id="commentEditCancel" style="display: none">취소</button>
+                                    <button class="comment-btn" id="commentEditSave" style="display: none">저장</button>
+                                </div>
+                            </div>
+                            <hr style="border: solid 0.5px lightgray;">
+                        `);
+
+                        // 본인 댓글일 경우 수정, 삭제 버튼 보임
+                        if(sessionEmail === post.commentsAuthor.email) {
+                            document.querySelector(`#comment-${post.commentsId} .commentEdit`).style.display = 'block';
+                            document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
+                        }
+
+                        // Manager, Artist는 삭제 버튼만 보임
+                        if(sessionFlag === 'M' || sessionFlag === 'A') {
+                            document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
+                        }
+                    });
+                } else {    // 댓글이 없는 경우
+                    document.getElementById("commentList").innerHTML = `
+                      <label>댓글이 없습니다.</label>
+                    `;
+                }
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -407,6 +540,103 @@
         }
     });
 
+    // 댓글 작성 버튼 클릭시
+    $('#submitComment').click(function () {
+        var commentsContent = $('#commentInput').val();
+        commentsContent = commentsContent.replace(/\n/g, '<br>');
+        if(commentsContent != "" || commentsContent != null) {
+            var commentsDto = {
+                commentsContent: commentsContent,
+                author: sessionEmail,
+                flag: "C",
+                communityId: selectedCommunityId
+            };
+            ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), function (data) {
+                if (data.code === "0000") {
+                    getCommunityDetail(selectedCommunityId);
+                    $('#commentInput').val("");
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
+    });
+
+    // 다른 댓글이 수정중 상태인지 확인
+    var editingState = false;
+
+    // 이벤트 위임으로 commentList 요소의 수정 버튼 클릭 시 처리
+    $('#commentList').on('click', '#commentEdit', function () {
+        if(editingState == false) {
+            editingState = true;
+            var commentElement = $(this).closest('.comment');
+            var originalContent = commentElement.find('.comment-text').html().replace(/<br\s*\/?>/gi, '\n'); // <br>을 줄바꿈으로 변환
+
+            // 댓글 내용을 textarea로 변경
+            commentElement.find('.comment-text').html(`<textarea id="editCommentText" style="width:100%;">${originalContent}</textarea>`);
+
+            // 수정, 삭제 버튼 숨기고 저장, 취소 버튼 표시
+            commentElement.find('#commentEdit, #commentDelete').hide();
+            commentElement.find('#commentEditCancel, #commentEditSave').show();
+        }
+    });
+
+    // 댓글 수정 -> 취소 버튼 클릭
+    $('#commentList').on('click', '#commentEditCancel', function() {
+        editingState = false;
+        getCommunityDetail(selectedCommunityId);
+    });
+
+    // 댓글 수정 -> 저장 버튼 클릭
+    $('#commentList').on('click', '#commentEditSave', function() {
+        // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+        var commentElement = $(this).closest('.comment');
+        var commentId = commentElement.attr('id').replace('comment-', ''); // 'comment-'를 제거하여 숫자 ID만 남김
+
+        // 댓글 입력 값 가져오기 및 개행 처리
+        var commentsContent = $('#editCommentText').val();
+        commentsContent = commentsContent.replace(/\n/g, '<br>');
+
+        if(commentsContent != "" || commentsContent != null) {
+            var commentsDto = {
+                commentsId: commentId,
+                commentsContent: commentsContent,
+                author: sessionEmail,
+                flag: "C",
+                communityId: selectedCommunityId
+            };
+            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+                if (data.code === "0000") {
+                    alert("댓글이 수정되었습니다.");
+                    editingState = false;
+                    getCommunityDetail(selectedCommunityId);
+                    $('#commentInput').val("");
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
+    });
+
+    // 댓글 삭제 버튼 클릭 이벤트
+    $('#commentList').on('click', '#commentDelete', function () {
+        var confirmC = confirm("정말로 댓글을 삭제하시겠습니까?");
+        // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
+        var commentElement = $(this).closest('.comment');
+        var commentId = commentElement.attr('id').replace('comment-', ''); // 'comment-'를 제거하여 숫자 ID만 남김
+        if(confirmC) {
+            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+                if (data.code === "0000") {
+                    alert("댓글이 삭제되었습니다.");
+                    getCommunityDetail(selectedCommunityId);
+                    $('#commentInput').val("");
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
+    });
+
     function dateFormat(date) {
         var year = date.getFullYear();
         var month = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -484,6 +714,7 @@
 
     // 모달 닫기 시 호출되는 함수 (수정 상태 복구)
     function closeDetailModal() {
+        editingState = false;
         // 수정 상태 초기화
         if (isEditing) {
             // 현재 입력 중이던 내용을 다시 label로 복구
@@ -500,6 +731,7 @@
 
             isEditing = false;
         }
+        $('#commentInput').val("");
 
         // 모달 닫기
         detailModal.style.display = "none";

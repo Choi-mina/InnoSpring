@@ -5,27 +5,26 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class Community {
+public class Comments {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private int communityId;
-    public String communityTitle;
-    public String communityContent;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int commentsId;
+    private String commentsContent;
     @ManyToOne
-    @JoinColumn(name = "community_author", referencedColumnName = "memId")
-    private Member communityAuthor;
-    public Timestamp createDate;
-    public Timestamp updateDate;
-
-    @OneToMany(mappedBy = "parentCpost", cascade = CascadeType.ALL)
-    private List<Comments> comments = new ArrayList<>();
-
+    @JoinColumn(name = "comments_author", referencedColumnName = "memId")
+    private Member commentsAuthor;
+    @ManyToOne
+    @JoinColumn(name = "parent_cpost", referencedColumnName = "communityId")
+    private Community parentCpost;
+    @ManyToOne
+    @JoinColumn(name = "parent_apost", referencedColumnName = "artistId")
+    private Artist parentApost;
+    private Timestamp createDate;
+    private Timestamp updateDate;
 
     @PrePersist
     protected void onCreate() {

@@ -1,7 +1,10 @@
 package com.example.cafe.Repository.Community;
 
+import com.example.cafe.dto.CommentsDto;
 import com.example.cafe.dto.CommunityDto;
+import com.example.cafe.dto.MemberDto;
 import com.example.cafe.dto.NoticeDto;
+import com.example.cafe.entity.Comments;
 import com.example.cafe.entity.Community;
 import com.example.cafe.entity.Member;
 import com.example.cafe.entity.Notice;
@@ -67,6 +70,20 @@ public class CommunityRepositoryImpl implements CommunityRepositoryCustom{
             for (Object[] result : results) {
                 Community community = (Community) result[0];
                 String memberEmail = (String) result[1];
+
+                List<CommentsDto> commentsDtos = new ArrayList<>();
+
+                for(Comments comment : community.getComments()) {
+                    CommentsDto commentsDto = new CommentsDto().builder()
+                            .commentsId(comment.getCommentsId())
+                            .commentsContent(comment.getCommentsContent())
+                            .commentsAuthor(comment.getCommentsAuthor())
+                            .createDate(comment.getCreateDate())
+                            .updateDate(comment.getUpdateDate())
+                            .build();
+                    commentsDtos.add(commentsDto);
+                }
+
                 communityDto = CommunityDto.builder()
                         .communityId(community.getCommunityId())
                         .communityTitle(community.getCommunityTitle())
@@ -74,6 +91,7 @@ public class CommunityRepositoryImpl implements CommunityRepositoryCustom{
                         .author(memberEmail)
                         .createDate(community.getCreateDate())
                         .updateDate(community.getUpdateDate())
+                        .comments(commentsDtos)
                         .build();
             }
 

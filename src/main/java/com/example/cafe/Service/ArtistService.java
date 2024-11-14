@@ -1,9 +1,9 @@
 package com.example.cafe.Service;
 
 import com.example.cafe.Repository.Artist.ArtistRepository;
-import com.example.cafe.dto.ArtistDto;
-import com.example.cafe.dto.ScheduleDto;
+import com.example.cafe.dto.*;
 import com.example.cafe.entity.Artist;
+import com.example.cafe.entity.Comments;
 import com.example.cafe.entity.Schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,13 +52,28 @@ public class ArtistService {
 
     public ArtistDto getArtistById(int artistId) {
         ArtistDto artistDto = new ArtistDto();
+        List<CommentsDto> commentsDtos = new ArrayList<>();
         Optional<Artist> artist = artistRepository.findById(Long.valueOf(artistId));
         if(artist != null) {
+            for(Comments comments : artist.get().getComments()) {
+                CommentsDto commentsDto = new CommentsDto().builder()
+                        .commentsId(comments.getCommentsId())
+                        .commentsContent(comments.getCommentsContent())
+                        .commentsAuthor(comments.getCommentsAuthor())
+                        .createDate(comments.getCreateDate())
+                        .updateDate(comments.getUpdateDate())
+                        .build();
+                commentsDtos.add(commentsDto);
+            }
+
             artistDto = ArtistDto.builder()
                     .artistId(artist.get().getArtistId())
                     .artistContent(artist.get().getArtistContent())
                     .artistImage(artist.get().getArtistImage())
                     .artistImagePath(artist.get().getArtistImagePath())
+                    .createDate(artist.get().getCreateDate())
+                    .updateDate(artist.get().getUpdateDate())
+                    .comments(commentsDtos)
                     .build();
         }
         return artistDto;
