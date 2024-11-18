@@ -96,7 +96,7 @@
       padding: 10px;
       border: none;
       border-radius: 3px;
-      font-size: 16px;
+      font-size: 13px;
       cursor: pointer;
     }
 
@@ -130,7 +130,7 @@
   <div class="sign-up-div" id="sign-up-div">
     <span class="sign-up-text">Sign Up</span>
     <div class="sign-up-form">
-      <form method="post" id="sign-up-form" action="/sign-up-result" th:object="${memberDto}">
+      <form method="post" id="sign-up-form" th:object="${memberDto}">
         <input type="text" name="userName" th:field="*{userName}" placeholder="UserName">
         <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" placeholder="PhoneNum">
         <div class="email-container">
@@ -155,7 +155,7 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 <script>
 
-  // 0: 버튼을 클릭하지 않음, 1: 이미 존재하는 이메일, 2: 중복확인 완료
+  // 0: 버튼을 클릭하지 않음, 1: 이미 존재하는 이메일, 2: 사용가능한 이메일
   var emailCheckFlag = 0;
 
   function oninputPhone(target) {
@@ -187,12 +187,17 @@
 
     var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!email || email.value === "" || !emailPattern.test(email.value)) {
-      alert("올바른 주소를 입력해주세요.");
+      alert("올바른 이메일을 입력해주세요.");
       return false;
     }
 
     if (!password || password.value === "" || password.value.length < 7) {
       alert("7글자 이상의 비밀번호를 입력해주세요.");
+      return false;
+    }
+
+    if (!passwordConfirm || passwordConfirm.value === "" || passwordConfirm.value.length < 7) {
+      alert("비밀번호 확인란을 입력해주세요.");
       return false;
     }
 
@@ -205,7 +210,7 @@
       alert("이메일 중복확인을 해주세요.");
       return false;
     } else if (emailCheckFlag == 1) {
-      alert("이미 존재하는 회원입니다. 다른 이메일을 입력 후 중복확인을 해주세요.");
+      alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");
       return false;
     }
 
@@ -220,12 +225,11 @@
       flag: selectedValue
     };
 
-    ajaxPostJsonCall('/sign-up-result', JSON.stringify(memberDto), function(data) {
+    ajaxPostJsonCall('/member/sign-up', JSON.stringify(memberDto), function(data) {
       if (data.code === "0000") {
         alert("회원가입 성공");
-        window.location.href = "/login";
+        window.location.href = "/login-web";
       } else {
-        console.log("이미 존재하는 회원");
         alert("회원가입에 실패했습니다. 잠시후에 이용해주세요.");
       }
     }, function(error) {
@@ -235,26 +239,26 @@
 
   window.onload = function() {
     document.getElementById("cancelBtn").addEventListener("click", function() {
-      window.location.href='/login';
+      window.location.href='/login-web';
     });
     document.getElementById("sign-up-form").addEventListener("submit", validateForm);
 
+    // 이메일 중복확인 이벤트리스터
     document.getElementById("emailCheck").addEventListener("click", function(event) {
       event.preventDefault();
       var form = document.getElementById("sign-up-form");
       var email = form.querySelector('[name="email"]');
       var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
       if (!email || email.value === "" || !emailPattern.test(email.value)) {
-        alert("이메일 형식이 올바르지 않습니다.");
+        alert("올바른 이메일을 입력해주세요.");
       } else {
-        ajaxJsonCall('/find-email?email=' + encodeURIComponent(email.value), null, function(data) {
+        ajaxJsonCall('/member/find-by-email?email=' + encodeURIComponent(email.value), null, function(data) {
           if (data.code === "0000") {
             emailCheckFlag = 1;
             alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");
-          } else {
+          } else {  // "0001", "No Data"
             emailCheckFlag = 2;
             alert("사용 가능한 이메일입니다.");
-
           }
         }, function(error) {
           alert("An error occurred: " + error.message);

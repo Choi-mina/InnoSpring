@@ -50,18 +50,18 @@ public class WebController {
         return ResponseEntity.ok(sessionValues);
     }
 
-    @RequestMapping("/login")
+    @RequestMapping("/login-web")
     public String LoginWeb() {
         return "html/login.html";
     }
 
-    @RequestMapping("/sign-up")
+    @RequestMapping("/sign-up-web")
     public String SignUpWeb(Model model) {
         model.addAttribute("memberDto", new MemberDto());
         return "html/signup.html";
     }
 
-    @RequestMapping("/mypage")
+    @RequestMapping("/mypage-web")
     public String MyPageWeb(Model model) {
         return "html/mypage.html";
     }
@@ -84,40 +84,6 @@ public class WebController {
     @RequestMapping("/notice-web")
     public String InformWeb(Model model) {
         return "html/notice.html";
-    }
-
-    // 이메일 중복확인을 위한 Web API
-    @RequestMapping("/find-email")
-    @ResponseBody
-    public ResultEntity FindByEmail(@RequestParam("email") String email) {
-        String url = baseUrl + "/member/find-by-email?email=" + email;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
-
-    // 회원가입을 위한 Web API
-    @RequestMapping("/sign-up-result")
-    @ResponseBody
-    public ResultEntity SginUp(@RequestBody MemberDto memberDto) {
-        String url = baseUrl + "/member/sign-up";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(memberDto, headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
     }
 
     // 스케줄 저장을 위한 Web API

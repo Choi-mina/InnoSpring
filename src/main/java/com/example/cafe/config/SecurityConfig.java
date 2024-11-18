@@ -23,7 +23,7 @@ public class SecurityConfig {
 //                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
 //                )
                 .formLogin(form -> form
-                        .loginPage("/login")
+                        .loginPage("/login-web")
                         .defaultSuccessUrl("/", true) // 로그인 성공 후 리다이렉트 URL
                 )
                 .logout(AbstractHttpConfigurer::disable);

@@ -65,7 +65,7 @@
             border: 0;
             background-color: transparent;
         }
-        .login-join {
+        .login-btn {
             color: rgba(255, 255, 255, 1);
             width: 50px;
             font-size: 20px;
@@ -89,27 +89,26 @@
         </button>
         <div class="div1"> </div>
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
-        <button class="mypage" id="mypage" onclick="location.href='/mypage'"><span>마이페이지</span></button>
+        <button class="mypage" id="mypage" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
         <div class="div1"> </div>
-        <button class="login-join" id="login-btn"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
+        <button class="login-btn" id="state-logout"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
     </div>
 </div>
 </body>
 <script th:src="@{/common/common.ajax.js}"></script>
 <script>
     var sessionEmail;
-    // 세션 확인
+    // 세션 조회
     ajaxJsonCall('/get-session', null, function (session) {
-        console.log(session);
         sessionEmail = session.email;
         sessionFlag = session.flag;
         sessionDate = session.date;
         if (session.email != "null" && session.email != null) {
-            document.querySelector('.login-join').setAttribute('id', 'logout-btn');
+            document.querySelector('.login-btn').setAttribute('id', 'state-login');
             document.getElementById("login-btn-image").src = "/images/login.png";
             document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
             document.getElementById("mypage").style.display = "block";
-            if(session.flag == 'F') {
+            if(session.flag == 'F') {   // fan인 경우 date 표시
                 var date = calDate(session.date);
                 $('#date').text('ꯁ + ' + date);
             }
@@ -119,24 +118,18 @@
     });
 
     // 로그인 버튼 클릭
-    // 클릭 이벤트 리스너 추가
-    document.getElementById("login-btn").addEventListener("click", function(event) {
-        const button = document.querySelector(".login-join");
-        const buttonId = button.getAttribute('id');
+    document.getElementById("state-logout").addEventListener("click", function(event) {
+        const button = document.querySelector(".login-btn");
+        const loginState = button.getAttribute('id');
 
-        if (buttonId === "login-btn") {
-            // 로그인 상태가 아닌 경우 로그인 페이지로 이동
-            window.location.href = "/login";
-        } else if (buttonId === "logout-btn") {
-            // 로그인 상태인 경우 로그아웃 처리
-            console.log("로그아웃 버튼 클릭");
-
+        if (loginState === "state-logout") { // 로그인 상태가 아닌 경우 로그인 페이지로 이동
+            window.location.href = "/login-web";
+        } else if (loginState === "state-login") { // 로그인 상태인 경우 로그아웃 처리
             const result = confirm('로그아웃 하시겠습니까?');
             if(result) {
                 // 로그아웃 API 호출
                 ajaxPostJsonCall('/logout', sessionEmail, function (data) {
                     if (data.code === "0000") {
-                        console.log("로그아웃 성공");
                         window.location.href = "/";
                     }
                 }, function (error) {
@@ -148,16 +141,14 @@
         }
     });
 
+    // 날짜 계산
     function calDate(dateString) {
-        // 문자열을 Date 객체로 변환
-        const date = new Date(dateString);
-
         // 오늘 날짜 가져오기 (시간 정보 제거)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         // 입력된 날짜의 시간 정보 제거
-        const inputDate = new Date(date);
+        const inputDate = new Date(dateString);
         inputDate.setHours(0, 0, 0, 0);
 
         // 날짜 차이 계산 (하루는 86400000 밀리초)

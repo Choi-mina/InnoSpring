@@ -31,12 +31,14 @@ public class MemberController {
     public ResultEntity memSignUp(@RequestBody MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
 
+        // 1 -> "F", 2 -> "A", 3 -> "M"
+        // 기본값 : 1
         memberDto.setFlag(memberDto.getFlag().equals("1") ? "F" : memberDto.getFlag().equals("2") ? "A" : "M" );
         try{
             if(!memValid(memberDto.getEmail())) {
                 memberService.memSignUp(memberDto);
 
-                // 회원가입 및 로그인 성공 반환
+                // 회원가입 성공 반환
                 result.setCode("0000");
                 result.setMessage("Sign-up Success");
                 log.info("Sign-up Success");
@@ -120,7 +122,7 @@ public class MemberController {
             }
             log.info("Find By Email Success");
         } catch (Exception e) {
-            log.error("Find By Phone Fail");
+            log.error("Find By Email Fail");
             return new ResultEntity(e);
         }
         return result;
