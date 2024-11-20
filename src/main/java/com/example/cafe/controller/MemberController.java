@@ -163,46 +163,6 @@ public class MemberController {
         return result;
     }
 
-    // 내 글 조회 API
-    @GetMapping("/find-my-community")
-    public ResultEntity findMyCommunity(@RequestParam("email") String email, Pageable pageable) {
-        ResultEntity result = new ResultEntity();
-        try {
-            Member member = memberService.findByEmailEt(email);
-            Page<CommunityDto> communityDtos = communityService.findByMemberId(member,pageable);
-
-            result.setCode("0000");
-            result.setMessage("Find My Community Success");
-            result.setData(communityDtos);
-
-            log.info("Find My Community Success");
-        } catch (Exception e) {
-            log.error("Find My Community Fail");
-            return new ResultEntity(e);
-        }
-        return result;
-    }
-
-    // 내 댓글 조회 API
-    @GetMapping("/find-my-comment")
-    public ResultEntity findMyCommment(@RequestParam("email") String email, @RequestParam("type") String postType, Pageable pageable) {
-        ResultEntity result = new ResultEntity();
-        try {
-            Member member = memberService.findByEmailEt(email);
-            Page<CommentsDto> commentsDtos = commentsService.findByMemberId(member, postType, pageable);
-
-            result.setCode("0000");
-            result.setMessage("Find My Comment Success");
-            result.setData(commentsDtos);
-
-            log.info("Find My Comment Success");
-        } catch (Exception e) {
-            log.error("Find My Comment Fail");
-            return new ResultEntity(e);
-        }
-        return result;
-    }
-
     // 회원이 존재하는지 validation
     public Boolean memValid(String email) {
         log.info("Find Member");

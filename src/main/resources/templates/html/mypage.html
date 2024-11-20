@@ -54,7 +54,7 @@
     .menu-item:hover {
       background-color: rgba(232, 217, 255, 0.5); /* 마우스 오버 시 효과 */
     }
-    .delete-account {
+    .withdrawal {
       font-size: 12px; /* Smaller font size */
       color: #999; /* Light grey color */
       margin-top: auto; /* Push the button to the bottom */
@@ -63,7 +63,7 @@
     }
 
 
-    .delete-account:hover {
+    .withdrawal:hover {
       color: #dc3545; /* Change color to red on hover */
     }
 
@@ -120,7 +120,7 @@
       text-align: center; /* 중앙 정렬 */
     }
 
-    #prev-page-btn, #next-page-btn, #cnext-page-btn, #cprev-page-btn {
+    #post-prev-page-btn, #post-next-page-btn, #comments-next-page-btn, #comments-prev-page-btn {
       background-color: rgba(232, 217, 255);
       color: white;
       border: none;
@@ -130,7 +130,7 @@
       cursor: pointer;
     }
 
-    #prev-page-btn:hover, #next-page-btn:hover, #cnext-page-btn:hover, #cprev-page-btn:hover {
+    #post-prev-page-btn:hover, #post-next-page-btn:hover, #comments-next-page-btn:hover, #comments-prev-page-btn:hover {
       background-color: rgba(209, 178, 255);
     }
 
@@ -198,13 +198,13 @@
       cursor: pointer;
     }
 
-    .commu-detail-btn-div {
+    .my-post-detail-btn-div {
       display: flex;
       justify-content: flex-end;
       margin-top: 20px;
     }
 
-    .commu-detail-btn {
+    .my-post-detail-btn {
       background-color: rgba(232, 217, 255);
       color: white;
       border: none;
@@ -214,11 +214,11 @@
       cursor: pointer;
     }
 
-    #commu-detail-edit-btn:hover, #commu-detail-save-btn:hover {
+    #my-post-edit-btn:hover, #my-post-save-btn:hover {
       background-color: rgba(209, 178, 255);
     }
 
-    #commu-detail-delete-btn:hover {
+    #my-post-delete-btn:hover {
       background-color: rgba(255, 100, 100);
     }
 
@@ -259,34 +259,34 @@
 <body>
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
 <div class="frame-container">
-  <div class="menu-bar" id="login-div">
+  <div class="menu-bar" id="menu-bar">
     <h2>Mypage</h2>
     <div class="menu-item" id="update-info-btn">회원정보 수정</div>
     <div class="menu-item" id="my-posts-btn">내 글</div>
-    <div class="menu-item" id="my-comment-btn">내 댓글</div>
-    <div class="delete-account" id="delete-btn">회원탈퇴</div>
+    <div class="menu-item" id="my-comments-btn">내 댓글</div>
+    <div class="withdrawal" id="withdrawal-btn">회원탈퇴</div>
   </div>
   <div class="content" id="content">
-    <h2>환영합니다!</h2>
-    <p>여기에 회원 정보를 수정하거나 내 글을 확인할 수 있습니다.</p>
-    <!-- 추가 콘텐츠가 필요하면 이곳에 작성 -->
+    <h2>안녕하세요!</h2>
+    <p>회원 정보를 수정하거나 내가 쓴 글, 댓글을 관리할 수 있습니다.</p>
   </div>
 
-  <div id="detailModal" class="modal">
+  <!--  내 글 상세보기 모달 -->
+  <div id="myPostDetailModal" class="modal">
     <div class="modal-content">
-      <span class="close-modal" id="detailModalClose">&times;</span>
+      <span class="close-modal" id="myPostDetailModalClose">&times;</span>
       <h3></h3>
-      <h3 for="edit-title" id="label-title"><span id="detail-title"></span></h3><br>
-      <label for="edit-content" id="label-content"><span id="detail-content"></span></label><br><br>
+      <h3 for="edit-title" id="label-title"><span id="my-post-detail-title"></span></h3><br>
+      <label for="edit-content" id="label-content"><span id="my-post-detail-content"></span></label><br><br>
 
-      <p id="detail-author">작성자: OOO</p>
-      <p id="detail-date">등록일: YYYY-MM-DD</p>
+      <p id="my-post-detail-author">작성자: OOO</p>
+      <p id="my-post-detail-date">등록일: YYYY-MM-DD</p>
 
       <!-- 수정 및 삭제 버튼 -->
-      <div class="commu-detail-btn-div">
-        <button class="commu-detail-btn" id="commu-detail-edit-btn">수정</button>
-        <button class="commu-detail-btn" id="commu-detail-delete-btn">삭제</button>
-        <button class="commu-detail-btn" id="commu-detail-save-btn" style="display: none;">저장</button>
+      <div class="my-post-detail-btn-div">
+        <button class="my-post-detail-btn" id="my-post-edit-btn">수정</button>
+        <button class="my-post-detail-btn" id="my-post-delete-btn">삭제</button>
+        <button class="my-post-detail-btn" id="my-post-save-btn" style="display: none;">저장</button>
       </div>
 
       <!-- 댓글창 -->
@@ -294,7 +294,7 @@
         <h3>댓글</h3>
 
         <!-- 기존 댓글 -->
-        <div class="comment-list" id="commentList">
+        <div class="comment-list" id="myPostCommentList">
         </div>
       </div>
     </div>
@@ -351,7 +351,7 @@
   document.getElementById("update-info-btn").addEventListener("click", function() {
     document.getElementById("content").innerHTML = `
       <h2>비밀번호를 입력해주세요.</h2>
-      <form id="pw-input">
+      <form id="pw-input-form">
         <div>
           <label for="email">이메일:</label>
           <label id="email">${sessionEmail}</label>
@@ -364,9 +364,8 @@
       </form>
     `;
 
-
     // 비밀번호 입력 버튼 클릭 이벤트
-    document.getElementById("pw-input").addEventListener("submit", function(event) {
+    document.getElementById("pw-input-form").addEventListener("submit", function(event) {
       event.preventDefault();
 
       const email = sessionEmail;
@@ -374,22 +373,20 @@
 
       // 비밀번호 일치 여부 조회 API 호출
       ajaxJsonCall('/member/login-in?email=' + email + '&password=' + password, null, function(data) {
-        if (data.code === "0000") {
-          ajaxJsonCall('/member/find-by-email?email=' + email, null, function(d) {
-            if (d.code === "0000") {
-              document.getElementById("content").innerHTML = `
+        if (data.code === "0000") { // 비밀번호가 일치하다면 개인정보 수정을 위한 form 생성
+          document.getElementById("content").innerHTML = `
                 <h2>회원정보 수정</h2>
-                <form id="info-modify">
+                <form id="info-modify-form">
                   <div style="display: none">
-                     <label id="id">${d.data.memId}</label>
+                     <label id="id">${data.data.memId}</label>
                    </div>
                   <div>
                      <label for="name">이름:</label>
-                     <label id="name">${d.data.userName}</label>
+                     <label id="name">${data.data.userName}</label>
                    </div>
                   <div>
                     <label for="email">이메일:</label>
-                    <label id="email">${sessionEmail}</label>
+                    <label id="email">${email}</label>
                   </div>
                   <div>
                     <label for="password">비밀번호:</label>
@@ -401,19 +398,16 @@
                   </div>
                   <div>
                     <label for="number">전화번호:</label>
-                    <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" value="${d.data.phoneNum}">
+                    <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" value="${data.data.phoneNum}">
                   </div>
                   <button type="submit" class="submit-btn">수정</button>
                 </form>
               `;
 
-              document.getElementById("info-modify").addEventListener("submit", validateForm);
-            }
-          }, function(error) {
-            alert("An error occurred: " + error.message);
-          });
+          // '수정' 버튼 클릭 시 이벤트 리스너
+          document.getElementById("info-modify-form").addEventListener("submit", validateForm);
         } else {
-          alert("비밀번호를 다시 확인해주세요.")
+          alert("비밀번호를 다시 확인해주세요.");
         }
       }, function(error) {
         alert("An error occurred: " + error.message);
@@ -421,27 +415,29 @@
     });
   });
 
-  var currentPage = 0;
-  var pageSize = 10; // 내 글 페이지당 표시할 게시글 수
-  var commentPageSize = 7;  // 내 댓글 페이지당 표시할 게시글 수
-  var currentcPage = 0;
-  var type;
-  var selectedDetailCommunityId;
+  var myPostsPageSize = 10; // 내 글 페이지당 표시할 게시글 수
+  var myCommentsPageSize = 7;  // 내 댓글 페이지당 표시할 게시글 수
+  var myPostsCurrentPage = 0;
+  var myCommentsCurrentPage = 0;
+  var type; // 댓글 community/artist 구분
+  var selectedPostId;
+  // 내 글 상세보기에서 수정중인지 확인하는 flag
+  // true: 수정중, false: 수정중X
   var myPostIsEditing = false
 
   // 내 글 메뉴 클릭 시 내용 변경
   document.getElementById("my-posts-btn").addEventListener("click", function() {
-    drawMyPostTable(currentPage);
+    drawMyPostsTable(myPostsCurrentPage);
   });
 
   // 내 댓글 메뉴 클릭 시 내용 변경
-  document.getElementById("my-comment-btn").addEventListener("click", function() {
+  document.getElementById("my-comments-btn").addEventListener("click", function() {
     drawCommentTabs();
   });
 
   // 내 글 보기의 테이블을 그리는 함수
-  function drawMyPostTable(page) {
-    ajaxJsonCall('/member/find-my-community?email=' + sessionEmail + '&page=' + page + '&size=' + pageSize, null, function(data) {
+  function drawMyPostsTable(page) {
+    ajaxJsonCall('/community/find-my-community?email=' + sessionEmail + '&page=' + page + '&size=' + myPostsPageSize, null, function(data) {
       if (data.code === "0000" && data.data.content.length > 0) {
         document.getElementById("content").innerHTML = `
         <h2>내 글</h2>
@@ -456,8 +452,8 @@
           </tbody>
         </table>
         <div id="pagination-container">
-        <button id="prev-page-btn"><</button>
-        <button id="next-page-btn">></button>
+        <button id="post-prev-page-btn"><</button>
+        <button id="post-next-page-btn">></button>
     </div>
       `;
 
@@ -481,20 +477,20 @@
           var targetRow = event.target.closest("tr");
           if (targetRow) {
             var communityId = targetRow.id.split('-')[1];
-            getCommunityDetail(communityId);
+            getMyPostDetail(communityId);
           }
         });
 
-        $('#prev-page-btn').click(function() {
-          if (currentPage > 0) {
-            currentPage--;
-            drawMyPostTable(currentPage);
+        $('#post-prev-page-btn').click(function() {
+          if (myPostsCurrentPage > 0) {
+            myPostsCurrentPage--;
+            drawMyPostsTable(myPostsCurrentPage);
           }
         });
 
-        $('#next-page-btn').click(function() {
-          currentPage++;
-          drawMyPostTable(currentPage);
+        $('#post-next-page-btn').click(function() {
+          myPostsCurrentPage++;
+          drawMyPostsTable(myPostsCurrentPage);
         });
       } if(data.data.content.length == 0) {
         document.getElementById("content").innerHTML = `
@@ -519,21 +515,19 @@
 
     // 탭 버튼 이벤트 등록
     document.getElementById("community-comments-btn").addEventListener("click", function() {
-      type = "C";
-      currentcPage = 0;
-      drawMyCommentsTable(type, currentcPage);
+      myCommentsCurrentPage = 0;
+      drawMyCommentsTable("C", myCommentsCurrentPage);
     });
 
     document.getElementById("artist-comments-btn").addEventListener("click", function() {
-      type = "A";
-      currentcPage = 0;
-      drawMyCommentsTable(type, currentcPage);
+      myCommentsCurrentPage = 0;
+      drawMyCommentsTable("A", myCommentsCurrentPage);
     });
   }
 
   // 내 댓글 테이블 그리기 함수
   function drawMyCommentsTable(type, page) {
-    ajaxJsonCall('/member/find-my-comment?email=' + sessionEmail + '&type=' + type + '&page=' + page + '&size=' + commentPageSize, null, function(data) {
+    ajaxJsonCall('/comments/find-my-comment?email=' + sessionEmail + '&type=' + type + '&page=' + page + '&size=' + myCommentsPageSize, null, function(data) {
       if (data.code === "0000" && data.data.content.length > 0) {
         document.getElementById("comments-content").innerHTML = `
           <h3>${type === "C" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
@@ -548,8 +542,8 @@
             </tbody>
           </table>
           <div id="pagination-container">
-            <button id="cprev-page-btn"><</button>
-            <button id="cnext-page-btn">></button>
+            <button id="comments-prev-page-btn"><</button>
+            <button id="comments-next-page-btn">></button>
           </div>
         `;
 
@@ -573,28 +567,28 @@
           var targetRow = event.target.closest("tr");
           if (targetRow) {
             var commentsId = targetRow.id.split('-')[1];
-            if(type == 'C') {
+            if(type == 'C') { // Community의 댓글 버튼 클릭
               communityDetailComment(commentsId, type);
-            } else {
+            } else {  // Artist의 댓글 버튼 클릭
               artistDetailComment(commentsId, type);
             }
           }
         });
 
-        $('#cprev-page-btn').click(function() {
-          if (currentcPage > 0) {
-            currentcPage--;
-            drawMyCommentsTable(type, currentcPage);
+        $('#comments-prev-page-btn').click(function() {
+          if (myCommentsCurrentPage > 0) {
+            myCommentsCurrentPage--;
+            drawMyCommentsTable(type, myCommentsCurrentPage);
           }
         });
 
-        $('#cnext-page-btn').click(function() {
-          currentcPage++;
-          drawMyCommentsTable(type, currentcPage);
+        $('#comments-next-page-btn').click(function() {
+          myCommentsCurrentPage++;
+          drawMyCommentsTable(type, myCommentsCurrentPage);
         });
       } else {
         document.getElementById("comments-content").innerHTML = `
-          <h3>${type === "community" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
+          <h3>${type === "C" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
           <p>작성한 댓글이 없습니다.</p>
         `;
       }
@@ -608,16 +602,16 @@
     if(totalPages == 1)
       $('#pagination-container').css('display', 'none');
     // 이전 버튼은 첫 페이지일 때 비활성화
-    $('#prev-page-btn').prop('disabled', currentPage === 0);
-    $('#cprev-page-btn').prop('disabled', currentcPage === 0);
+    $('#post-prev-page-btn').prop('disabled', myPostsCurrentPage === 0);
+    $('#comments-prev-page-btn').prop('disabled', myPostsCurrentPage === 0);
 
     // 다음 버튼은 마지막 페이지일 때 비활성화
-    $('#next-page-btn').prop('disabled', currentPage >= totalPages - 1);
-    $('#cnext-page-btn').prop('disabled', currentcPage >= totalPages - 1);
+    $('#post-next-page-btn').prop('disabled', myPostsCurrentPage >= totalPages - 1);
+    $('#comments-next-page-btn').prop('disabled', myPostsCurrentPage >= totalPages - 1);
   }
 
   // 회원 탈퇴 이벤트
-  document.getElementById("delete-btn").addEventListener("click", function() {
+  document.getElementById("withdrawal-btn").addEventListener("click", function() {
     var confirmV = confirm("정말로 탈퇴하시겠습니까?");
     if(confirmV) {
       ajaxPostJsonCall('/logout', sessionEmail, function (data) {
@@ -643,12 +637,13 @@
             .replace(/(^02.{0}|^01.{1}|[0-9]{3,4})([0-9]{3,4})([0-9]{4})/g, "$1-$2-$3");
   }
 
+  // 개인정보 수정 유효성 검증
   function validateForm(event) {
     var confirmV = confirm("회원정보를 수정하시겠습니까?")
     if(confirmV) {
       event.preventDefault();
 
-      var form = document.getElementById("info-modify");
+      var form = document.getElementById("info-modify-form");
       var id = document.getElementById("id").innerText;
       var name = document.getElementById("name").innerText;
       var email = document.getElementById("email").innerText;
@@ -684,7 +679,7 @@
       ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
         if (data.code === "0000") {
           alert("회원정보가 수정되었습니다.");
-          window.location.href = "/mypage";
+          window.location.href = "/mypage-web";
         }
       }, function(error) {
         alert("An error occurred: " + error.message);
@@ -703,29 +698,29 @@
   }
 
   // 내 글 상세보기
-  function getCommunityDetail(communityId) {
+  function getMyPostDetail(communityId) {
     ajaxJsonCall('/community/find-by-id?id='+communityId, null, function(data) {
       if (data.code === "0000") {
-        $('#detail-title').text(data.data.communityTitle);
-        $('#detail-content').html(data.data.communityContent);
-        $('#detail-author').text("작성자: " + data.data.author);
-        $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
-        $('#detailModal').fadeIn();
-        selectedDetailCommunityId = communityId;
-        if(sessionEmail == null || (sessionFlag == 'F' && data.data.author != sessionEmail)) {
-          $('#edit-btn').css('display', 'none');
-          $('#delete-btn').css('display', 'none');
+        $('#my-post-detail-title').text(data.data.communityTitle);
+        $('#my-post-detail-content').html(data.data.communityContent);
+        $('#my-post-detail-author').text("작성자: " + data.data.author);
+        $('#my-post-detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
+        $('#myPostDetailModal').fadeIn();
+        selectedPostId = communityId;
+        if(sessionEmail == null || (data.data.author != sessionEmail)) {
+          $('#my-post-edit-btn').css('display', 'none');
+          $('#my-post-delete-btn').css('display', 'none');
         }
 
         // 댓글 넣기
         if(data.data.comments.length > 0) {
-          document.getElementById("commentList").innerHTML = ""; // 기존 내용을 초기화
+          document.getElementById("myPostCommentList").innerHTML = ""; // 기존 내용을 초기화
           const sortedComments = data.data.comments.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
           sortedComments.forEach(function(post) {
             var index = post.commentsAuthor.email.indexOf('@');
             var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
-            document.getElementById("commentList").insertAdjacentHTML("beforeend", `
-                            <div class="comment" id="detailCComment-${post.commentsId}">
+            document.getElementById("myPostCommentList").insertAdjacentHTML("beforeend", `
+                            <div class="comment" id="myPostComment-${post.commentsId}">
                                 <p class="comment-author">${authorName}</p>
                                 <p class="comment-text">${post.commentsContent}</p>
                             </div>
@@ -733,7 +728,7 @@
                         `);
           });
         } else {    // 댓글이 없는 경우
-          document.getElementById("commentList").innerHTML = `
+          document.getElementById("myPostCommentList").innerHTML = `
                       <label>댓글이 없습니다.</label>
                     `;
         }
@@ -744,35 +739,35 @@
   }
 
   // 내 글 상세보기 수정 버튼 클릭 시
-  $('#commu-detail-edit-btn').click(function () {
+  $('#my-post-edit-btn').click(function () {
     if (!myPostIsEditing) {
       myPostIsEditing = true;
 
       // 제목과 내용을 input과 textarea로 변경
-      var titleText = $('#detail-title').text();
-      var contentHtml = $('#detail-content').html();
+      var titleText = $('#my-post-detail-title').text();
+      var contentHtml = $('#my-post-detail-content').html();
       var contentText = contentHtml.replace(/<br\s*\/?>/gi, '\n');
 
       $('#label-title').html('<input type="text" id="edit-title" value="' + titleText + '" style="width: 100%;">');
       $('#label-content').html('<textarea id="edit-content" rows="10" style="width: 100%;">' + contentText + '</textarea>');
 
       // 저장 버튼 표시
-      $('#commu-detail-save-btn').show();
-      $('#commu-detail-edit-btn').hide();
-      $('#commu-detail-delete-btn').hide();
+      $('#my-post-save-btn').show();
+      $('#my-post-edit-btn').hide();
+      $('#my-post-delete-btn').hide();
     }
   });
 
   // 내 글 상세보기 저장 버튼 클릭 시
-  $('#commu-detail-save-btn').click(function () {
+  $('#my-post-save-btn').click(function () {
     var updatedTitle = $('#edit-title').val();
     var updatedContent = $('#edit-content').val();
     updatedContent = updatedContent.replace(/\n/g, '<br>');
-    var author = $('#detail-author').text();
+    var author = $('#my-post-detail-author').text();
     author = author.substring(5,author.length);
 
     var communityDto = {
-      communityId: selectedDetailCommunityId,
+      communityId: selectedPostId,
       communityTitle: updatedTitle,
       communityContent: updatedContent,
       author: author
@@ -782,17 +777,17 @@
     ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
       if (data.code === "0000") {
         alert("글이 수정되었습니다.");
-        drawMyPostTable(currentPage);
+        drawMyPostsTable(0);
 
         // 제목과 내용을 다시 label로 변경
-        $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
-        $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
+        $('#label-title').html('<span id="my-post-detail-title">' + updatedTitle + '</span>');
+        $('#label-content').html('<span id="my-post-detail-content">' + updatedContent + '</span>');
 
         // 수정 모드 해제
-        isEditing = false;
-        $('#commu-detail-save-btn').hide();
-        $('#commu-detail-edit-btn').show();
-        $('#commu-detail-delete-btn').show();
+        myPostIsEditing = false;
+        $('#my-post-save-btn').hide();
+        $('#my-post-edit-btn').show();
+        $('#my-post-delete-btn').show();
       }
     }, function (error) {
       alert("An error occurred: " + error.message);
@@ -800,13 +795,13 @@
   });
 
   // 내 글 상세보기 삭제 버튼 클릭 시
-  $('#commu-detail-delete-btn').click(function () {
-    if (selectedDetailCommunityId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
-      ajaxPostJsonCall('/community/delete?id=' + selectedDetailCommunityId, null, function (data) {
+  $('#my-post-delete-btn').click(function () {
+    if (selectedPostId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
+      ajaxPostJsonCall('/community/delete?id=' + selectedPostId, null, function (data) {
         if (data.code === "0000") {
           alert("글이 삭제되었습니다.");
-          $('#detailModal').fadeOut();
-          drawMyPostTable(currentPage);
+          $('#myPostDetailModal').fadeOut();
+          drawMyPostsTable(myPostsCurrentPage);
         }
       }, function (error) {
         alert("An error occurred: " + error.message);
@@ -815,7 +810,7 @@
   });
 
   // 다른 댓글이 수정중 상태인지 확인
-  var editingState = false;
+  var commentEditingState = false;
 
   var selectedCommunityId;
   // 커뮤니티 글 댓글 상세보기 모달
@@ -869,8 +864,8 @@
 
   // 이벤트 위임으로 cCommentList 요소의 수정 버튼 클릭 시 처리
   $('#cCommentList').on('click', '#cCommentEdit', function () {
-    if(editingState == false) {
-      editingState = true;
+    if(commentEditingState == false) {
+      commentEditingState = true;
       var commentElement = $(this).closest('.comment');
       var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
       $('#detailCComment-' + commentId).css('background-color', 'transparent');
@@ -889,7 +884,7 @@
 
   // community 댓글 수정 -> 취소 버튼 클릭
   $('#cCommentList').on('click', '#cCommentEditCancel', function() {
-    editingState = false;
+    commentEditingState = false;
     // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
     var commentElement = $(this).closest('.comment');
     var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
@@ -917,8 +912,8 @@
       ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
         if (data.code === "0000") {
           alert("댓글이 수정되었습니다.");
-          editingState = false;
-          drawMyCommentsTable("C", currentcPage);
+          commentEditingState = false;
+          drawMyCommentsTable("C", myCommentsCurrentPage);
           communityDetailComment(commentId, "C");
         }
       }, function (error) {
@@ -938,7 +933,7 @@
         if (data.code === "0000") {
           detailCModal.style.display = "none";
           alert("댓글이 삭제되었습니다.");
-          drawMyCommentsTable("C", currentcPage);
+          drawMyCommentsTable("C", myCommentsCurrentPage);
         }
       }, function (error) {
         alert("An error occurred: " + error.message);
@@ -1016,8 +1011,8 @@
 
   // 이벤트 위임으로 aCommentList 요소의 수정 버튼 클릭 시 처리
   $('#aCommentList').on('click', '#aCommentEdit', function () {
-    if(editingState == false) {
-      editingState = true;
+    if(commentEditingState == false) {
+      commentEditingState = true;
       var commentElement = $(this).closest('.comment');
       var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
       $('#detailAComment-' + commentId).css('background-color', 'transparent');
@@ -1040,7 +1035,7 @@
     // 클릭된 수정 버튼의 부모 요소에서 댓글 ID 추출
     var commentElement = $(this).closest('.comment');
     var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
-    editingState = false;
+    commentEditingState = false;
     artistDetailComment(commentId, "A");
 });
 
@@ -1064,8 +1059,8 @@
       ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
         if (data.code === "0000") {
           alert("댓글이 수정되었습니다.");
-          editingState = false;
-          drawMyCommentsTable("A", currentcPage);
+          commentEditingState = false;
+          drawMyCommentsTable("A", myCommentsCurrentPage);
           artistDetailComment(commentId, "A");
         }
       }, function (error) {
@@ -1085,7 +1080,7 @@
         if (data.code === "0000") {
           detailAModal.style.display = "none";
           alert("댓글이 삭제되었습니다.");
-          drawMyCommentsTable("A", currentcPage);
+          drawMyCommentsTable("A", myCommentsCurrentPage);
         }
       }, function (error) {
         alert("An error occurred: " + error.message);
@@ -1093,25 +1088,25 @@
     }
   });
 
-  var detailClose = document.getElementById("detailModalClose");
+  var detailClose = document.getElementById("myPostDetailModalClose");
   var detailCCommentClose = document.getElementById("detailCModalClose");
   var detailACommentClose = document.getElementById("detailAModalClose");
 
   // X 버튼 클릭 시 모달 닫기
   detailClose.onclick = function() {
-    detailModal.style.display = "none";
+    myPostDetailModal.style.display = "none";
     if (myPostIsEditing) {
       // 현재 입력 중이던 내용을 다시 label로 복구
       var titleText = $('#edit-title').val();
       var contentText = $('#edit-content').val();
 
-      $('#label-title').html('<h3 id="detail-title">' + titleText + '</h3>');
-      $('#label-content').html('<span id="detail-content">' + contentText + '</span>');
+      $('#label-title').html('<h3 id="my-post-detail-title">' + titleText + '</h3>');
+      $('#label-content').html('<span id="my-post-detail-content">' + contentText + '</span>');
 
       // 저장 버튼 숨기고 수정 버튼 보이기
-      $('#commu-detail-save-btn').hide();
-      $('#commu-detail-edit-btn').show();
-      $('#commu-detail-delete-btn').show();
+      $('#my-post-save-btn').hide();
+      $('#my-post-edit-btn').show();
+      $('#my-post-delete-btn').show();
 
       myPostIsEditing = false;
     }
@@ -1119,12 +1114,12 @@
 
   detailCCommentClose.onclick = function() {
     detailCModal.style.display = "none";
-    editingState = false;
+    commentEditingState = false;
   }
 
   detailACommentClose.onclick = function() {
     detailAModal.style.display = "none";
-    editingState = false;
+    commentEditingState = false;
   }
 
 
