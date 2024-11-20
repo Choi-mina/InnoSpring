@@ -428,7 +428,9 @@
 
     // 공지사항 상세 정보 가져오기
     function getNoticeDetail(noticeId) {
-        ajaxJsonCall('/notice/find-by-id?id='+noticeId, null, function(data) {
+        const param = {};
+        param["id"] = noticeId;
+        ajaxJsonCall('/notice/find-by-id', param, function(data) {
             if (data.code === "0000") {
                 $('#detail-title').text(data.data.noticeTitle);
                 $('#detail-content').html(data.data.noticeContent);
@@ -545,7 +547,10 @@
 
     // 모든 공지사항 조회
     function findNotice(page) {
-        ajaxJsonCall('/notice/find-all?page=' + page + '&size=' + pageSize, null, function (data) {
+        const param = {};
+        param["page"] = page;
+        param["size"] = pageSize;
+        ajaxJsonCall('/notice/find-all', param, function (data) {
             drawTable(data);
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -646,7 +651,7 @@
                 param["title"] = searchText;
                 param["page"] = page;
                 param["size"] = pageSize;
-                ajaxJsonCall('/find-by-title-notice-web', param, function(data) {
+                ajaxJsonCall('/notice/find-by-title', param, function(data) {
                     drawTable(data);
                 });
             }
@@ -660,7 +665,7 @@
                 params["date2"] = searchText2;
                 params["page"] = page;
                 params["size"] = pageSize;
-                ajaxJsonCall('/find-by-date-notice-web', params, function(data) {
+                ajaxJsonCall('/notice/find-by-date', params, function(data) {
                     drawTable(data);
                 });
             }

@@ -69,7 +69,7 @@ public class NoticeController {
     }
 
     @GetMapping("/find-by-title")
-    public ResultEntity findByTitle(@RequestParam String title, Pageable pageable) {
+    public ResultEntity findByTitle(@RequestParam("title") String title, Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
             Page<NoticeDto> noticeDtoList = noticeService.findByTitle(title, pageable);
@@ -86,7 +86,7 @@ public class NoticeController {
     }
 
     @GetMapping("/find-by-date")
-    public ResultEntity findByDate(@RequestParam String date1, @RequestParam String date2, Pageable pageable) {
+    public ResultEntity findByDate(@RequestParam("date1") String date1, @RequestParam("date2") String date2, Pageable pageable) {
         ResultEntity result = new ResultEntity();
         try {
             Page<NoticeDto> noticeDtoList = noticeService.findByDate(date1, date2, pageable);
