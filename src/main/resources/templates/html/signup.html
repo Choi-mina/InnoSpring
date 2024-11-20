@@ -252,7 +252,9 @@
       if (!email || email.value === "" || !emailPattern.test(email.value)) {
         alert("올바른 이메일을 입력해주세요.");
       } else {
-        ajaxJsonCall('/member/find-by-email?email=' + encodeURIComponent(email.value), null, function(data) {
+        const param = {};
+        param["email"] = email.value;
+        ajaxJsonCall('/member/find-by-email', param, function(data) {
           if (data.code === "0000") {
             emailCheckFlag = 1;
             alert("이미 존재하는 회원입니다. 다른 이메일을 입력해주세요.");

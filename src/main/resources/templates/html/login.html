@@ -113,7 +113,10 @@
                 alert("비밀번호를 입력해주세요.");
                 return false;
             } else {
-                ajaxJsonCall('/log-in-result?email=' + encodeURIComponent(email) + '&password=' + password, null, function (data) {
+                const param = {};
+                param["email"] = email;
+                param["password"] = password;
+                ajaxJsonCall('/log-in-result', param, function (data) {
                     if (data.code === "0000") {
                         location.href = '/';
                     } else if (data.code === "9999") {
