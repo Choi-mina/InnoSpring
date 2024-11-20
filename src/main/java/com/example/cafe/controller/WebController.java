@@ -154,60 +154,6 @@ public class WebController {
         return response.getBody();
     }
 
-    // 공지사항 저장 Web API
-    @RequestMapping("/save-notice-web")
-    @ResponseBody
-    public ResultEntity SaveNotice(@RequestBody NoticeDto noticeDto) {
-        String url = baseUrl + "/notice/save";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<NoticeDto> httpEntity = new HttpEntity<>(noticeDto, headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
-
-    // 공지사항 전체 조회 Web API
-    @RequestMapping("/find-all-notice-web")
-    @ResponseBody
-    public ResultEntity FindAllNotice(
-            @RequestParam int page,  // 페이지 번호
-            @RequestParam int size // 페이지당 표시할 게시글 수
-    ) {
-        String url = baseUrl + "/notice/find-all?page=" + page + "&size=" + size;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
-
-    // 공지사항 상세보기 Web API
-    @RequestMapping("/find-by-id-notice-web")
-    @ResponseBody
-    public ResultEntity FindByIdNotice(@RequestParam("id") int id) {
-        String url = baseUrl + "/notice/find-by-id?id=" + id;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<MemberDto> httpEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
-
     // 제목으로 공지사항 조회 Web API
     @RequestMapping("/find-by-title-notice-web")
     @ResponseBody
@@ -243,40 +189,6 @@ public class WebController {
         ResponseEntity<ResultEntity> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
-
-    // 공지사항 수정 Web API
-    @RequestMapping("/modify-notice-web")
-    @ResponseBody
-    public ResultEntity ModifyNotice(@RequestBody NoticeDto noticeDto) {
-        String url = baseUrl + "/notice/modify";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<NoticeDto> httpEntity = new HttpEntity<>(noticeDto, headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
-
-    // 공지사항 삭제 Web API
-    @RequestMapping("/delete-notice-web")
-    @ResponseBody
-    public ResultEntity DeleteNotice(@RequestParam("id") int id) {
-        String url = baseUrl + "/notice/delete?id=" + id;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<NoticeDto> httpEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
                 httpEntity,
                 ResultEntity.class);
         return response.getBody();
