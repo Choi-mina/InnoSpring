@@ -246,7 +246,6 @@
         </tr>
         </thead>
         <tbody>
-        <!-- 데이터가 여기에 추가됩니다. -->
         </tbody>
     </table>
     <div id="pagination-container">
@@ -383,6 +382,14 @@
         var noticeContent = $('#content').val();
         noticeContent = noticeContent.replace(/\n/g, '<br>');
 
+        if(noticeTitle == null || noticeTitle == '') {
+            alert("제목을 입력해주세요.");
+            return false;
+        } else if(noticeContent == null || noticeContent == '') {
+            alert("내용을 입력해주세요.");
+            return false;
+        }
+
         var noticeDto = {
             noticeTitle: noticeTitle,
             noticeContent: noticeContent
@@ -394,7 +401,7 @@
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
                 $('#writeForm')[0].reset(); // 폼 초기화
-                findNotice(0);
+                location.reload();
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -476,6 +483,14 @@
         var updatedContent = $('#edit-content').val();
         updatedContent = updatedContent.replace(/\n/g, '<br>');
 
+        if(updatedTitle == null || updatedTitle == '') {
+            alert("제목을 입력해주세요.");
+            return false;
+        } else if(updatedContent == null || updatedContent == '') {
+            alert("내용을 입력해주세요.");
+            return false;
+        }
+
         var noticeDto = {
             noticeId: selectedNoticeId,
             noticeTitle: updatedTitle,
@@ -489,13 +504,14 @@
                 findNotice(0);
 
                 // 제목과 내용을 다시 label로 변경
-                $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
-                $('#label-content').html('내용: <span id="detail-content">' + updatedContent + '</span>');
+                $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
+                $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
 
                 // 수정 모드 해제
                 isEditing = false;
                 $('#save-btn').hide();
                 $('#edit-btn').show();
+                $('#delete-btn').show();
             }
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -537,7 +553,6 @@
     }
 
     function drawTable(data) {
-        console.log(data);
         // 테이블의 행 개수
         var rowCount = table.rows.length;
 
