@@ -153,23 +153,4 @@ public class WebController {
                 ResultEntity.class);
         return response.getBody();
     }
-
-    // community 글 목록 불러오기
-    @RequestMapping("/community-find-web")
-    @ResponseBody
-    public ResultEntity CommunityFindWeb(@RequestParam int page,  // 페이지 번호
-                                         @RequestParam int size // 페이지당 표시할 게시글 수
-                                         ) {
-        String url = baseUrl + "/community/find-all?page=" + page + "&size=" + size;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<ResultEntity> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                httpEntity,
-                ResultEntity.class);
-        return response.getBody();
-    }
 }

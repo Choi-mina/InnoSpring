@@ -508,6 +508,7 @@
                 // 제목과 내용을 다시 label로 변경
                 $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
                 $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
+                getNoticeDetail(selectedNoticeId);
 
                 // 수정 모드 해제
                 isEditing = false;
