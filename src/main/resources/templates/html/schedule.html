@@ -155,11 +155,22 @@
             text-align: center;
         }
 
-        .close-btn {
+        .close-btn, .close {
+            color: #aaa;
             float: right;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus,
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
             cursor: pointer;
         }
+
 
         #event-list {
             margin-top: 20px;
@@ -170,12 +181,14 @@
         .schedule-modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 100;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
         }
 
         /* 모달 창 내용 */
@@ -185,7 +198,9 @@
             padding: 20px;
             border: transparent;
             width: 500px;
-            text-align: left;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
         }
 
         input {
@@ -193,18 +208,27 @@
             border-radius: 8px;
         }
 
-        /* 닫기 버튼 스타일 */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        input[type="text"] {
+            border: 1px solid rgba(83 , 52 , 129);
+            border-radius: 8px;
+            width: 250px;
         }
 
-        .close:hover,
-        .close:focus {
-            color: black;
+        .delete-btn, .save-btn {
+            background-color: rgba(232, 217, 255);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
             cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background-color: rgba(209, 178, 255);
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(255, 100, 100);
         }
 
     </style>
@@ -274,7 +298,7 @@
             <span class="close">&times;</span>
             <h2 id="schedule-modal-date"></h2>
             <form id="schedule-form">
-                <label for="event-title">스케줄 제목:</label>
+                <label for="event-title">스케줄 명:</label>
                 <input type="text" id="event-title" name="event-title" required><br><br>
 
                 <label for="event-time">시간:</label>
@@ -283,7 +307,7 @@
 <!--                <label for="event-desc">설명:</label><br>-->
 <!--                <textarea id="event-desc" name="event-desc" rows="4" cols="50"></textarea><br><br>-->
 
-                <button type="submit" style="background-color: rgba(232 , 217 , 255); border-color: transparent" >저장</button>
+                <button class="save-btn" type="submit" >저장</button>
             </form>
         </div>
     </div>
@@ -295,14 +319,14 @@
             <h2 id="edit-schedule-modal-date"></h2>
             <form id="edit-schedule-form">
                 <input type="hidden" id="edit-schedule-id" name="edit-schedule-id" required> <!-- 숨겨진 ID 필드 -->
-                <label for="edit-event-title">스케줄 제목:</label>
+                <label for="edit-event-title">스케줄 명:</label>
                 <input type="text" id="edit-event-title" name="edit-event-title" required><br><br>
 
                 <label for="edit-event-time">시간:</label>
                 <input type="time" id="edit-event-time" name="edit-event-time"><br><br>
 
-                <button type="submit" style="background-color: rgba(232 , 217 , 255); border-color: transparent">저장</button>
-                <button type="button" id="delete-schedule-button" style="background-color: rgba(255, 100, 100); border-color: transparent; color: white; margin-left: 10px;">삭제</button> <!-- 삭제 버튼 -->
+                <button class="save-btn" type="submit">저장</button>
+                <button class="delete-btn" type="button" id="delete-schedule-button">삭제</button> <!-- 삭제 버튼 -->
             </form>
         </div>
     </div>
@@ -380,9 +404,6 @@
         $('#tbl-month').empty();
 
         var td = '<td class="__REST__ __TODAY__"><a __HREF__>__DATE__</a><button class="add-event">+</button></td>';
-        // var href = '/depart/schedule?date=' + date.substring(0, 8);
-        var hasEvent;
-        var tdClass;
         var week = null;
         var days = fullDays(date);
         for (var i = 0, length = days.length; i < length; i += 7) {
@@ -391,19 +412,32 @@
 
             var $tr = $('<tr></tr>');
             week.forEach(function (obj, index) {
-                hasEvent = (index === 3);
-                tdClass = (index === 0)? 'sun': '';
-                tdClass = (index === 6)? 'sat': tdClass;
+                var tdClass = (index === 0) ? 'sun' : '';
+                tdClass = (index === 6) ? 'sat' : tdClass;
 
-                $tr.append(td.replace('__REST__', tdClass)
-                    .replace('__TODAY__', (obj['today'])? 'today': '')
-                    // .replace('__HREF__', (hasEvent)? 'href="'+ href + ('0' + obj['date']).slice(-2) +'"': '')
+                // 현재 td의 내용 추가
+                var $td = $(td.replace('__REST__', tdClass)
+                    .replace('__TODAY__', (obj['today']) ? 'today' : '')
                     .replace('__DATE__', obj['date']));
+
+                // obj['date']가 빈 문자열이거나 공백인 경우, add-event 요소 숨기기
+                if (obj['date'] == '' || obj['date'] == ' ') {
+                    $td.find('.add-event').css('display', 'none');
+                }
+
+                // 해당 <tr>에 추가
+                $tr.append($td);
             });
+
+            // 테이블에 <tr> 추가
             $('#tbl-month').append($tr);
         }
-        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
+        try {
+            if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
+                $('.add-event').css('display', 'none');
+        } catch (e) {
             $('.add-event').css('display', 'none');
+        }
     }
 
     // scheduleDate를 hh:mm 형식으로 변환하는 함수
@@ -464,7 +498,10 @@
 
     // 모달 창 닫기
     $('.close').on('click', function() {
+        $('#event-title').val("");
+        $('#event-time').val("");
         $('#schedule-modal').fadeOut(); // 모달 창 닫기
+
     });
 
     // 스케줄 저장 이벤트는 페이지가 로드될 때 한 번만 등록
@@ -475,22 +512,28 @@
         var scheduleTime = $('#event-time').val();
         var scheduleDate = $('#modal-date').text();
 
-        var scheduleDto = {
-            scheduleDate: scheduleDate,
-            scheduleTime: scheduleTime,
-            scheduleName: scheduleName
-        };
+        if(scheduleName == '') {
+            alert("스케줄 명을 입력해주세요.");
+        } else if(scheduleTime == '') {
+            alert("스케줄 시간을 선택해주세요.");
+        } else {
+            var scheduleDto = {
+                scheduleDate: scheduleDate,
+                scheduleTime: scheduleTime,
+                scheduleName: scheduleName
+            };
 
-        // schedule 저장을 위한 API 호출
-        ajaxPostJsonCall('/schedule-save-web', JSON.stringify(scheduleDto), function(data) {
-            if (data.code === "0000") {
-                // 모달 창 닫기 및 폼 초기화
-                $('#schedule-modal').fadeOut();
-                $('#schedule-form')[0].reset(); // 폼 초기화
-            }
-        }, function(error) {
-            alert("An error occurred: " + error.message);
-        });
+            // schedule 저장을 위한 API 호출
+            ajaxPostJsonCall('/schedule/save', JSON.stringify(scheduleDto), function(data) {
+                if (data.code === "0000") {
+                    // 모달 창 닫기 및 폼 초기화
+                    $('#schedule-modal').fadeOut();
+                    $('#schedule-form')[0].reset(); // 폼 초기화
+                }
+            }, function(error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
     });
 
     // 날짜 버튼 클릭 시 일정 보여주는 모달
@@ -508,8 +551,11 @@
         // 모달에 날짜 설정
         $('#modal-date').text(finalDateText);
 
+        const param = {};
+        param["date"] = formattedDate;
+
         // 해당 날짜에 대한 일정을 불러와서 #event-list에 표시
-        ajaxJsonCall('/find-schedule-web?date=' + formattedDate, null, function(data) {
+        ajaxJsonCall('/schedule/find-by-date', param, function(data) {
             if (data.code === "0000") {
                 $('#event-list').empty();  // 기존 일정을 초기화
 
@@ -550,40 +596,37 @@
         $('#event-modal').fadeOut();
     });
 
-    // 모달 바깥 클릭 시 모달 닫기
-    $(window).on('click', function(event) {
-        if ($(event.target).is('#event-modal')) {
-            $('#event-modal').fadeOut();
-        }
-    });
-
     // 일정 클릭 시 수정 모달 띄우기
-    if(sessionFlag != null && sessionFlag != 'F')
-        $(document).on('click', '#event-list li', function (e) {
-            e.preventDefault();
+    try {
+        if(sessionFlag != null && sessionFlag != 'F')
+            $(document).on('click', '#event-list li', function (e) {
+                e.preventDefault();
 
-            // 일정확인 모델 닫기
-            $('#event-modal').fadeOut();
+                // 일정확인 모델 닫기
+                $('#event-modal').fadeOut();
 
-            // 일정 정보 가져오기
-            var scheduleText = $(this).text(); // 전체 텍스트 가져오기
-            var scheduleInfo = scheduleText.split(/\s+/, 1);
-            var scheduleTime = scheduleInfo[0]; // 시간
-            var scheduleName = scheduleText.substring(scheduleTime.length).trim(); // 시간 이후의 나머지 텍스트 가져오기 (앞뒤 공백 제거)
-            const scheduleId = $(this).data('schedule-id'); // 클릭한 리스트 항목의 scheduleId 가져오기
-            // 모달에 scheduleId를 저장
-            $('#edit-schedule-form').data('edit-schedule-id', scheduleId);
+                // 일정 정보 가져오기
+                var scheduleText = $(this).text(); // 전체 텍스트 가져오기
+                var scheduleInfo = scheduleText.split(/\s+/, 1);
+                var scheduleTime = scheduleInfo[0]; // 시간
+                var scheduleName = scheduleText.substring(scheduleTime.length).trim(); // 시간 이후의 나머지 텍스트 가져오기 (앞뒤 공백 제거)
+                const scheduleId = $(this).data('schedule-id'); // 클릭한 리스트 항목의 scheduleId 가져오기
+                // 모달에 scheduleId를 저장
+                $('#edit-schedule-form').data('edit-schedule-id', scheduleId);
 
 
-            // 수정 모달에 값 설정
-            $('#edit-schedule-modal-date').text($('#modal-date').text());
-            $('#edit-event-title').val(scheduleName);
-            $('#edit-event-time').val(scheduleTime);
-            $('#edit-schedule-id').val(scheduleId); // 숨겨진 ID 필드에 값 설정
+                // 수정 모달에 값 설정
+                $('#edit-schedule-modal-date').text($('#modal-date').text());
+                $('#edit-event-title').val(scheduleName);
+                $('#edit-event-time').val(scheduleTime);
+                $('#edit-schedule-id').val(scheduleId); // 숨겨진 ID 필드에 값 설정
 
-            // 수정 모달 열기
-            $('#edit-schedule-modal').fadeIn();
-        });
+                // 수정 모달 열기
+                $('#edit-schedule-modal').fadeIn();
+            });
+    } catch (e) {
+        $('#edit-schedule-modal').fadeOut();
+    }
 
     // 수정 모달 폼 제출 시
     $('#edit-schedule-form').on('submit', function (e) {
@@ -594,23 +637,29 @@
         var scheduleTime = $('#edit-event-time').val();
         var scheduleDate = convertDateFormat($('#edit-schedule-modal-date').text());
 
-        var scheduleDto = {
-            scheduleId: scheduleId, // 수정할 일정의 ID
-            scheduleDate: scheduleDate,
-            scheduleTime: scheduleTime,
-            scheduleName: scheduleName
-        };
+        if(scheduleName == '') {
+            alert("스케줄 명을 입력해주세요.");
+        } else if(scheduleTime == '') {
+            alert("스케줄 시간을 선택해주세요.");
+        } else {
+            var scheduleDto = {
+                scheduleId: scheduleId, // 수정할 일정의 ID
+                scheduleDate: scheduleDate,
+                scheduleTime: scheduleTime,
+                scheduleName: scheduleName
+            };
 
-        // schedule 수정 요청을 위한 API 호출
-        ajaxPostJsonCall('/modify-schedule-web', JSON.stringify(scheduleDto), function (data) {
-            if (data.code === "0000") {
-                // 모달 닫기 및 폼 초기화
-                $('#edit-schedule-modal').fadeOut();
-                $('#edit-schedule-form')[0].reset(); // 폼 초기화
-            }
-        }, function (error) {
-            alert("An error occurred: " + error.message);
-        });
+            // schedule 수정 요청을 위한 API 호출
+            ajaxPostJsonCall('/schedule/modify', JSON.stringify(scheduleDto), function (data) {
+                if (data.code === "0000") {
+                    // 모달 닫기 및 폼 초기화
+                    $('#edit-schedule-modal').fadeOut();
+                    $('#edit-schedule-form')[0].reset(); // 폼 초기화
+                }
+            }, function (error) {
+                alert("An error occurred: " + error.message);
+            });
+        }
     });
 
     // 수정 모달 닫기 버튼 클릭 시 모달 닫기
@@ -632,12 +681,12 @@
         if (scheduleId) {
             // 삭제 요청을 위한 API 호출
             if (confirm("정말로 스케줄을 삭제하시겠습니까?")) {
-                ajaxPostJsonCall('/delete-schedule-web?id=' + scheduleId, null, function (data) {
+                ajaxPostJsonCall('/schedule/delete?id=' + scheduleId, null, function (data) {
                     if (data.code === "0000") {
                         // 삭제 성공 시 모달 닫기 및 UI 업데이트
                         $('#edit-schedule-modal').fadeOut();
                         $('#edit-schedule-form')[0].reset(); // 폼 초기화
-                        alert("일정이 삭제되었습니다.");
+                        alert("스케줄이 삭제되었습니다.");
                         // 여기서 UI를 업데이트하여 삭제된 일정을 제거할 수 있습니다.
                     }
                 }, function (error) {
