@@ -525,7 +525,7 @@
         // 서버로 수정된 데이터를 전송 (Ajax)
         ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
             if (data.code === "0000") {
-                alert("글이 수정되었습니다.");
+                alert("포스트가 수정되었습니다.");
                 findCommunity(0);
 
                 // 제목과 내용을 다시 label로 변경
@@ -546,10 +546,10 @@
 
     // 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
-        if (selectedCommunityId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
+        if (selectedCommunityId && confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
             ajaxPostJsonCall('/community/delete?id=' + selectedCommunityId, null, function (data) {
                 if (data.code === "0000") {
-                    alert("글이 삭제되었습니다.");
+                    alert("포스트가 삭제되었습니다.");
                     $('#detailModal').fadeOut();
                     findCommunity(0);
                 }
