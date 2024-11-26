@@ -93,7 +93,7 @@
                 <input id="loginBtn" type="submit" value="Login">
             </form>
         </div>
-        <button class="sign-up" onclick="location.href='/sign-up'">아직 회원이 아니신가요?</button>
+        <button class="sign-up" onclick="location.href='/sign-up-web'">아직 회원이 아니신가요?</button>
     </div>
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
@@ -113,11 +113,14 @@
                 alert("비밀번호를 입력해주세요.");
                 return false;
             } else {
-                ajaxJsonCall('/log-in-result?email=' + encodeURIComponent(email) + '&password=' + password, null, function (data) {
+                const param = {};
+                param["email"] = email;
+                param["password"] = password;
+                ajaxJsonCall('/log-in-result', param, function (data) {
                     if (data.code === "0000") {
                         location.href = '/';
                     } else if (data.code === "9999") {
-                        alert("이메일이나 비밀번호를 다시 확인해주세요.")
+                        alert("이메일 또는 비밀번호를 다시 확인해주세요.")
                     }
                 }, function (error) {
                     alert("An error occurred: " + error.message);

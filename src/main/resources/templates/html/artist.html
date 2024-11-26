@@ -238,15 +238,7 @@
             color: darkgray;
         }
 
-        #commentEdit:hover {
-            color: black;
-        }
-
-        #commentEditCancel:hover {
-            color: black;
-        }
-
-        #commentEditSave:hover {
+        #commentEdit:hover, #commentEditCancel:hover, #commentEditSave:hover {
             color: black;
         }
 
@@ -272,7 +264,7 @@
             <form id="postForm" enctype="multipart/form-data" method="post">
                 <textarea id="postContent" rows="4" style="width: 100%;" placeholder="내용을 입력하세요" name="artistContent"></textarea>
                 <br>
-                <label for="uploadPhoto">사진 추가:</label>
+                <label for="uploadPhoto">사진: </label>
                 <input type="file" id="uploadPhoto" accept="image/*" name="artistImage">
                 <br><br>
                 <button type="submit" class="submit-btn">게시하기</button>
@@ -320,13 +312,13 @@
 <script>
     var selectedArtistId
     window.onload = function() {
-        fetchAllArtists();
+        fetchAllArtistsPost();
         checkSessionFlag();
     };
 
     // sessionFlag 확인 후 버튼 표시 여부 결정
     function checkSessionFlag() {
-        if (typeof sessionFlag !== "undefined" && sessionFlag !== null) {
+        if (sessionFlag !== "undefined" && sessionFlag !== null) {
             if (sessionFlag === 'F') {
                 document.getElementById('write-btn').style.display = 'none';
             } else {
@@ -338,7 +330,7 @@
     }
 
     // 전체 아티스트를 조회하는 함수
-    function fetchAllArtists() {
+    function fetchAllArtistsPost() {
         fetch('/artist/find-all')
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
@@ -357,8 +349,9 @@
     // 아티스트 그리드를 표시하는 함수
     function displayArtistGrid(artists) {
         const artistGrid = document.getElementById('artistGrid');
-        artistGrid.innerHTML = ''; // Clear existing content
+        artistGrid.innerHTML = ''; // 기존 내용 삭제
 
+        // 최신 글이 앞쪽에 오도록 정렬
         const sortedArtists = artists.sort((a, b) => new Date(b.updateDate) - new Date(a.updateDate));
 
         sortedArtists.forEach(artist => {
@@ -368,11 +361,11 @@
             const img = document.createElement('img');
             img.setAttribute('artist-id', artist.artistId);
 
-            if (artist.artistImage) {
+            if (artist.artistImage) {   // 사진이 있는 경우
                 img.src = 'data:image/jpeg;base64,' + artist.artistImage;
                 img.style.display = 'block';
                 gridItem.appendChild(img);
-            } else {
+            } else {    // 글만 있는 경우
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'caption';
                 const contentText = artist.artistContent.replace(/<br\s*\/?>/g, '\n');
@@ -492,7 +485,9 @@
         var commentsContent = $('#editCommentText').val();
         commentsContent = commentsContent.replace(/\n/g, '<br>');
 
-        if(commentsContent != "" || commentsContent != null) {
+        if(commentsContent == '') {
+            alert('수정할 댓글을 작성해주세요.');
+        } else {
             var commentsDto = {
                 commentsId: commentId,
                 commentsContent: commentsContent,
@@ -553,6 +548,7 @@
             editContent.value = artist.artistContent.replace(/<br\s*\/?>/gi, '\n');
             editPhoto.style.display = "block"; // 사진 수정 input 표시
             saveButton.style.display = "block";
+            deleteButton.style.display = "none";
             document.getElementById("detailContent").style.display = "none";
         };
 
@@ -587,8 +583,9 @@
                     })
                     .then(data => {
                         if (data.code === "0000") {
-                            alert("수정되었습니다.");
-                            location.reload();
+                            alert("포스트가 수정되었습니다.");
+                            fetchAllArtistsPost()
+                            openDetailModal(artist.artistId)
                         }
                     })
                     .catch(error => console.error('Error updating artist:', error));
@@ -596,7 +593,7 @@
         }
 
         deleteButton.onclick = function() {
-            if (confirm("정말로 삭제하시겠습니까?")) {
+            if (confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
                 fetch(`/artist/delete?id=${artist.artistId}`, { method: 'POST' })
                     .then(response => {
                         if (!response.ok) throw new Error("HTTP status " + response.status);
@@ -604,9 +601,9 @@
                     })
                     .then(data => {
                         if (data.code === "0000") {
-                            alert("삭제되었습니다.");
+                            alert("포스트가 삭제되었습니다.");
                             document.getElementById("detailModal").style.display = "none";
-                            fetchAllArtists();
+                            fetchAllArtistsPost();
                         }
                     })
                     .catch(error => console.error('Error deleting artist:', error));
@@ -617,7 +614,7 @@
         commentsSave.onclick = function() {
             var commentsContent = $('#commentInput').val();
             commentsContent = commentsContent.replace(/\n/g, '<br>');
-            if(commentsContent != "" || commentsContent != null) {
+            if(commentsContent != '') {
                 var commentsDto = {
                     commentsContent: commentsContent,
                     author: sessionEmail,
@@ -660,17 +657,17 @@
         var fileInput = document.getElementById("uploadPhoto");
         var file = fileInput.files[0];
 
-        var confirmPost = confirm("정말로 게시하시겠습니까?");
-        if (confirmPost) {
-            if((content == null || content == "") && (fileInput == null || file == null))
-                alert("내용을 입력해주세요.");
-            else {
+        if((content == null || content == "") && (fileInput == null || file == null))
+            alert("내용을 입력해주세요.");
+        else {
+            var confirmPost = confirm("정말로 게시하시겠습니까?");
+            if (confirmPost) {
                 var artistDto = {
                     artistContent: content
                 };
 
                 var formData = new FormData();
-                formData.append("artistDto", new Blob([JSON.stringify(artistDto)], { type: "application/json" }));
+                formData.append("artistDto", new Blob([JSON.stringify(artistDto)], {type: "application/json"}));
                 if (file) {
                     formData.append("artistImage", file);
                 } else

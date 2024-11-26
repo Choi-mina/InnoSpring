@@ -31,12 +31,14 @@ public class MemberController {
     public ResultEntity memSignUp(@RequestBody MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
 
+        // 1 -> "F", 2 -> "A", 3 -> "M"
+        // 기본값 : 1
         memberDto.setFlag(memberDto.getFlag().equals("1") ? "F" : memberDto.getFlag().equals("2") ? "A" : "M" );
         try{
             if(!memValid(memberDto.getEmail())) {
                 memberService.memSignUp(memberDto);
 
-                // 회원가입 및 로그인 성공 반환
+                // 회원가입 성공 반환
                 result.setCode("0000");
                 result.setMessage("Sign-up Success");
                 log.info("Sign-up Success");
@@ -120,7 +122,7 @@ public class MemberController {
             }
             log.info("Find By Email Success");
         } catch (Exception e) {
-            log.error("Find By Phone Fail");
+            log.error("Find By Email Fail");
             return new ResultEntity(e);
         }
         return result;
@@ -156,46 +158,6 @@ public class MemberController {
             log.info("Member Delete Success");
         } catch (Exception e) {
             log.error("Member Delete Fail");
-            return new ResultEntity(e);
-        }
-        return result;
-    }
-
-    // 내 글 조회 API
-    @GetMapping("/find-my-community")
-    public ResultEntity findMyCommunity(@RequestParam("email") String email, Pageable pageable) {
-        ResultEntity result = new ResultEntity();
-        try {
-            Member member = memberService.findByEmailEt(email);
-            Page<CommunityDto> communityDtos = communityService.findByMemberId(member,pageable);
-
-            result.setCode("0000");
-            result.setMessage("Find My Community Success");
-            result.setData(communityDtos);
-
-            log.info("Find My Community Success");
-        } catch (Exception e) {
-            log.error("Find My Community Fail");
-            return new ResultEntity(e);
-        }
-        return result;
-    }
-
-    // 내 댓글 조회 API
-    @GetMapping("/find-my-comment")
-    public ResultEntity findMyCommment(@RequestParam("email") String email, @RequestParam("type") String postType, Pageable pageable) {
-        ResultEntity result = new ResultEntity();
-        try {
-            Member member = memberService.findByEmailEt(email);
-            Page<CommentsDto> commentsDtos = commentsService.findByMemberId(member, postType, pageable);
-
-            result.setCode("0000");
-            result.setMessage("Find My Comment Success");
-            result.setData(commentsDtos);
-
-            log.info("Find My Comment Success");
-        } catch (Exception e) {
-            log.error("Find My Comment Fail");
             return new ResultEntity(e);
         }
         return result;

@@ -82,6 +82,26 @@ public class CommunityController {
         return result;
     }
 
+    // 내 글 조회 API
+    @GetMapping("/find-my-community")
+    public ResultEntity findMyCommunity(@RequestParam("email") String email, Pageable pageable) {
+        ResultEntity result = new ResultEntity();
+        try {
+            Member member = memberService.findByEmailEt(email);
+            Page<CommunityDto> communityDtos = communityService.findByMemberId(member,pageable);
+
+            result.setCode("0000");
+            result.setMessage("Find My Community Success");
+            result.setData(communityDtos);
+
+            log.info("Find My Community Success");
+        } catch (Exception e) {
+            log.error("Find My Community Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
     @PostMapping("/modify")
     public ResultEntity modifyCommunity(@RequestBody CommunityDto communityDto) {
         ResultEntity result = new ResultEntity();

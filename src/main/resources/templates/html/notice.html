@@ -246,7 +246,6 @@
         </tr>
         </thead>
         <tbody>
-        <!-- 데이터가 여기에 추가됩니다. -->
         </tbody>
     </table>
     <div id="pagination-container">
@@ -357,7 +356,7 @@
 
     // 검색 버튼 이벤트
     $("#search-btn").click(function() {
-        handleSearch(currentPage);
+        handleSearch(0);
 
     });
 
@@ -383,18 +382,26 @@
         var noticeContent = $('#content').val();
         noticeContent = noticeContent.replace(/\n/g, '<br>');
 
+        if(noticeTitle == null || noticeTitle == '') {
+            alert("제목을 입력해주세요.");
+            return false;
+        } else if(noticeContent == null || noticeContent == '') {
+            alert("내용을 입력해주세요.");
+            return false;
+        }
+
         var noticeDto = {
             noticeTitle: noticeTitle,
             noticeContent: noticeContent
         };
 
         // 공지사항 저장을 위한 API 호출
-        ajaxPostJsonCall('/save-notice-web', JSON.stringify(noticeDto), function(data) {
+        ajaxPostJsonCall('/notice/save', JSON.stringify(noticeDto), function(data) {
             if (data.code === "0000") {
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
                 $('#writeForm')[0].reset(); // 폼 초기화
-                findNotice(0);
+                location.reload();
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -413,7 +420,7 @@
                     }
                 } else {
                     alert("로그인을 해주세요.");
-                    location.href = '/login';
+                    location.href = '/login-web';
                 }
             });
         });
@@ -421,7 +428,9 @@
 
     // 공지사항 상세 정보 가져오기
     function getNoticeDetail(noticeId) {
-        ajaxJsonCall('/find-by-id-notice-web?id='+noticeId, null, function(data) {
+        const param = {};
+        param["id"] = noticeId;
+        ajaxJsonCall('/notice/find-by-id', param, function(data) {
             if (data.code === "0000") {
                 $('#detail-title').text(data.data.noticeTitle);
                 $('#detail-content').html(data.data.noticeContent);
@@ -476,6 +485,14 @@
         var updatedContent = $('#edit-content').val();
         updatedContent = updatedContent.replace(/\n/g, '<br>');
 
+        if(updatedTitle == null || updatedTitle == '') {
+            alert("제목을 입력해주세요.");
+            return false;
+        } else if(updatedContent == null || updatedContent == '') {
+            alert("내용을 입력해주세요.");
+            return false;
+        }
+
         var noticeDto = {
             noticeId: selectedNoticeId,
             noticeTitle: updatedTitle,
@@ -483,19 +500,21 @@
         };
 
         // 서버로 수정된 데이터를 전송 (Ajax)
-        ajaxPostJsonCall('/modify-notice-web', JSON.stringify(noticeDto), function (data) {
+        ajaxPostJsonCall('/notice/modify', JSON.stringify(noticeDto), function (data) {
             if (data.code === "0000") {
                 alert("공지사항이 수정되었습니다.");
                 findNotice(0);
 
                 // 제목과 내용을 다시 label로 변경
-                $('#label-title').html('제목: <span id="detail-title">' + updatedTitle + '</span>');
-                $('#label-content').html('내용: <span id="detail-content">' + updatedContent + '</span>');
+                $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
+                $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
+                getNoticeDetail(selectedNoticeId);
 
                 // 수정 모드 해제
                 isEditing = false;
                 $('#save-btn').hide();
                 $('#edit-btn').show();
+                $('#delete-btn').show();
             }
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -505,7 +524,7 @@
     // 공지사항 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
         if (selectedNoticeId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
-            ajaxPostJsonCall('/delete-notice-web?id=' + selectedNoticeId, null, function (data) {
+            ajaxPostJsonCall('/notice/delete?id=' + selectedNoticeId, null, function (data) {
                 if (data.code === "0000") {
                     alert("공지사항이 삭제되었습니다.");
                     $('#detailModal').fadeOut();
@@ -529,7 +548,10 @@
 
     // 모든 공지사항 조회
     function findNotice(page) {
-        ajaxJsonCall('/find-all-notice-web?page=' + page + '&size=' + pageSize, null, function (data) {
+        const param = {};
+        param["page"] = page;
+        param["size"] = pageSize;
+        ajaxJsonCall('/notice/find-all', param, function (data) {
             drawTable(data);
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -537,7 +559,6 @@
     }
 
     function drawTable(data) {
-        console.log(data);
         // 테이블의 행 개수
         var rowCount = table.rows.length;
 
@@ -631,7 +652,7 @@
                 param["title"] = searchText;
                 param["page"] = page;
                 param["size"] = pageSize;
-                ajaxJsonCall('/find-by-title-notice-web', param, function(data) {
+                ajaxJsonCall('/notice/find-by-title', param, function(data) {
                     drawTable(data);
                 });
             }
@@ -645,7 +666,7 @@
                 params["date2"] = searchText2;
                 params["page"] = page;
                 params["size"] = pageSize;
-                ajaxJsonCall('/find-by-date-notice-web', params, function(data) {
+                ajaxJsonCall('/notice/find-by-date', params, function(data) {
                     drawTable(data);
                 });
             }

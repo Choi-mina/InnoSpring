@@ -244,7 +244,6 @@
         </tr>
         </thead>
         <tbody>
-        <!-- 데이터가 여기에 추가됩니다. -->
         </tbody>
     </table>
     <div id="pagination-container">
@@ -309,7 +308,8 @@
 <script>
     var table = document.getElementById("community-table");
     var selectedCommunityId = null;
-    var isEditing = false;
+    var postIsEditing = false;  // 글이 수정중인지 확인하는 boolean타입 변수
+    var commentsIsEditing = false;   // 다른 댓글이 수정중 상태인지 확인
     var currentPage = 0;
     var pageSize = 10; // 페이지당 표시할 게시글 수
 
@@ -339,13 +339,13 @@
     });
 
     // 모달 관련 요소들 가져오기
-    var modal = document.getElementById("writeModal");
+    var writeModal = document.getElementById("writeModal");
     var btn = document.getElementById("write-btn");
     var span = document.getElementsByClassName("close")[0];
 
     // 글작성 버튼 클릭 시 모달 열기
     btn.onclick = function() {
-        modal.style.display = "block";
+        writeModal.style.display = "block";
     }
 
     // X 버튼 클릭 시 모달 닫기
@@ -360,6 +360,14 @@
         var communityContent = $('#content').val();
         communityContent = communityContent.replace(/\n/g, '<br>');
 
+        if(communityTitle == null || communityTitle == '') {
+            alert("제목을 입력해주세요.");
+            return false;
+        } else if(communityContent == null || communityContent == '') {
+            alert("내용을 입력해주세요.");
+            return false;
+        }
+
         var communityDto = {
             communityTitle: communityTitle,
             communityContent: communityContent,
@@ -372,7 +380,7 @@
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
                 $('#writeForm')[0].reset(); // 폼 초기화
-                findCommunity(0);
+                location.reload();
             }
         }, function(error) {
             alert("An error occurred: " + error.message);
@@ -391,7 +399,7 @@
                     }
                 } else {
                     alert("로그인을 해주세요.");
-                    location.href = '/login';
+                    location.href = '/login-web';
                 }
             });
         });
@@ -399,7 +407,9 @@
 
     // community 글 상세 정보 가져오기
     function getCommunityDetail(communityId) {
-        ajaxJsonCall('/community/find-by-id?id='+communityId, null, function(data) {
+        const param = {};
+        param["id"] = communityId;
+        ajaxJsonCall('/community/find-by-id', param, function(data) {
             if (data.code === "0000") {
                 $('#detail-title').text(data.data.communityTitle);
                 $('#detail-content').html(data.data.communityContent);
@@ -471,8 +481,8 @@
 
     // 수정 버튼 클릭 시
     $('#edit-btn').click(function () {
-        if (!isEditing) {
-            isEditing = true;
+        if (!postIsEditing) {
+            postIsEditing = true;
 
             // 제목과 내용을 input과 textarea로 변경
             var titleText = $('#detail-title').text();
@@ -497,6 +507,14 @@
         var author = $('#detail-author').text();
         author = author.substring(5,author.length);
 
+        if(updatedTitle == null || updatedTitle == '') {
+            alert("제목을 입력해주세요.");
+            return false;
+        } else if(updatedContent == null || updatedContent == '') {
+            alert("내용을 입력해주세요.");
+            return false;
+        }
+
         var communityDto = {
             communityId: selectedCommunityId,
             communityTitle: updatedTitle,
@@ -507,15 +525,16 @@
         // 서버로 수정된 데이터를 전송 (Ajax)
         ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
             if (data.code === "0000") {
-                alert("글이 수정되었습니다.");
+                alert("포스트가 수정되었습니다.");
                 findCommunity(0);
 
                 // 제목과 내용을 다시 label로 변경
                 $('#label-title').html('<span id="detail-title">' + updatedTitle + '</span>');
                 $('#label-content').html('<span id="detail-content">' + updatedContent + '</span>');
+                getCommunityDetail(selectedCommunityId);
 
                 // 수정 모드 해제
-                isEditing = false;
+                postIsEditing = false;
                 $('#save-btn').hide();
                 $('#edit-btn').show();
                 $('#delete-btn').show();
@@ -527,10 +546,10 @@
 
     // 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
-        if (selectedCommunityId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
+        if (selectedCommunityId && confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
             ajaxPostJsonCall('/community/delete?id=' + selectedCommunityId, null, function (data) {
                 if (data.code === "0000") {
-                    alert("글이 삭제되었습니다.");
+                    alert("포스트가 삭제되었습니다.");
                     $('#detailModal').fadeOut();
                     findCommunity(0);
                 }
@@ -544,7 +563,7 @@
     $('#submitComment').click(function () {
         var commentsContent = $('#commentInput').val();
         commentsContent = commentsContent.replace(/\n/g, '<br>');
-        if(commentsContent != "" || commentsContent != null) {
+        if(commentsContent != '') {
             var commentsDto = {
                 commentsContent: commentsContent,
                 author: sessionEmail,
@@ -562,13 +581,10 @@
         }
     });
 
-    // 다른 댓글이 수정중 상태인지 확인
-    var editingState = false;
-
     // 이벤트 위임으로 commentList 요소의 수정 버튼 클릭 시 처리
     $('#commentList').on('click', '#commentEdit', function () {
-        if(editingState == false) {
-            editingState = true;
+        if(commentsIsEditing == false) {
+            commentsIsEditing = true;
             var commentElement = $(this).closest('.comment');
             var originalContent = commentElement.find('.comment-text').html().replace(/<br\s*\/?>/gi, '\n'); // <br>을 줄바꿈으로 변환
 
@@ -583,7 +599,7 @@
 
     // 댓글 수정 -> 취소 버튼 클릭
     $('#commentList').on('click', '#commentEditCancel', function() {
-        editingState = false;
+        commentsIsEditing = false;
         getCommunityDetail(selectedCommunityId);
     });
 
@@ -596,8 +612,9 @@
         // 댓글 입력 값 가져오기 및 개행 처리
         var commentsContent = $('#editCommentText').val();
         commentsContent = commentsContent.replace(/\n/g, '<br>');
-
-        if(commentsContent != "" || commentsContent != null) {
+        if(commentsContent == '') {
+            alert('수정할 댓글을 작성해주세요.');
+        } else {
             var commentsDto = {
                 commentsId: commentId,
                 commentsContent: commentsContent,
@@ -608,7 +625,7 @@
             ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 수정되었습니다.");
-                    editingState = false;
+                    commentsIsEditing = false;
                     getCommunityDetail(selectedCommunityId);
                     $('#commentInput').val("");
                 }
@@ -649,7 +666,10 @@
 
     // 모든 글 조회
     function findCommunity(page) {
-        ajaxJsonCall('/community-find-web?page=' + page + '&size=' + pageSize, null, function (data) {
+        const param = {};
+        param["page"] = page;
+        param["size"] = pageSize;
+        ajaxJsonCall('/community/find-all', param, function (data) {
             drawTable(data);
         }, function (error) {
             alert("An error occurred: " + error.message);
@@ -709,14 +729,14 @@
         $('#writeForm')[0].reset();
 
         // 모달 닫기
-        modal.style.display = "none";
+        writeModal.style.display = "none";
     }
 
     // 모달 닫기 시 호출되는 함수 (수정 상태 복구)
     function closeDetailModal() {
-        editingState = false;
+        commentsIsEditing = false;
         // 수정 상태 초기화
-        if (isEditing) {
+        if (postIsEditing) {
             // 현재 입력 중이던 내용을 다시 label로 복구
             var titleText = $('#edit-title').val();
             var contentText = $('#edit-content').val();
@@ -729,7 +749,7 @@
             $('#edit-btn').show();
             $('#delete-btn').show();
 
-            isEditing = false;
+            postIsEditing = false;
         }
         $('#commentInput').val("");
 

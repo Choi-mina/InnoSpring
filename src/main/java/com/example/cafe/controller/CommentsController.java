@@ -12,6 +12,8 @@ import com.example.cafe.entity.ResultEntity;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -96,6 +98,26 @@ public class CommentsController {
             return new ResultEntity(e);
         }
 
+        return result;
+    }
+
+    // 내 댓글 조회 API
+    @GetMapping("/find-my-comment")
+    public ResultEntity findMyCommment(@RequestParam("email") String email, @RequestParam("type") String postType, Pageable pageable) {
+        ResultEntity result = new ResultEntity();
+        try {
+            Member member = memberService.findByEmailEt(email);
+            Page<CommentsDto> commentsDtos = commentsService.findByMemberId(member, postType, pageable);
+
+            result.setCode("0000");
+            result.setMessage("Find My Comment Success");
+            result.setData(commentsDtos);
+
+            log.info("Find My Comment Success");
+        } catch (Exception e) {
+            log.error("Find My Comment Fail");
+            return new ResultEntity(e);
+        }
         return result;
     }
 
