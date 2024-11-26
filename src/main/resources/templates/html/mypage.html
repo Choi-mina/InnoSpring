@@ -370,11 +370,16 @@
 
       const email = sessionEmail;
       const password = document.getElementById("password").value;
-
-      // 비밀번호 일치 여부 조회 API 호출
-      ajaxJsonCall('/member/login-in?email=' + email + '&password=' + password, null, function(data) {
-        if (data.code === "0000") { // 비밀번호가 일치하다면 개인정보 수정을 위한 form 생성
-          document.getElementById("content").innerHTML = `
+      if(password == '')
+        alert("비밀번호를 입력해주세요.");
+      else {
+        // 비밀번호 일치 여부 조회 API 호출
+        const params = {};
+        params["email"] = email;
+        params["password"] = password;
+        ajaxJsonCall('/member/login-in', params, function(data) {
+          if (data.code === "0000") { // 비밀번호가 일치하다면 개인정보 수정을 위한 form 생성
+            document.getElementById("content").innerHTML = `
                 <h2>회원정보 수정</h2>
                 <form id="info-modify-form">
                   <div style="display: none">
@@ -404,14 +409,15 @@
                 </form>
               `;
 
-          // '수정' 버튼 클릭 시 이벤트 리스너
-          document.getElementById("info-modify-form").addEventListener("submit", validateForm);
-        } else {
-          alert("비밀번호를 다시 확인해주세요.");
-        }
-      }, function(error) {
-        alert("An error occurred: " + error.message);
-      });
+            // '수정' 버튼 클릭 시 이벤트 리스너
+            document.getElementById("info-modify-form").addEventListener("submit", validateForm);
+          } else {
+            alert("비밀번호를 다시 확인해주세요.");
+          }
+        }, function(error) {
+          alert("An error occurred: " + error.message);
+        });
+      }
     });
   });
 
@@ -437,7 +443,11 @@
 
   // 내 글 보기의 테이블을 그리는 함수
   function drawMyPostsTable(page) {
-    ajaxJsonCall('/community/find-my-community?email=' + sessionEmail + '&page=' + page + '&size=' + myPostsPageSize, null, function(data) {
+    const params = {};
+    params["email"] = sessionEmail;
+    params["page"] = page;
+    params["size"] = myPostsPageSize;
+    ajaxJsonCall('/community/find-my-community', params, function(data) {
       if (data.code === "0000" && data.data.content.length > 0) {
         document.getElementById("content").innerHTML = `
         <h2>내 포스트</h2>
@@ -527,7 +537,12 @@
 
   // 내 댓글 테이블 그리기 함수
   function drawMyCommentsTable(type, page) {
-    ajaxJsonCall('/comments/find-my-comment?email=' + sessionEmail + '&type=' + type + '&page=' + page + '&size=' + myCommentsPageSize, null, function(data) {
+    const params = {};
+    params["email"] = sessionEmail;
+    params["type"] = type;
+    params["page"] = page;
+    params["size"] = myCommentsPageSize;
+    ajaxJsonCall('/comments/find-my-comment', params, function(data) {
       if (data.code === "0000" && data.data.content.length > 0) {
         document.getElementById("comments-content").innerHTML = `
           <h3>${type === "C" ? "내 커뮤니티 댓글" : "내 아티스트 댓글"}</h3>
@@ -603,11 +618,11 @@
       $('#pagination-container').css('display', 'none');
     // 이전 버튼은 첫 페이지일 때 비활성화
     $('#post-prev-page-btn').prop('disabled', myPostsCurrentPage === 0);
-    $('#comments-prev-page-btn').prop('disabled', myPostsCurrentPage === 0);
+    $('#comments-prev-page-btn').prop('disabled', myCommentsCurrentPage === 0);
 
     // 다음 버튼은 마지막 페이지일 때 비활성화
     $('#post-next-page-btn').prop('disabled', myPostsCurrentPage >= totalPages - 1);
-    $('#comments-next-page-btn').prop('disabled', myPostsCurrentPage >= totalPages - 1);
+    $('#comments-next-page-btn').prop('disabled', myCommentsCurrentPage >= totalPages - 1);
   }
 
   // 회원 탈퇴 이벤트
@@ -697,9 +712,12 @@
     return dateString;
   }
 
-  // 내 글 상세보기
+  // 내 포스트 상세보기
   function getMyPostDetail(communityId) {
-    ajaxJsonCall('/community/find-by-id?id='+communityId, null, function(data) {
+    const param = {};
+    param["id"] = communityId;
+
+    ajaxJsonCall('/community/find-by-id', param, function(data) {
       if (data.code === "0000") {
         $('#my-post-detail-title').text(data.data.communityTitle);
         $('#my-post-detail-content').html(data.data.communityContent);
@@ -738,7 +756,7 @@
     });
   }
 
-  // 내 글 상세보기 수정 버튼 클릭 시
+  // 내 포스트 상세보기 수정 버튼 클릭 시
   $('#my-post-edit-btn').click(function () {
     if (!myPostIsEditing) {
       myPostIsEditing = true;
@@ -758,7 +776,7 @@
     }
   });
 
-  // 내 글 상세보기 저장 버튼 클릭 시
+  // 내 포스트 상세보기 저장 버튼 클릭 시
   $('#my-post-save-btn').click(function () {
     var updatedTitle = $('#edit-title').val();
     var updatedContent = $('#edit-content').val();
@@ -766,37 +784,43 @@
     var author = $('#my-post-detail-author').text();
     author = author.substring(5,author.length);
 
-    var communityDto = {
-      communityId: selectedPostId,
-      communityTitle: updatedTitle,
-      communityContent: updatedContent,
-      author: author
-    };
+    if(updatedTitle == '')
+      alert("제목을 입력해주세요.");
+    else if(updatedContent == '')
+      alert("내용을 입력해주세요.")
+    else {
+      var communityDto = {
+        communityId: selectedPostId,
+        communityTitle: updatedTitle,
+        communityContent: updatedContent,
+        author: author
+      };
 
-    // 서버로 수정된 데이터를 전송 (Ajax)
-    ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
-      if (data.code === "0000") {
-        alert("포스트가 수정되었습니다.");
-        drawMyPostsTable(0);
+      // 서버로 수정된 데이터를 전송 (Ajax)
+      ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
+        if (data.code === "0000") {
+          alert("포스트가 수정되었습니다.");
+          drawMyPostsTable(0);
 
-        // 제목과 내용을 다시 label로 변경
-        $('#label-title').html('<span id="my-post-detail-title">' + updatedTitle + '</span>');
-        $('#label-content').html('<span id="my-post-detail-content">' + updatedContent + '</span>');
+          // 제목과 내용을 다시 label로 변경
+          $('#label-title').html('<span id="my-post-detail-title">' + updatedTitle + '</span>');
+          $('#label-content').html('<span id="my-post-detail-content">' + updatedContent + '</span>');
 
-        // 수정 모드 해제
-        myPostIsEditing = false;
-        $('#my-post-save-btn').hide();
-        $('#my-post-edit-btn').show();
-        $('#my-post-delete-btn').show();
-      }
-    }, function (error) {
-      alert("An error occurred: " + error.message);
-    });
+          // 수정 모드 해제
+          myPostIsEditing = false;
+          $('#my-post-save-btn').hide();
+          $('#my-post-edit-btn').show();
+          $('#my-post-delete-btn').show();
+        }
+      }, function (error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
   });
 
-  // 내 글 상세보기 삭제 버튼 클릭 시
+  // 내 포스트 상세보기 삭제 버튼 클릭 시
   $('#my-post-delete-btn').click(function () {
-    if (selectedPostId && confirm("정말로 이 글을 삭제하시겠습니까?")) {
+    if (selectedPostId && confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
       ajaxPostJsonCall('/community/delete?id=' + selectedPostId, null, function (data) {
         if (data.code === "0000") {
           alert("포스트가 삭제되었습니다.");
@@ -815,7 +839,11 @@
   var selectedCommunityId;
   // 커뮤니티 글 댓글 상세보기 모달
   function communityDetailComment(commentsId, type) {
-    ajaxJsonCall('/comments/find-by-id?id='+commentsId+'&type='+type, null, function(data) {
+    const params = {};
+    params["id"] = commentsId;
+    params["type"] = type;
+
+    ajaxJsonCall('/comments/find-by-id', params, function(data) {
       if (data.code === "0000") {
         selectedCommunityId = data.data.communityId;
         $('#detail-Ctitle').text(data.data.communityTitle);
@@ -901,7 +929,9 @@
     var commentsContent = $('#cEditCommentText').val();
     commentsContent = commentsContent.replace(/\n/g, '<br>');
 
-    if(commentsContent != "" || commentsContent != null) {
+    if(commentsContent == '')
+      alert("수정할 댓글을 입력해주세요.");
+    else {
       var commentsDto = {
         commentsId: commentId,
         commentsContent: commentsContent,
@@ -1048,7 +1078,9 @@
     var commentsContent = $('#aEditCommentText').val();
     commentsContent = commentsContent.replace(/\n/g, '<br>');
 
-    if(commentsContent != "" || commentsContent != null) {
+    if(commentsContent == '')
+      alert("수정할 댓글을 입력해주세요.");
+    else {
       var commentsDto = {
         commentsId: commentId,
         commentsContent: commentsContent,
