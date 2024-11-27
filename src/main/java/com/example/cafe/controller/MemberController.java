@@ -106,8 +106,30 @@ public class MemberController {
         return result;
     }
 
+    @GetMapping("/find-id")
+    public ResultEntity findEmail(@RequestParam("name") String name, @RequestParam("phone") String phoneNum) {
+        ResultEntity result = new ResultEntity();
+        try {
+            MemberDto member = memberService.findId(name, phoneNum);
+
+            if(member != null) {
+                result.setCode("0000");
+                result.setMessage("Find By Phone Success");
+                result.setData(member);
+            } else {
+                result.setCode("0001");
+                result.setMessage("No Data");
+            }
+            log.info("Find By Phone Success");
+        } catch (Exception e) {
+            log.error("Find By Phone Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
     @GetMapping("/find-by-email")
-    public ResultEntity findByEmail(@RequestParam("email") String email) {
+    public ResultEntity findPassword(@RequestParam("email") String email) {
         ResultEntity result = new ResultEntity();
         try {
             MemberDto member = memberService.findByEmail(email);
