@@ -182,7 +182,6 @@
 
     const modal =  document.getElementById('pw-update');
     const createDate = modal.getAttribute('data-createDate');
-    console.log(createDate);
 
     // 새 비밀번호와 확인 비밀번호 값 가져오기
     const newPassword = document.getElementById('newPassword').value;
@@ -207,7 +206,6 @@
         flag: data.flag,
         createDate: createDate
       };
-      console.log(memberDto);
 
       ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
         if (data.code === "0000") {
