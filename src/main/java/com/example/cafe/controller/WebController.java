@@ -77,13 +77,22 @@ public class WebController {
         try {
             resultMap = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {});
 
+            // 이메일 마스킹 처리
+            String email = (String) resultMap.get("email");
+            String[] parts = email.split("@");
+            String localPart = parts[0];
+            String domainPart = parts[1];
+            String maskedLocal = localPart.length() <= 4
+                    ? localPart.charAt(0) + "**" + localPart.charAt(localPart.length() - 1)
+                    : localPart.substring(0, 2) + "*".repeat(localPart.length() - 4) + localPart.substring(localPart.length() - 2);
+            email = maskedLocal + "@" + domainPart;
+
+
             // 모델에 데이터 추가
             String type = (String) resultMap.get("type");
             model.addAttribute("type", type);
-            model.addAttribute("memCreateDate", resultMap.get("createDate"));
-            resultMap.remove("createDate");
-            resultMap.remove("updateDate");
-            model.addAttribute("result", resultMap);
+            model.addAttribute("email", email);
+            model.addAttribute("id", resultMap.get("memId"));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -185,6 +185,34 @@ public class MemberController {
         return result;
     }
 
+    @PostMapping("/change-pw")
+    public ResultEntity changePw(@RequestBody MemberDto memberDto) {
+        ResultEntity result = new ResultEntity();
+        try {
+            MemberDto memberDto1 = memberService.findById((long) memberDto.getMemId());
+            memberDto =  MemberDto.builder()
+                    .memId(memberDto.getMemId())
+                    .userName(memberDto1.getUserName())
+                    .phoneNum(memberDto1.getPhoneNum())
+                    .email(memberDto1.getEmail())
+                    .password(memberDto.getPassword())
+                    .createDate(memberDto1.getCreateDate())
+                    .flag(memberDto1.getFlag())
+                    .build();
+
+            memberService.modifyMember(memberDto);
+
+            result.setCode("0000");
+            result.setMessage("Change Password Success");
+
+            log.info("Change Password Success");
+        } catch (Exception e) {
+            log.error("Change Password Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
     // 회원이 존재하는지 validation
     public Boolean memValid(String email) {
         log.info("Find Member");

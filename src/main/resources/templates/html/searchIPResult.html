@@ -116,9 +116,8 @@
       <h2>아이디 찾기 결과</h2>
       <div class="form-group">
         <label for="email">이메일</label>
-        <div id="emailModal" class="modal" th:data-email="${result.email}">
+        <div id="emailModal" class="modal" th:data-email="${email}">
           <p id="email" style="border: 1px solid rgba(83, 52, 129); padding: 10px; border-radius: 8px; background-color: #f9f9f9;">
-            <!-- 이메일 주소가 여기에 표시됩니다. -->
           </p>
         </div>
       </div>
@@ -128,7 +127,7 @@
     </div>
 
     <!-- 비밀번호 찾기 결과 -->
-    <div th:if="${type == 'pw'}" id="pw-update" th:data-info="${result}" th:data-createDate="${memCreateDate}">
+    <div th:if="${type == 'pw'}" id="pw-update" th:mem-id="${id}">
       <h2>비밀번호 재설정</h2>
       <form action="" id="pw-update-form">
         <div class="form-group">
@@ -156,32 +155,14 @@
     const modal = document.getElementById('emailModal');
     const email = modal.getAttribute('data-email');
 
-    // 이메일 마스킹
-    const maskedEmail = maskEmail(email);
-
     // 마스킹된 이메일을 modal의 p 태그에 삽입
-    document.getElementById("email").textContent = maskedEmail;
-
-    // 이메일 마스킹 함수
-    function maskEmail(email) {
-      const [localPart, domainPart] = email.split('@');
-      const maskedLocal = localPart.slice(0, 2) + '*'.repeat(localPart.length - 4) + localPart.slice(-2);
-      return maskedLocal + '@' + domainPart;
-    }
+    document.getElementById("email").textContent = email;
   }
 
   // 비밀번호 변경 이벤트
   document.getElementById('pw-update-form').addEventListener('submit', function(event) {
     event.preventDefault();
-    const pwUpdateElement = document.getElementById('pw-update').getAttribute("data-info");
-    let validData = pwUpdateElement
-            .replace(/(\w+)=/g, '"$1":') // 키를 "key": 형태로 변경
-            .replace(/([^"{},:\s]+)/g, '"$1"') // 값을 따옴표로 감쌈 (숫자, 이메일, 텍스트 등 포함)
-            .replace(/""/g, '"'); // 중복된 따옴표 제거
-    const data = JSON.parse(validData);
-
-    const modal =  document.getElementById('pw-update');
-    const createDate = modal.getAttribute('data-createDate');
+    const data = document.getElementById('pw-update').getAttribute("mem-id");
 
     // 새 비밀번호와 확인 비밀번호 값 가져오기
     const newPassword = document.getElementById('newPassword').value;
@@ -198,16 +179,11 @@
       return;
     } else {
       var memberDto = {
-        memId: data.memId,
-        userName: data.userName,
-        phoneNum: data.phoneNum,
-        email: data.email,
-        password: newPassword,
-        flag: data.flag,
-        createDate: createDate
+        memId: data,
+        password: newPassword
       };
 
-      ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
+      ajaxPostJsonCall('/member/change-pw', JSON.stringify(memberDto), function(data) {
         if (data.code === "0000") {
           alert("비밀변호가 변경되었습니다.");
           window.location.href = "/login-web";
