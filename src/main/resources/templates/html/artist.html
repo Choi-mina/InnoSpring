@@ -173,6 +173,11 @@
             background-color: rgba(255, 100, 100);
         }
 
+        #detailUpdateDate {
+            color: #aaa;
+            font-size: 13px;
+        }
+
         .comment-list {
             max-height: 200px;
             overflow-y: auto;
@@ -190,9 +195,14 @@
             color: #333;
         }
 
+        .comment-date {
+            color: #aaa;
+            font-size: 13px;
+        }
+
         .comment-text {
             margin: 5px 0;
-            color: #555;
+            color: #333;;
         }
 
         /* 댓글 작성 폼 스타일 */
@@ -278,6 +288,10 @@
         <div class="modal-content">
             <span class="close" id="closeDetailModal">&times;</span>
             <h2></h2>
+            <div>
+                <h2>KINO</h2>
+                <p id="detailUpdateDate"></p>
+            </div>
             <img id="detailImage" src="" alt="상세 이미지" style="width: 100%; height: auto;"/>
             <p id="detailContent"></p>
             <textarea id="editContent" style="width: 100%; display: none;" placeholder="수정 내용을 입력하세요"></textarea>
@@ -400,6 +414,7 @@
                     else
                         document.getElementById("detailImage").style.visibility="hidden"
                     document.getElementById("detailContent").innerHTML = artist.artistContent.replace(/<br\s*\/?>/g, '<br>');
+                    document.getElementById("detailUpdateDate").innerHTML = dateFormat(new Date(artist.updateDate));
 
                     // 모달 보이기
                     document.getElementById("detailModal").style.display = "block";
@@ -414,7 +429,15 @@
                             var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
                             document.getElementById("commentList").insertAdjacentHTML("beforeend", `
                             <div class="comment" id="comment-${post.commentsId}">
-                                <p class="comment-author">${authorName}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div style="flex: 1; text-align: left;">
+                                        <p class="comment-author">${authorName}</p>
+                                    </div>
+                                    <div style="text-align: center; flex: 1;"></div>
+                                    <div style="flex: 1; text-align: right;">
+                                        <p class="comment-date">${dateFormat(new Date(post.updateDate))}</p>
+                                    </div>
+                                </div>
                                 <p class="comment-text">${post.commentsContent}</p>
                                 <div class="comment-btn-div">
                                     <button class="comment-btn commentEdit" id="commentEdit" style="display: none">수정</button>
@@ -724,6 +747,17 @@
         detailContent.innerHTML = ""; // 기존 내용을 비움
         detailImage.src = ""; // 기존 이미지를 제거
         $('#commentInput').val("");
+    }
+
+    // 날짜 포맷 함수
+    function dateFormat(date) {
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+
+        var dateString = year + '-' + month  + '-' + day;
+
+        return dateString;
     }
 
 </script>

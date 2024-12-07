@@ -3,155 +3,194 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
-  <link href="../css/home.css" rel="stylesheet" type="text/css"/>
-  <title>SignUp</title>
+  <title>회원가입</title>
   <style>
     * {
       box-sizing: border-box;
     }
+
     body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
       font-size: 14px;
-      overflow: scroll;
     }
-    .frame-container {
-      top: 100px;
-      left: 0px;
+
+    header {
+      position: fixed;
+      top: 0;
       width: 100%;
-      height: 87%;
-      position: absolute;
-      align-items: center;
-    }
-    .sign-up-div {
-      top: 20%;
-      left: 40%;
-      width: 20%;
-      height: 70%;
-      position: relative;
-    }
-    .sign-up-text {
-      color: rgba(0,0,0,1);
-      position: absolute;
-      width: 100%;
-      top: 5%;
-      font-weight: Bold;
-      font-size: x-large;
+      background-color: #6f42c1;
+      color: white;
       text-align: center;
-    }
-    /* login-form의 스타일 설정 */
-    .sign-up-form {
-      margin-top: 10px;
-      position: absolute;
-      top: 15%;
-      width: 100%;
+      padding: 15px 0;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
     }
 
-    .sign-up-form form {
+    .container {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding-top: 100px; /* 헤더 공간 확보 */
     }
 
-    .sign-up-form input[type="text"],
-    .sign-up-form input[type="password"] {
-      margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid rgba(232 , 217 , 255);
-      border-radius: 3px;
+    .sign-up-box {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 400px;
+      padding: 30px 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .sign-up-box h1 {
+      text-align: center;
+      color: #6f42c1;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #555;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border: 1px solid rgba(232, 217, 255);
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border-color: rgba(83, 52, 129, 0.8);
+      box-shadow: 0 0 8px rgba(83, 52, 129, 0.4);
     }
 
     .email-container {
       display: flex;
+      gap: 10px;
       align-items: center;
     }
 
-    .email-container input[name="email"] {
-      width: auto; /* Adjust width as necessary */
+    .email-container input {
       flex: 1;
     }
 
     .email-container button {
-      height: 30px;
-      margin-left: 10px;
-      margin-bottom: 10px;
-      padding: 10px;
-      background-color: rgba(232 , 217 , 255);
-      border: none;
-      border-radius: 3px;
+      background-color: rgba(232, 217, 255);
       color: white;
-      font-size: 10px;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
       cursor: pointer;
+      transition: 0.3s ease;
     }
 
     .email-container button:hover {
       background-color: rgba(209, 178, 255);
     }
-    .sign-up-form .button-container {
+
+    .button-container {
       display: flex;
       justify-content: space-between;
-      margin-top: 10px;
+      margin-top: 20px;
     }
 
-    .sign-up-form input[type="submit"],
-    .sign-up-form button#cancelBtn {
-      padding: 10px;
+    .button-container button,
+    .button-container input[type="submit"] {
+      width: 48%;
+      padding: 12px;
+      font-size: 14px;
       border: none;
-      border-radius: 3px;
-      font-size: 13px;
+      border-radius: 8px;
       cursor: pointer;
-    }
-
-    .sign-up-form input[type="submit"] {
-      background-color: rgba(232 , 217 , 255);
       color: white;
-      margin-left: 10px; /* 간격 조절 */
+      transition: 0.3s ease;
     }
 
-    .sign-up-form input[type="submit"]:hover {
+    .button-container button {
+      background-color: #f44336;
+    }
+
+    .button-container button:hover {
+      background-color: #e53935;
+    }
+
+    .button-container input[type="submit"] {
+      background-color: rgba(232, 217, 255);
+    }
+
+    .button-container input[type="submit"]:hover {
       background-color: rgba(209, 178, 255);
     }
 
-    .sign-up-form button#cancelBtn {
-      background-color: #f44336;
-      color: white;
-    }
-
-    .sign-up-form button#cancelBtn:hover {
-      background-color: #e53935;
-    }
     .hidden {
       display: none;
     }
-
   </style>
 </head>
 <body>
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
-<div class="frame-container">
-  <div class="sign-up-div" id="sign-up-div">
-    <span class="sign-up-text">Sign Up</span>
-    <div class="sign-up-form">
-      <form method="post" id="sign-up-form" th:object="${memberDto}">
-        <input type="text" name="userName" th:field="*{userName}" placeholder="UserName">
-        <input type="text" name="phoneNum" class="form-control" oninput="oninputPhone(this)" maxlength="13" th:field="*{phoneNum}" placeholder="PhoneNum">
-        <div class="email-container">
-          <input type="text" name="email" th:field="*{email}" placeholder="Email">
-          <button id="emailCheck" type="button">중복확인</button>
-        </div>
-        <input type="password" name="password" th:field="*{password}" placeholder="Password">
-        <input type="password" name="passwordConfirm" placeholder="Password Confirm">
-        <div class="button-container">
-          <button type="button" id="cancelBtn">취소</button>
-          <input type="submit" value="SignUp">
-        </div>
-      </form>
+
+<!-- 회원가입 폼 -->
+<div class="container">
+  <div class="sign-up-box">
+    <h1>회원가입</h1>
+    <form method="post" id="sign-up-form" th:object="${memberDto}">
+      <div class="form-group">
+        <label for="userName">사용자 이름</label>
+        <input type="text" id="userName" name="userName" th:field="*{userName}" placeholder="UserName" required>
+      </div>
+      <div class="form-group">
+        <label for="phoneNum">휴대폰 번호</label>
+        <input type="text" id="phoneNum" name="phoneNum" oninput="oninputPhone(this)" maxlength="13"
+               th:field="*{phoneNum}" placeholder="PhoneNum" required>
+      </div>
+      <div class="form-group email-container">
+        <label for="email">이메일(아이디)</label>
+        <input type="text" name="email" id="email" th:field="*{email}" placeholder="Email" required>
+        <button id="emailCheck" type="button">중복확인</button>
+      </div>
+      <div class="form-group">
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" name="password" th:field="*{password}" placeholder="Password" required>
+      </div>
+      <div class="form-group">
+        <label for="passwordConfirm">비밀번호 확인</label>
+        <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="Password Confirm" required>
+      </div>
+      <div class="button-container">
+        <button type="button" id="cancelBtn">Cancel</button>
+        <input type="submit" value="SignUp">
+      </div>
       <select id="options" class="hidden">
         <option value="1" selected>Fan</option>
         <option value="2">Artist</option>
         <option value="3">Manager</option>
       </select>
-    </div>
+    </form>
   </div>
 </div>
+</body>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 <script>
 
@@ -217,22 +256,33 @@
     var selectBox = document.getElementById("options");
     var selectedValue = selectBox.value; // 선택된 옵션의 값 가져오기
 
-    var memberDto = {
-      userName: userName.value,
-      phoneNum: phoneNum.value,
-      email: email.value,
-      password: password.value,
-      flag: selectedValue
-    };
+    // 휴대폰 번호로 가입된 사용자인지 확인
+    const param = {};
+    param["phoneNum"] = phoneNum.value;
+    ajaxJsonCall('/member/find-by-phone', param, function (data) {
+      if(data.code == "0001") {
+        var memberDto = {
+          userName: userName.value,
+          phoneNum: phoneNum.value,
+          email: email.value,
+          password: password.value,
+          flag: selectedValue
+        };
 
-    ajaxPostJsonCall('/member/sign-up', JSON.stringify(memberDto), function(data) {
-      if (data.code === "0000") {
-        alert("회원가입 성공");
-        window.location.href = "/login-web";
+        ajaxPostJsonCall('/member/sign-up', JSON.stringify(memberDto), function(data) {
+          if (data.code === "0000") {
+            alert("회원가입 성공");
+            window.location.href = "/login-web";
+          } else {
+            alert("회원가입에 실패했습니다. 잠시후에 이용해주세요.");
+          }
+        }, function(error) {
+          alert("An error occurred: " + error.message);
+        });
       } else {
-        alert("회원가입에 실패했습니다. 잠시후에 이용해주세요.");
+        alert("가입되어있는 번호입니다. \n다른번호를 입력하시거나 가입되어있는 정보로 로그인해주세요.");
       }
-    }, function(error) {
+    }, function (error) {
       alert("An error occurred: " + error.message);
     });
   }

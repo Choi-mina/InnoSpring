@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아이디/비밀번호 찾기 완료</title>
+  <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
+  <style>
+    /* 기본 스타일 */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-size: 14px;
+      font-family: 'Cairo', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding-top: 70px; /* 헤더 높이만큼 여백 추가 */
+    }
+
+    .form-box {
+      width: 400px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 1em;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-box h2 {
+      text-align: center;
+      color: #6f42c1;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid rgba(83, 52, 129);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(83, 52, 129, 0.8);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: rgba(232, 217, 255);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+      background-color: rgba(209, 178, 255);
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .links a {
+      font-size: 14px;
+      color: #6f42c1;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #6f42c1;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+<th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
+<div class="container">
+  <div class="form-box" th:type="${type}">
+    <!-- 아이디 찾기 결과 -->
+    <div th:if="${type == 'id'}">
+      <h2>아이디 찾기 결과</h2>
+      <div class="form-group">
+        <label for="email">이메일</label>
+        <div id="emailModal" class="modal" th:data-email="${email}">
+          <p id="email" style="border: 1px solid rgba(83, 52, 129); padding: 10px; border-radius: 8px; background-color: #f9f9f9;">
+          </p>
+        </div>
+      </div>
+      <div class="links">
+        <a href="/login-web">로그인 페이지로 돌아가기</a>
+      </div>
+    </div>
+
+    <!-- 비밀번호 찾기 결과 -->
+    <div th:if="${type == 'pw'}" id="pw-update" th:mem-id="${id}">
+      <h2>비밀번호 재설정</h2>
+      <form action="" id="pw-update-form">
+        <div class="form-group">
+          <label for="newPassword">새 비밀번호</label>
+          <input type="password" id="newPassword" name="newPassword" placeholder="새 비밀번호">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">새 비밀번호 확인</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 확인">
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">비밀번호 변경</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+<script>
+
+  const formBox = document.querySelector('.form-box');
+  const typeValue = formBox.getAttribute('type');
+
+  // 아이디 찾기를 한 경우에만 이메일 마스킹 처리
+  if(typeValue == 'id') {
+    // 이메일 값을 data-email 속성에서 가져오기
+    const modal = document.getElementById('emailModal');
+    const email = modal.getAttribute('data-email');
+
+    // 마스킹된 이메일을 modal의 p 태그에 삽입
+    document.getElementById("email").textContent = email;
+  }
+
+  // 비밀번호 변경 이벤트
+  document.getElementById('pw-update-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const data = document.getElementById('pw-update').getAttribute("mem-id");
+
+    // 새 비밀번호와 확인 비밀번호 값 가져오기
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if(newPassword == '' || newPassword.length < 7) {
+      alert('새 비밀번호를 7글자 이상 입력해주세요.');
+      return;
+    } else if(confirmPassword == '' || confirmPassword.length < 7) {
+      alert('새 비밀번호 확인란에 7글자 이상 입력해주세요.');
+      return;
+    } else if (newPassword !== confirmPassword) {
+      alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    } else {
+      var memberDto = {
+        memId: data,
+        password: newPassword
+      };
+
+      ajaxPostJsonCall('/member/change-pw', JSON.stringify(memberDto), function(data) {
+        if (data.code === "0000") {
+          alert("비밀변호가 변경되었습니다.");
+          window.location.href = "/login-web";
+        } else {
+          alert("비밀번호 변경에 실패했습니다. 잠시후에 이용해주세요.");
+        }
+      }, function(error) {
+        alert("An error occurred: " + error.message);
+      });
+    }
+  });
+
+</script>
+</html>

@@ -4,5 +4,6 @@ import com.example.cafe.entity.Member;
 
 public interface MemberRepositoryCustom {
     public Member findByPhone(String phoneNum);
+    public Member findId(String name, String phoneNum);
     public Member findByEmail(String email);
 }

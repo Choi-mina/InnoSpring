@@ -29,6 +29,24 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
         return member;
     }
 
+    public Member findId(String name, String phoneNum) {
+        Member member = null;
+        try {
+            TypedQuery<Member> query = em.createQuery("SELECT m from Member m where m.userName = :name and m.phoneNum = :phoneNum", Member.class)
+                    .setParameter("name", name)
+                    .setParameter("phoneNum", phoneNum);
+            List<Member> results = query.getResultList();
+
+            if (!results.isEmpty()) {
+                member = results.get(0);
+            }
+        } catch (NoResultException e) {
+            // 데이터가 없을 때
+            member = null;
+        }
+        return member;
+    }
+
     public Member findByEmail(String email) {
         Member member = null;
         try {

@@ -179,6 +179,11 @@
       color: #333;
     }
 
+    .comment-date {
+      color: #aaa;
+      font-size: 13px;
+    }
+
     .comment-text {
       margin: 5px 0;
       color: #555;
@@ -739,7 +744,16 @@
             var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
             document.getElementById("myPostCommentList").insertAdjacentHTML("beforeend", `
                             <div class="comment" id="myPostComment-${post.commentsId}">
-                                <p class="comment-author">${authorName}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div style="flex: 1; text-align: left;">
+                                        <p class="comment-author">${authorName}</p>
+                                    </div>
+                                    <div style="text-align: center; flex: 1;"></div>
+                                    <div style="flex: 1; text-align: right;">
+                                        <p class="comment-date">${dateFormat(new Date(post.updateDate))}</p>
+                                    </div>
+                                </div>
+
                                 <p class="comment-text">${post.commentsContent}</p>
                             </div>
                             <hr style="border: solid 0.5px lightgray;">
@@ -861,7 +875,15 @@
             var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
             document.getElementById("cCommentList").insertAdjacentHTML("beforeend", `
                             <div class="comment" id="detailCComment-${post.commentsId}">
-                                <p class="comment-author">${authorName}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div style="flex: 1; text-align: left;">
+                                        <p class="comment-author">${authorName}</p>
+                                    </div>
+                                    <div style="text-align: center; flex: 1;"></div>
+                                    <div style="flex: 1; text-align: right;">
+                                        <p class="comment-date">${dateFormat(new Date(post.updateDate))}</p>
+                                    </div>
+                                </div>
                                 <p class="comment-text">${post.commentsContent}</p>
                                 <div class="comment-btn-div">
                                     <button class="comment-btn commentEdit" id="cCommentEdit" style="display: none">수정</button>
@@ -1007,7 +1029,15 @@
                     var authorName = index > -1 ? post.commentsAuthor.email.substring(0, index) : post.commentsAuthor.email;
                     document.getElementById("aCommentList").insertAdjacentHTML("beforeend", `
                             <div class="comment" id="detailAComment-${post.commentsId}">
-                                <p class="comment-author">${authorName}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <div style="flex: 1; text-align: left;">
+                                        <p class="comment-author">${authorName}</p>
+                                    </div>
+                                    <div style="text-align: center; flex: 1;"></div>
+                                    <div style="flex: 1; text-align: right;">
+                                        <p class="comment-date">${dateFormat(new Date(post.updateDate))}</p>
+                                    </div>
+                                </div>
                                 <p class="comment-text">${post.commentsContent}</p>
                                 <div class="comment-btn-div">
                                     <button class="comment-btn commentEdit" id="aCommentEdit" style="display: none">수정</button>

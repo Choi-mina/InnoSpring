@@ -62,6 +62,24 @@ public class MemberService {
         return memberDto;
     }
 
+    public MemberDto findId(String name, String phoneNum) {
+        Member member = memberRepository.findId(name ,phoneNum);
+        // Entity -> Dto
+        MemberDto memberDto = null;
+        if(member != null) {
+            memberDto = MemberDto.builder()
+                    .userName(member.getUserName())
+                    .email(member.getEmail())
+                    .phoneNum(member.getPhoneNum())
+                    .password(member.getPassword())
+                    .createDate(member.getCreateDate())
+                    .updateDate(member.getUpdateDate())
+                    .flag(member.getFlag())
+                    .build();
+        }
+        return memberDto;
+    }
+
     public MemberDto findByEmail(String email) {
         Member member = memberRepository.findByEmail(email);
         // Entity -> Dto

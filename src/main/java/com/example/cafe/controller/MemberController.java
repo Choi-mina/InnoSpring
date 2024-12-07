@@ -106,8 +106,30 @@ public class MemberController {
         return result;
     }
 
+    @GetMapping("/find-id")
+    public ResultEntity findEmail(@RequestParam("name") String name, @RequestParam("phone") String phoneNum) {
+        ResultEntity result = new ResultEntity();
+        try {
+            MemberDto member = memberService.findId(name, phoneNum);
+
+            if(member != null) {
+                result.setCode("0000");
+                result.setMessage("Find By Phone Success");
+                result.setData(member);
+            } else {
+                result.setCode("0001");
+                result.setMessage("No Data");
+            }
+            log.info("Find By Phone Success");
+        } catch (Exception e) {
+            log.error("Find By Phone Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
     @GetMapping("/find-by-email")
-    public ResultEntity findByEmail(@RequestParam("email") String email) {
+    public ResultEntity findPassword(@RequestParam("email") String email) {
         ResultEntity result = new ResultEntity();
         try {
             MemberDto member = memberService.findByEmail(email);
@@ -158,6 +180,34 @@ public class MemberController {
             log.info("Member Delete Success");
         } catch (Exception e) {
             log.error("Member Delete Fail");
+            return new ResultEntity(e);
+        }
+        return result;
+    }
+
+    @PostMapping("/change-pw")
+    public ResultEntity changePw(@RequestBody MemberDto memberDto) {
+        ResultEntity result = new ResultEntity();
+        try {
+            MemberDto memberDto1 = memberService.findById((long) memberDto.getMemId());
+            memberDto =  MemberDto.builder()
+                    .memId(memberDto.getMemId())
+                    .userName(memberDto1.getUserName())
+                    .phoneNum(memberDto1.getPhoneNum())
+                    .email(memberDto1.getEmail())
+                    .password(memberDto.getPassword())
+                    .createDate(memberDto1.getCreateDate())
+                    .flag(memberDto1.getFlag())
+                    .build();
+
+            memberService.modifyMember(memberDto);
+
+            result.setCode("0000");
+            result.setMessage("Change Password Success");
+
+            log.info("Change Password Success");
+        } catch (Exception e) {
+            log.error("Change Password Fail");
             return new ResultEntity(e);
         }
         return result;
