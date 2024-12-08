@@ -7,67 +7,75 @@
     <title>Home</title>
     <style>
         * {
-            box-sizing: border-box; /* 박스 모델 설정 */
+            box-sizing: border-box;
         }
         body {
-            font-family: 'Cairo', sans-serif; /* 폰트 설정 */
-            background-color: #f9f9f9; /* 배경색 설정 */
-            margin: 0; /* 기본 마진 제거 */
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('/images/KINO.png') no-repeat center center fixed;
+            background-size: cover;
         }
-        .home-div {
-            top: 100px;
-            left: 0;
+        .header-spacer {
+            height: 90px; /* 헤더 높이와 동일하게 설정 */
+        }
+        .container {
+            position: relative;
             width: 100%;
-            height: 87%;
-            position: absolute;
-            display: flex; /* 플렉스 박스 사용 */
-            flex-direction: column; /* 세로 방향 정렬 */
-            align-items: center; /* 중앙 정렬 */
-            justify-content: center; /* 수직 중앙 정렬 */
+            min-height: calc(100vh - 90px); /* 화면 전체 높이에서 헤더를 뺀 높이 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         .menu-btn {
-            margin: 10px; /* 버튼 사이 여백 */
-            padding: 15px 30px; /* 버튼 패딩 */
-            font-size: 16px; /* 버튼 텍스트 크기 */
-            border: none; /* 테두리 제거 */
-            border-radius: 5px; /* 둥근 모서리 */
-            background-color: #6f42c1; /* 배경색 */
-            color: white; /* 글자색 */
-            cursor: pointer; /* 커서 포인터 변경 */
-            transition: background-color 0.3s; /* 배경색 전환 효과 */
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #6f42c1, #5a31a1);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
         }
         .menu-btn:hover {
-            background-color: #5a31a1; /* 마우스 오버 시 색상 변화 */
+            transform: scale(1.05);
+            background-color: #4e2590;
         }
         .social-buttons {
-            margin-top: 20px; /* 소셜 버튼과 메뉴 버튼 사이 여백 */
-        }
-        .social-buttons {
-            margin: 5px; /* 소셜 버튼 사이 여백 */
-            padding: 10px 20px; /* 패딩 */
-            border: none; /* 테두리 제거 */
-            cursor: pointer; /* 커서 포인터 변경 */
-            transition: background-color 0.3s; /* 배경색 전환 효과 */
-        }
-        .social-image-button:hover {
-            background-color: #d5d8db; /* 마우스 오버 시 색상 변화 */
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
         }
         .social-image-button {
-            background: none; /* 배경 제거 */
-            border: none; /* 테두리 제거 */
-            cursor: pointer; /* 커서 포인터 변경 */
-            padding: 0; /* 패딩 제거 */
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
         }
         .social-image-button img {
-            width: 30px; /* 이미지 크기 설정 */
-            height: 30px; /* 이미지 크기 설정 */
+            width: 40px;
+            height: 40px;
         }
     </style>
 </head>
 <body>
 <th:block layout:fragment="header" th:include="@{fragments/header}"></th:block>
-<div class="home-div">
-    <div>
+<div class="header-spacer"></div> <!-- 헤더 아래에 공간 확보 -->
+<div class="container">
+    <div class="menu-buttons">
         <button onclick="location.href='/community-web'" class="menu-btn">Community</button>
         <button class="menu-btn" id="artist-btn">Artist</button>
         <button class="menu-btn" id="schedule-btn">Schedule</button>
@@ -87,33 +95,30 @@
         </button>
     </div>
 </div>
-<th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
 <script>
-    // artist 페이지는 로그인 되어있는 회원만 접근 가능
     document.getElementById("artist-btn").addEventListener("click", function() {
-        try{
-            if(sessionEmail != null) {
+        try {
+            if (sessionEmail != null) {
                 location.href = '/artist-web';
             } else {
                 alert("로그인을 해주세요.");
                 location.href = '/login-web';
             }
-        } catch(e) {
+        } catch (e) {
             alert("로그인을 해주세요.");
         }
     });
 
-    // schedule 페이지는 로그인 되어있는 회원만 접근 가능
     document.getElementById("schedule-btn").addEventListener("click", function() {
-        try{
-            if(sessionEmail != null) {
+        try {
+            if (sessionEmail != null) {
                 location.href = '/schedule-web';
             } else {
                 alert("로그인을 해주세요.");
                 location.href = '/login-web';
             }
-        } catch(e) {
+        } catch (e) {
             alert("로그인을 해주세요.");
         }
     });
