@@ -91,7 +91,7 @@
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
         <button class="mypage" id="mypage" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
         <div class="div1"> </div>
-        <button class="login-btn" id="state-logout"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
+        <button class="login-btn" id="state-logout" onclick="location.href='/login-web'"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
     </div>
 </div>
 </body>
@@ -118,28 +118,28 @@
     });
 
     // 로그인 버튼 클릭
-    document.getElementById("state-logout").addEventListener("click", function(event) {
-        const button = document.querySelector(".login-btn");
-        const loginState = button.getAttribute('id');
-
-        if (loginState === "state-logout") { // 로그인 상태가 아닌 경우 로그인 페이지로 이동
-            window.location.href = "/login-web";
-        } else if (loginState === "state-login") { // 로그인 상태인 경우 로그아웃 처리
-            const result = confirm('로그아웃 하시겠습니까?');
-            if(result) {
-                // 로그아웃 API 호출
-                ajaxPostJsonCall('/logout', sessionEmail, function (data) {
-                    if (data.code === "0000") {
-                        window.location.href = "/";
-                    }
-                }, function (error) {
-                    alert("An error occurred: " + error.message);
-                });
-            } else {
-                return false;
-            }
-        }
-    });
+    // document.getElementById("state-logout").addEventListener("click", function(event) {
+    //     const button = document.querySelector(".login-btn");
+    //     const loginState = button.getAttribute('id');
+    //
+    //     if (loginState === "state-logout") { // 로그인 상태가 아닌 경우 로그인 페이지로 이동
+    //         window.location.href = "/login-web";
+    //     } else if (loginState === "state-login") { // 로그인 상태인 경우 로그아웃 처리
+    //         const result = confirm('로그아웃 하시겠습니까?');
+    //         if(result) {
+    //             // 로그아웃 API 호출
+    //             ajaxPostJsonCall('/logout', sessionEmail, function (data) {
+    //                 if (data.code === "0000") {
+    //                     window.location.href = "/";
+    //                 }
+    //             }, function (error) {
+    //                 alert("An error occurred: " + error.message);
+    //             });
+    //         } else {
+    //             return false;
+    //         }
+    //     }
+    // });
 
     // 날짜 계산
     function calDate(dateString) {

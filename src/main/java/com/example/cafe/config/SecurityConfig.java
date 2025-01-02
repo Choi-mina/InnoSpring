@@ -3,30 +3,38 @@ package com.example.cafe.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+@EnableWebSecurity
 @Configuration
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionFixation().migrateSession()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll()
+                        .requestMatchers("/").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/", "/logout", "/redis/**").permitAll() // 접근 허용
-//                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+//                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionFixation().migrateSession()
 //                )
+//                .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
+////                .authorizeHttpRequests(authorize -> authorize
+////                        .requestMatchers("/", "/logout", "/redis/**").permitAll() // 접근 허용
+////                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+////                )
                 .formLogin(form -> form
-                        .loginPage("/login-web")
+                        .loginPage("/login-web").permitAll()
                         .defaultSuccessUrl("/", true) // 로그인 성공 후 리다이렉트 URL
                 )
-                .logout(AbstractHttpConfigurer::disable);
+                .logout(AbstractHttpConfigurer::disable)
+        ;
 
         return http.build();
     }

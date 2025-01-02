@@ -125,7 +125,7 @@
 <div class="login-container">
     <h2>로그인</h2>
     <div class="login-form">
-        <form method="post" id="login-form">
+        <form th:action="@{/login}" method="post" id="login-form">
             <input type="text" name="email" placeholder="아이디(이메일)" required>
             <input type="password" name="userPassword" placeholder="비밀번호" required>
             <input type="submit" value="로그인" id="loginBtn">

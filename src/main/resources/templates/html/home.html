@@ -77,8 +77,8 @@
 <div class="container">
     <div class="menu-buttons">
         <button onclick="location.href='/community-web'" class="menu-btn">Community</button>
-        <button class="menu-btn" id="artist-btn">Artist</button>
-        <button class="menu-btn" id="schedule-btn">Schedule</button>
+        <button onclick="location.href='/artist-web'" class="menu-btn" id="artist-btn">Artist</button>
+        <button onclick="location.href='/schedule-web'" class="menu-btn" id="schedule-btn">Schedule</button>
     </div>
     <div class="social-buttons">
         <button class="social-image-button" onclick="window.open('https://www.instagram.com/nakedxproud?igsh=aXVib2JvanNjYXJl', '_blank')">
@@ -97,30 +97,5 @@
 </div>
 </body>
 <script>
-    document.getElementById("artist-btn").addEventListener("click", function() {
-        try {
-            if (sessionEmail != null) {
-                location.href = '/artist-web';
-            } else {
-                alert("로그인을 해주세요.");
-                location.href = '/login-web';
-            }
-        } catch (e) {
-            alert("로그인을 해주세요.");
-        }
-    });
-
-    document.getElementById("schedule-btn").addEventListener("click", function() {
-        try {
-            if (sessionEmail != null) {
-                location.href = '/schedule-web';
-            } else {
-                alert("로그인을 해주세요.");
-                location.href = '/login-web';
-            }
-        } catch (e) {
-            alert("로그인을 해주세요.");
-        }
-    });
 </script>
 </html>
