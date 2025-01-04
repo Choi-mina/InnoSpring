@@ -31,9 +31,9 @@ public class MemberController {
     public ResultEntity memSignUp(@RequestBody MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
 
-        // 1 -> "F", 2 -> "A", 3 -> "M"
+        // 1 -> "ROLE_USER", 2 -> "ROLE_ADMIN", 3 -> "ROLE_MANAGER"
         // 기본값 : 1
-        memberDto.setFlag(memberDto.getFlag().equals("1") ? "F" : memberDto.getFlag().equals("2") ? "A" : "M" );
+        memberDto.setFlag(memberDto.getFlag().equals("1") ? "ROLE_USER" : memberDto.getFlag().equals("2") ? "ROLE_ADMIN" : "ROLE_MANAGER" );
         try{
             if(!memValid(memberDto.getEmail())) {
                 memberService.memSignUp(memberDto);

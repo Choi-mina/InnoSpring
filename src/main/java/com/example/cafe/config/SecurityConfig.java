@@ -3,6 +3,7 @@ package com.example.cafe.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,7 +26,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll()
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/", "/sign-up-web").permitAll()
                         .anyRequest().authenticated()
                 )
 //                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionFixation().migrateSession()
@@ -35,6 +36,12 @@ public class SecurityConfig {
 ////                        .requestMatchers("/", "/logout", "/redis/**").permitAll() // 접근 허용
 ////                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
 ////                )
+                // 세션 관리 정책 설정: 세션 무효화 강제 설정
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // 항상 세션을 생성
+                        .invalidSessionUrl("/login-web") // 세션이 무효화되면 이 URL로 리다이렉트
+                )
+
                 .formLogin(form -> form
                         .loginPage("/login-web").permitAll()
                         .loginProcessingUrl("/login")
@@ -44,6 +51,9 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider)
                 .logout(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/login", "/login/**", "/member/sign-up") // 특정 URL에 대해 CSRF 예외 처리
+                )
         ;
 
         return http.build();
