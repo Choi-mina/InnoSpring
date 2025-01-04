@@ -2,6 +2,8 @@
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,7 +59,7 @@
             border-color: #6f42c1;
         }
 
-        .login-form input[type="submit"] {
+        .login-form button {
             background-color: #6f42c1;
             color: white;
             border: none;
@@ -69,7 +71,7 @@
             border-radius: 8px;
         }
 
-        .login-form input[type="submit"]:hover {
+        .login-form button:hover{
             background-color: #5a36b2;
         }
 
@@ -103,7 +105,7 @@
                 font-size: 14px;
             }
 
-            .login-form input[type="submit"] {
+            .login-form button {
                 padding: 12px;
                 font-size: 16px;
             }
@@ -126,9 +128,9 @@
     <h2>로그인</h2>
     <div class="login-form">
         <form th:action="@{/login}" method="post" id="login-form">
-            <input type="text" name="email" placeholder="아이디(이메일)" required>
-            <input type="password" name="userPassword" placeholder="비밀번호" required>
-            <input type="submit" value="로그인" id="loginBtn">
+            <input type="text" name="email" placeholder="아이디(이메일)" id="email" required>
+            <input type="password" name="userPassword" placeholder="비밀번호" id="password" required>
+            <button type="submit" class="login-btn">로그인</button>
         </form>
     </div>
 
@@ -141,33 +143,33 @@
 </body>
 <script>
     window.onload = function() {
-        document.getElementById("login-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            const email = document.querySelector('input[name="email"]').value;
-            const password = document.querySelector('input[name="userPassword"]').value;
-
-            if (!email) {
-                alert("아이디(이메일)을 입력해주세요.");
-                return false;
-            } else if (!password) {
-                alert("비밀번호를 입력해주세요.");
-                return false;
-            } else {
-                const param = {};
-                param["email"] = email;
-                param["password"] = password;
-                ajaxJsonCall('/log-in-result', param, function (data) {
-                    if (data.code === "0000") {
-                        location.href = '/';
-                    } else if (data.code === "9999") {
-                        alert("아이디 또는 비밀번호를 다시 확인해주세요.")
-                    }
-                }, function (error) {
-                    alert("An error occurred: " + error.message);
-                });
-            }
-        });
+        // document.getElementById("login-form").addEventListener("submit", function(event) {
+        //     event.preventDefault();
+        //
+        //     const email = document.querySelector('input[name="email"]').value;
+        //     const password = document.querySelector('input[name="userPassword"]').value;
+        //
+        //     if (!email) {
+        //         alert("아이디(이메일)을 입력해주세요.");
+        //         return false;
+        //     } else if (!password) {
+        //         alert("비밀번호를 입력해주세요.");
+        //         return false;
+        //     } else {
+        //         const param = {};
+        //         param["email"] = email;
+        //         param["password"] = password;
+        //         ajaxJsonCall('/log-in-result', param, function (data) {
+        //             if (data.code === "0000") {
+        //                 location.href = '/';
+        //             } else if (data.code === "9999") {
+        //                 alert("아이디 또는 비밀번호를 다시 확인해주세요.")
+        //             }
+        //         }, function (error) {
+        //             alert("An error occurred: " + error.message);
+        //         });
+        //     }
+        // });
     }
 </script>
 </body>

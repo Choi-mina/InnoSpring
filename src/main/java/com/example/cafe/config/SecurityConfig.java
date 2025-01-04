@@ -1,18 +1,24 @@
 package com.example.cafe.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final AuthenticationProvider authenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,8 +37,12 @@ public class SecurityConfig {
 ////                )
                 .formLogin(form -> form
                         .loginPage("/login-web").permitAll()
+                        .loginProcessingUrl("/login")
+                        .usernameParameter("email")         // username 필드를 email로 매핑
+                        .passwordParameter("userPassword")  // password 필드를 userPassword로 매핑
                         .defaultSuccessUrl("/", true) // 로그인 성공 후 리다이렉트 URL
                 )
+                .authenticationProvider(authenticationProvider)
                 .logout(AbstractHttpConfigurer::disable)
         ;
 
