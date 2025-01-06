@@ -55,7 +55,6 @@
             background-color: transparent;
         }
         .mypage {
-            display: none;
             color: rgba(83 , 52 , 129);
             font-size: 20px;
             font-style: inherit;
@@ -102,7 +101,7 @@
         </button>
         <div class="div1"> </div>
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
-        <button class="mypage" id="mypage" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
+        <button class="mypage" id="mypage" sec:authorize="isAuthenticated()" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
         <div class="div1"> </div>
         <button class="login-btn" id="state-logout" sec:authorize="isAnonymous()" onclick="location.href='/login-web'"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
         <button class="logout-btn" id="state-login" sec:authorize="isAuthenticated()" onclick="location.href='/logout'"><img src="/images/login.png" alt="login btn image" id="logout-btn-image" width="50px"></button>
@@ -121,7 +120,7 @@
             document.querySelector('.login-btn').setAttribute('id', 'state-login');
             document.getElementById("login-btn-image").src = "/images/login.png";
             document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
-            document.getElementById("mypage").style.display = "block";
+            // document.getElementById("mypage").style.display = "block";
             if(session.flag == 'F') {   // fan인 경우 date 표시
                 var date = calDate(session.date);
                 $('#date').text('ꯁ + ' + date);

@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")         // username 필드를 email로 매핑
                         .passwordParameter("userPassword")  // password 필드를 userPassword로 매핑
-                        .successHandler(successHandler) // 로그인 성공 후 리다이렉트 URL
+                        .successHandler(successHandler) // 로그인 성공 핸들러
                 )
                 .authenticationProvider(authenticationProvider) // 인증 프로바이더 설정
                 // 로그아웃 설정
