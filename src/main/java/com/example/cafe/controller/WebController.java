@@ -39,8 +39,6 @@ public class WebController {
     @RequestMapping("/")
     public String MainWeb() {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
-        // redis에서 key에 해당하는 value를 찾음.
-//        String cachedData = ops.get("user:login:" + email);
 
         return "html/home.html";
     }

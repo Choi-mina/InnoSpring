@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @EnableWebSecurity
 @Configuration
@@ -20,13 +21,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
+    private final AuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // 요청 경로 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*").permitAll()
+                        .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/common/**").permitAll()
                         .requestMatchers("/", "/sign-up-web").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -47,7 +49,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")         // username 필드를 email로 매핑
                         .passwordParameter("userPassword")  // password 필드를 userPassword로 매핑
-                        .defaultSuccessUrl("/", true) // 로그인 성공 후 리다이렉트 URL
+                        .successHandler(successHandler) // 로그인 성공 후 리다이렉트 URL
                 )
                 .authenticationProvider(authenticationProvider) // 인증 프로바이더 설정
                 // 로그아웃 설정
