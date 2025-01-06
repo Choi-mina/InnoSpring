@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -77,6 +78,18 @@
             border: 0;
             background-color: transparent;
         }
+        .logout-btn {
+            color: rgba(255, 255, 255, 1);
+            width: 50px;
+            font-size: 20px;
+            font-style: inherit;
+            text-align: right;
+            font-family: DM Sans;
+            font-weight: 700;
+            flex: 1;
+            border: 0;
+            background-color: transparent;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
@@ -91,7 +104,8 @@
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
         <button class="mypage" id="mypage" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
         <div class="div1"> </div>
-        <button class="login-btn" id="state-logout" onclick="location.href='/login-web'"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
+        <button class="login-btn" id="state-logout" sec:authorize="isAnonymous()" onclick="location.href='/login-web'"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
+        <button class="logout-btn" id="state-login" sec:authorize="isAuthenticated()" onclick="location.href='/logout'"><img src="/images/login.png" alt="login btn image" id="logout-btn-image" width="50px"></button>
     </div>
 </div>
 </body>
