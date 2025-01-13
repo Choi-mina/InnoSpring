@@ -97,7 +97,7 @@
     <div class="navbar-div" id="navbar-div">
         <button class="logo" onclick="location.href='/'">
             <span>InnoSpring</span>
-            <label id="date"></label>
+            <label id="date" sec:authorize="hasRole('ROLE_FAN')"></label>
         </button>
         <div class="div1"> </div>
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
@@ -112,23 +112,25 @@
 <script>
     var sessionEmail;
     // 세션 조회
-    ajaxJsonCall('/get-session', null, function (session) {
-        sessionEmail = session.email;
-        sessionFlag = session.flag;
-        sessionDate = session.date;
-        if (session.email != "null" && session.email != null) {
-            document.querySelector('.login-btn').setAttribute('id', 'state-login');
-            document.getElementById("login-btn-image").src = "/images/login.png";
-            document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
-            // document.getElementById("mypage").style.display = "block";
-            if(session.flag == 'F') {   // fan인 경우 date 표시
-                var date = calDate(session.date);
-                $('#date').text('ꯁ + ' + date);
-            }
-        }
-    }, function (error) {
-        alert("An error occurred: " + error.message);
-    });
+    // ajaxJsonCall('/get-session', null, function (session) {
+    //     sessionEmail = session.email;
+    //     sessionFlag = session.flag;
+    //     sessionDate = session.date;
+    //     if (session.email != "null" && session.email != null) {
+    //         document.querySelector('.login-btn').setAttribute('id', 'state-login');
+    //         document.getElementById("login-btn-image").src = "/images/login.png";
+    //         document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
+    //         // document.getElementById("mypage").style.display = "block";
+    //         if(session.flag == 'F') {   // fan인 경우 date 표시
+    //
+    //         }
+    //     }
+    // }, function (error) {
+    //     alert("An error occurred: " + error.message);
+    // });
+
+    var date = calDate();
+    $('#date').text('ꯁ + ' + date);
 
     // 로그인 버튼 클릭
     // document.getElementById("state-logout").addEventListener("click", function(event) {

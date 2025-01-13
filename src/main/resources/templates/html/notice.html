@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>Notice</title>
@@ -252,7 +253,7 @@
         <button id="prev-page-btn" disabled><</button>
         <button id="next-page-btn">></button>
     </div>
-    <button class="write-btn" id="write-btn">+</button>
+    <button class="write-btn" id="write-btn" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button>
 
     <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
     <div id="writeModal" class="modal">
@@ -314,9 +315,6 @@
             currentPage++;
             findNotice(currentPage);
         });
-
-        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
-            $('#write-btn').css('display', 'none');
     });
 
     // select-search 옵션 값 가지고오기

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
     <link href="../css/home.css" rel="stylesheet" type="text/css"/>
@@ -71,6 +72,10 @@
 
         td:hover .add-event {
             display: block;
+        }
+
+        .add-event.hover-show:hover {
+            display: inline-block;
         }
 
 
@@ -259,23 +264,23 @@
             </thead>
             <tbody id="tbl-month">
             <tr>
-                <td class="sun"><a>1</a><button class="add-event">+</button></td>
-                <td class=""><a href="/news/schedule?date=2022-05-02">2</a><button class="add-event">+</button></td>
-                <td class=""><a>3</a><button class="add-event">+</button></td>
-                <td class=""><a>4</a><button class="add-event">+</button></td>
-                <td class="today"><a>5</a><button class="add-event">+</button></td>
-                <td class=""><a>6</a><button class="add-event">+</button></td>
-                <td class="sat"><a>7</a><button class="add-event">+</button></td>
+                <td class="sun"><a>1</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a href="/news/schedule?date=2022-05-02">2</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a>3</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a>4</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class="today"><a>5</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a>6</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class="sat"><a>7</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
             </tr>
             <!-- 행 반복 -->
             <tr>
-                <td class="sun"><a>29</a><button class="add-event">+</button></td>
-                <td class=""><a>30</a><button class="add-event">+</button></td>
-                <td class=""><a>31</a><button class="add-event">+</button></td>
-                <td class=""><a></a><button class="add-event">+</button></td>
-                <td class=""><a></a><button class="add-event">+</button></td>
-                <td class=""><a></a><button class="add-event">+</button></td>
-                <td class="sat"></a><button class="add-event">+</button>/td>
+                <td class="sun"><a>29</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a>30</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a>31</a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a></a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a></a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class=""><a></a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button></td>
+                <td class="sat"></a><button class="add-event" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button>/td>
             </tr>
             </tbody>
         </table>
@@ -336,7 +341,7 @@
 </body>
 <script th:src="@{/common/common.ajax.js}"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+<script th:inline="javascript">
     function prevMonth(date) {
         var target = new Date(date);
         target.setDate(1);
@@ -429,14 +434,21 @@
                 $tr.append($td);
             });
 
+            /*<![CDATA[*/
+            var userRole = /*[[${userRole}]]*/ 'ROLE_USER'; // 기본값 'ROLE_USER'
+            console.log(userRole);
+
+            // 권한이 ROLE_MANAGER 또는 ROLE_ARTIST인 경우에만 + 버튼을 보이도록 설정
+            if (userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
+                // add-event 버튼을 hover할 때만 보이도록 CSS 클래스 추가
+                $('.add-event').addClass('hover-show');
+            } else {
+                $('.add-event').hide();
+            }
+            /*]]>*/
+
             // 테이블에 <tr> 추가
             $('#tbl-month').append($tr);
-        }
-        try {
-            if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
-                $('.add-event').css('display', 'none');
-        } catch (e) {
-            $('.add-event').css('display', 'none');
         }
     }
 

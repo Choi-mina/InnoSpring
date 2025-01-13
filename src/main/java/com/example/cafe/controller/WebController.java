@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -116,7 +117,17 @@ public class WebController {
     }
 
     @RequestMapping("schedule-web")
-    public String ScheduleWeb(Model model) {
+    public String ScheduleWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_USER"); // 기본값은 ROLE_USER
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
+
         return "html/schedule.html";
     }
 

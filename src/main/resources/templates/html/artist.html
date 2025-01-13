@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
     <title>Artist</title>
@@ -264,7 +265,7 @@
     <div class="artist-div">
         <div class="grid-container" id="artistGrid"></div>
     </div>
-    <button class="write-btn" id="write-btn">+</button>
+    <button class="write-btn" id="write-btn" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button>
 
     <!--  글 작성 modal  -->
     <div id="myModal" class="modal">
@@ -329,19 +330,6 @@
         fetchAllArtistsPost();
         checkSessionFlag();
     };
-
-    // sessionFlag 확인 후 버튼 표시 여부 결정
-    function checkSessionFlag() {
-        if (sessionFlag !== "undefined" && sessionFlag !== null) {
-            if (sessionFlag === 'F') {
-                document.getElementById('write-btn').style.display = 'none';
-            } else {
-                document.getElementById('write-btn').style.display = 'block';
-            }
-        } else {
-            document.getElementById('write-btn').style.display = 'none';
-        }
-    }
 
     // 전체 아티스트를 조회하는 함수
     function fetchAllArtistsPost() {

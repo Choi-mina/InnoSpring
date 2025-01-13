@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationDetailsSource;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 @EnableWebSecurity
 @Configuration
@@ -27,6 +27,15 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final AuthenticationSuccessHandler successHandler;
 
+    // RoleHierarchy 설정
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        String hierarchy = "ROLE_MANAGER > ROLE_ARTIST > ROLE_FAN"; // ROLE_MANAGER가 ROLE_ARTIST와 ROLE_FAN보다 높은 권한
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -34,20 +43,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/common/**").permitAll()
                         .requestMatchers("/", "/sign-up-web", "/member/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
-//                .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-////                .authorizeHttpRequests(authorize -> authorize
-////                        .requestMatchers("/", "/logout", "/redis/**").permitAll() // 접근 허용
-////                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
-////                )
                 // 세션 관리 설정
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 필요한 경우 세션 생성
                         .sessionFixation().newSession() // 로그인 시 새로운 세션 생성
                         .invalidSessionUrl("/login-web") // 세션이 무효화되면 이 URL로 리다이렉트
                 )
-
                 .formLogin(form -> form
                         .loginPage("/login-web").permitAll()
                         .loginProcessingUrl("/login")

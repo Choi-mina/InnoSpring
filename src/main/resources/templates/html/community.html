@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>Community</title>
@@ -333,14 +334,6 @@
             currentPage++;
             findCommunity(currentPage);
         });
-        try{
-            if(sessionFlag == null)
-                $('#write-btn').css('display', 'none');
-            else
-                $('#write-btn').css('display', 'block');
-        } catch (e) {
-            $('#write-btn').css('display', 'none');
-        }
     });
 
     // 모달 관련 요소들 가져오기
