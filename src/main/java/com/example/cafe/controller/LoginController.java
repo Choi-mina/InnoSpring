@@ -4,6 +4,7 @@ import com.example.cafe.Service.MemberService;
 import com.example.cafe.Service.UserService;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.ApiResult;
+import com.example.cafe.entity.MemberContext;
 import com.example.cafe.entity.ResultEntity;
 import com.example.cafe.util.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -107,23 +109,24 @@ public class LoginController {
         return response;
     }
 
-    @PostMapping("/logout")
-    @ResponseBody
-    public ResultEntity logOut(@RequestBody String email, final HttpServletRequest httpRequest) {
+    @RequestMapping("/logout")
+    public String logOut(@AuthenticationPrincipal MemberDto memberDto, final HttpServletRequest httpRequest) {
         final HttpSession session = httpRequest.getSession(false);
         if (session != null) {
             session.invalidate();
         }
 
-        // Redis에서 세션 정보 삭제
-        try {
-            userService.deleteUserData(email);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(memberDto != null){
+            // Redis에서 세션 정보 삭제
+            try {
+                userService.deleteUserData(memberDto.getEmail());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            log.info("logout success");
         }
 
-        log.info("logout success");
-
-        return new ResultEntity("0000", "Logout successful", null);
+        return "redirect:/";
     }
 }
