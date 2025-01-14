@@ -346,6 +346,9 @@
 <script th:inline="javascript">
     const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
     const csrfToken = $('meta[name="_csrf"]').attr('content');
+    /*<![CDATA[*/
+    var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+    /*]]>*/
     function prevMonth(date) {
         var target = new Date(date);
         target.setDate(1);
@@ -438,9 +441,6 @@
                 $tr.append($td);
             });
 
-            /*<![CDATA[*/
-            var userRole = /*[[${userRole}]]*/ 'ROLE_USER'; // 기본값 'ROLE_USER'
-
             // 권한이 ROLE_MANAGER 또는 ROLE_ARTIST인 경우에만 + 버튼을 보이도록 설정
             if (userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
                 // add-event 버튼을 hover할 때만 보이도록 CSS 클래스 추가
@@ -448,7 +448,6 @@
             } else {
                 $('.add-event').hide();
             }
-            /*]]>*/
 
             // 테이블에 <tr> 추가
             $('#tbl-month').append($tr);
@@ -613,9 +612,6 @@
 
     // 일정 클릭 시 수정 모달 띄우기
     try {
-        /*<![CDATA[*/
-        var userRole = /*[[${userRole}]]*/ 'ROLE_USER'; // 기본값 'ROLE_USER'
-
         // MANAGER, ARTIST 권한만 수정 모달 보이기
         if (userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
             $(document).on('click', '#event-list li', function (e) {
@@ -644,8 +640,6 @@
                 $('#edit-schedule-modal').fadeIn();
             });
         }
-
-        /*]]>*/
     } catch (e) {
         $('#edit-schedule-modal').fadeOut();
     }

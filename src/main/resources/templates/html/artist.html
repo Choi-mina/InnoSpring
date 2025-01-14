@@ -326,13 +326,16 @@
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
-<script>
+<script th:inline="javascript">
     const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
     const csrfToken = $('meta[name="_csrf"]').attr('content');
+    /*<![CDATA[*/
+    var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+    /*]]>*/
+
     var selectedArtistId
     window.onload = function() {
         fetchAllArtistsPost();
-        checkSessionFlag();
     };
 
     // 전체 아티스트를 조회하는 함수
@@ -448,7 +451,7 @@
                             }
 
                             // Manager, Artist는 삭제 버튼만 보임
-                            if(sessionFlag === 'M' || sessionFlag === 'A') {
+                            if(userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
                                 document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
                             }
                         });
@@ -551,7 +554,7 @@
         const editPhoto = document.getElementById("editPhoto");
         const commentsSave = document.getElementById("submitComment");
 
-        if(sessionFlag == 'F' || sessionFlag == null) {
+        if(userRole == 'ROLE_FAN') {
             editButton.style.display = "none";
             deleteButton.style.display = "none";
         }
@@ -691,7 +694,10 @@
 
                 fetch('/artist/save', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
                 })
                     .then(response => {
                         if (!response.ok) {

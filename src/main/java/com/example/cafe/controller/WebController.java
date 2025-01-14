@@ -107,7 +107,17 @@ public class WebController {
     }
 
     @RequestMapping("/community-web")
-    public String CommunityWeb(Model model) {
+    public String CommunityWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
+
         return "html/community.html";
     }
 
@@ -123,7 +133,7 @@ public class WebController {
                 .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
                 .map(grantedAuthority -> grantedAuthority.getAuthority())
                 .findFirst()
-                .orElse("ROLE_USER"); // 기본값은 ROLE_USER
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
 
         // 권한 정보를 모델에 추가
         model.addAttribute("userRole", userRole);
@@ -132,7 +142,16 @@ public class WebController {
     }
 
     @RequestMapping("/notice-web")
-    public String InformWeb(Model model) {
+    public String InformWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
         return "html/notice.html";
     }
 }

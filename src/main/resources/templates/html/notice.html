@@ -295,7 +295,7 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 
 <script th:src="@{/common/common.ajax.js}"></script>
-<script>
+<script th:inline="javascript">
     const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
     const csrfToken = $('meta[name="_csrf"]').attr('content');
     var table = document.getElementById("notice-table");
@@ -303,6 +303,9 @@
     var isEditing = false;
     var currentPage = 0;
     var pageSize = 5; // 페이지당 표시할 게시글 수
+    /*<![CDATA[*/
+    var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+    /*]]>*/
 
     // 페이지 로드
     $(document).ready(function() {
@@ -414,15 +417,10 @@
     function attachRowClickEvent() {
         $('#notice-table tr').each(function() {
             $(this).click(function() {
-                if(sessionEmail != null) {
-                    var noticeId = $(this).attr('data-notice-id');
-                    if (noticeId) {
-                        // 공지사항 상세정보 가져오기
-                        getNoticeDetail(noticeId);
-                    }
-                } else {
-                    alert("로그인을 해주세요.");
-                    location.href = '/login-web';
+                var noticeId = $(this).attr('data-notice-id');
+                if (noticeId) {
+                    // 공지사항 상세정보 가져오기
+                    getNoticeDetail(noticeId);
                 }
             });
         });
@@ -442,7 +440,8 @@
                     $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
                 $('#detailModal').fadeIn();
                 selectedNoticeId = noticeId;
-                if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F')) {
+
+                if(userRole == 'ROLE_FAN') {
                     $('#edit-btn').css('display', 'none');
                     $('#delete-btn').css('display', 'none');
                 }
