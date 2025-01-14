@@ -3,6 +3,8 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
     <title>Artist</title>
@@ -325,6 +327,8 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
 <script>
+    const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    const csrfToken = $('meta[name="_csrf"]').attr('content');
     var selectedArtistId
     window.onload = function() {
         fetchAllArtistsPost();
@@ -506,7 +510,7 @@
                 flag: "A",
                 artistId: selectedArtistId
             };
-            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 수정되었습니다.");
                     editingState = false;
@@ -526,7 +530,7 @@
         var commentElement = $(this).closest('.comment');
         var commentId = commentElement.attr('id').replace('comment-', ''); // 'comment-'를 제거하여 숫자 ID만 남김
         if(confirmC) {
-            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 삭제되었습니다.");
                     openDetailModal(selectedArtistId);
@@ -632,7 +636,7 @@
                     flag: "A",
                     artistId: artist.artistId
                 };
-                ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), function (data) {
+                ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
                     if (data.code === "0000") {
                         openDetailModal(artist.artistId);
                         $('#commentInput').val("");

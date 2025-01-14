@@ -3,6 +3,8 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
     <link href="../css/home.css" rel="stylesheet" type="text/css"/>
@@ -342,6 +344,8 @@
 <script th:src="@{/common/common.ajax.js}"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:inline="javascript">
+    const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    const csrfToken = $('meta[name="_csrf"]').attr('content');
     function prevMonth(date) {
         var target = new Date(date);
         target.setDate(1);
@@ -436,7 +440,6 @@
 
             /*<![CDATA[*/
             var userRole = /*[[${userRole}]]*/ 'ROLE_USER'; // 기본값 'ROLE_USER'
-            console.log(userRole);
 
             // 권한이 ROLE_MANAGER 또는 ROLE_ARTIST인 경우에만 + 버튼을 보이도록 설정
             if (userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
@@ -536,7 +539,7 @@
             };
 
             // schedule 저장을 위한 API 호출
-            ajaxPostJsonCall('/schedule/save', JSON.stringify(scheduleDto), function(data) {
+            ajaxPostJsonCall('/schedule/save', JSON.stringify(scheduleDto), csrfHeader, csrfToken, function(data) {
                 if (data.code === "0000") {
                     // 모달 창 닫기 및 폼 초기화
                     $('#schedule-modal').fadeOut();
@@ -610,7 +613,11 @@
 
     // 일정 클릭 시 수정 모달 띄우기
     try {
-        if(sessionFlag != null && sessionFlag != 'F')
+        /*<![CDATA[*/
+        var userRole = /*[[${userRole}]]*/ 'ROLE_USER'; // 기본값 'ROLE_USER'
+
+        // MANAGER, ARTIST 권한만 수정 모달 보이기
+        if (userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
             $(document).on('click', '#event-list li', function (e) {
                 e.preventDefault();
 
@@ -636,6 +643,9 @@
                 // 수정 모달 열기
                 $('#edit-schedule-modal').fadeIn();
             });
+        }
+
+        /*]]>*/
     } catch (e) {
         $('#edit-schedule-modal').fadeOut();
     }
@@ -662,7 +672,7 @@
             };
 
             // schedule 수정 요청을 위한 API 호출
-            ajaxPostJsonCall('/schedule/modify', JSON.stringify(scheduleDto), function (data) {
+            ajaxPostJsonCall('/schedule/modify', JSON.stringify(scheduleDto), csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     // 모달 닫기 및 폼 초기화
                     $('#edit-schedule-modal').fadeOut();
@@ -693,7 +703,7 @@
         if (scheduleId) {
             // 삭제 요청을 위한 API 호출
             if (confirm("정말로 스케줄을 삭제하시겠습니까?")) {
-                ajaxPostJsonCall('/schedule/delete?id=' + scheduleId, null, function (data) {
+                ajaxPostJsonCall('/schedule/delete?id=' + scheduleId, null, csrfHeader, csrfToken, function (data) {
                     if (data.code === "0000") {
                         // 삭제 성공 시 모달 닫기 및 UI 업데이트
                         $('#edit-schedule-modal').fadeOut();

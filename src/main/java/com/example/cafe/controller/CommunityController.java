@@ -8,10 +8,12 @@ import com.example.cafe.entity.Member;
 import com.example.cafe.entity.ResultEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,10 +27,13 @@ public class CommunityController {
     private final MemberService memberService;
 
     @PostMapping("/save")
-    public ResultEntity saveCommunity(@RequestBody CommunityDto communityDto) {
+    public ResultEntity saveCommunity(@RequestBody CommunityDto communityDto, @AuthenticationPrincipal MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
         try {
-            Member member = memberService.findByEmailEt(communityDto.getAuthor());
+            // 인증된 사용자를 작성자로 넣기
+            // MemberDto -> Member
+            ModelMapper modelMapper = new ModelMapper();
+            Member member = modelMapper.map(memberDto, Member.class);
             communityDto.setCommunityAuthor(member);
             communityService.saveCommunity(communityDto);
 
@@ -103,10 +108,13 @@ public class CommunityController {
     }
 
     @PostMapping("/modify")
-    public ResultEntity modifyCommunity(@RequestBody CommunityDto communityDto) {
+    public ResultEntity modifyCommunity(@RequestBody CommunityDto communityDto, @AuthenticationPrincipal MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
         try {
-            Member member = memberService.findByEmailEt(communityDto.getAuthor());
+            // 인증된 사용자를 작성자로 넣기
+            // MemberDto -> Member
+            ModelMapper modelMapper = new ModelMapper();
+            Member member = modelMapper.map(memberDto, Member.class);
             communityDto.setCommunityAuthor(member);
             communityService.modifyCommunity(communityDto);
 

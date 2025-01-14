@@ -3,6 +3,8 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <meta charset="UTF-8">
     <title>Notice</title>
@@ -294,6 +296,8 @@
 
 <script th:src="@{/common/common.ajax.js}"></script>
 <script>
+    const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    const csrfToken = $('meta[name="_csrf"]').attr('content');
     var table = document.getElementById("notice-table");
     var selectedNoticeId = null;
     var isEditing = false;
@@ -394,7 +398,7 @@
         };
 
         // 공지사항 저장을 위한 API 호출
-        ajaxPostJsonCall('/notice/save', JSON.stringify(noticeDto), function(data) {
+        ajaxPostJsonCall('/notice/save', JSON.stringify(noticeDto), csrfHeader, csrfToken, function(data) {
             if (data.code === "0000") {
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
@@ -498,7 +502,7 @@
         };
 
         // 서버로 수정된 데이터를 전송 (Ajax)
-        ajaxPostJsonCall('/notice/modify', JSON.stringify(noticeDto), function (data) {
+        ajaxPostJsonCall('/notice/modify', JSON.stringify(noticeDto), csrfHeader, csrfToken, function (data) {
             if (data.code === "0000") {
                 alert("공지사항이 수정되었습니다.");
                 findNotice(0);
@@ -522,7 +526,7 @@
     // 공지사항 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
         if (selectedNoticeId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
-            ajaxPostJsonCall('/notice/delete?id=' + selectedNoticeId, null, function (data) {
+            ajaxPostJsonCall('/notice/delete?id=' + selectedNoticeId, null, csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("공지사항이 삭제되었습니다.");
                     $('#detailModal').fadeOut();
