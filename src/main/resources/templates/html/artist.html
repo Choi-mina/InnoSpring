@@ -554,7 +554,7 @@
         const editPhoto = document.getElementById("editPhoto");
         const commentsSave = document.getElementById("submitComment");
 
-        if(userRole == 'ROLE_FAN') {
+        if(userRole === 'ROLE_FAN') {
             editButton.style.display = "none";
             deleteButton.style.display = "none";
         }
@@ -591,7 +591,10 @@
 
                 fetch('/artist/modify', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -612,7 +615,10 @@
 
         deleteButton.onclick = function() {
             if (confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
-                fetch(`/artist/delete?id=${artist.artistId}`, { method: 'POST' })
+                fetch(`/artist/delete?id=${artist.artistId}`, { method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    } })
                     .then(response => {
                         if (!response.ok) throw new Error("HTTP status " + response.status);
                         return response.json();
@@ -656,14 +662,17 @@
     var WriteBtn = document.getElementById("write-btn");
     var WriteSpan = document.getElementsByClassName("close")[0];
 
-    // 글작성 버튼 클릭 시 모달 열기
-    WriteBtn.onclick = function() {
-        WriteModal.style.display = "block";
-    }
 
-    // X 버튼 클릭 시 모달 닫기
-    WriteSpan.onclick = function() {
-        WriteModal.style.display = "none";
+    if(userRole !== 'ROLE_FAN') {
+        // 글작성 버튼 클릭 시 모달 열기
+        WriteBtn.onclick = function() {
+            WriteModal.style.display = "block";
+        }
+
+        // X 버튼 클릭 시 모달 닫기
+        WriteSpan.onclick = function() {
+            WriteModal.style.display = "none";
+        }
     }
 
     // '게시하기' 버튼 클릭 핸들러

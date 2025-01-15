@@ -122,7 +122,16 @@ public class WebController {
     }
 
     @RequestMapping("artist-web")
-    public String ArtistWeb(Model model) {
+    public String ArtistWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
         return "html/artist.html";
     }
 

@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/common/**").permitAll()
                         .requestMatchers("/", "/sign-up-web", "/member/**").permitAll()
-                        .requestMatchers("/notice/save", "/notice/delete", "/notice/modify", "/schedule/save", "/schedule/modify", "schedule/delete", "/artist/save")
+                        .requestMatchers("/notice/save", "/notice/delete", "/notice/modify", "/schedule/save", "/schedule/modify", "schedule/delete", "/artist/save", "/artist/modify", "artist/delete")
                         .hasAnyRole("MANAGER", "ARTIST")
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )

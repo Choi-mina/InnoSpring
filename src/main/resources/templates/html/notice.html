@@ -370,14 +370,16 @@
     var btn = document.getElementById("write-btn");
     var span = document.getElementsByClassName("close")[0];
 
-    // 글작성 버튼 클릭 시 모달 열기
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
+    if(userRole !== 'ROLE_FAN') {
+        // 글작성 버튼 클릭 시 모달 열기
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
 
-    // X 버튼 클릭 시 모달 닫기
-    span.onclick = function() {
-        closeWriteModal();
+        // X 버튼 클릭 시 모달 닫기
+        span.onclick = function() {
+            closeWriteModal();
+        }
     }
 
     //  공지사항 등록
@@ -638,7 +640,7 @@
         }
 
         // 모달 닫기
-        detailModal.style.display = "none";
+        $('#detailModal').fadeOut();
     }
 
     function handleSearch(page) {   // 검색 이벤트 함수
