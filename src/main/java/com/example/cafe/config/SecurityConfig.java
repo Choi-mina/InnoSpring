@@ -50,7 +50,7 @@ public class SecurityConfig {
                 // 세션 관리 설정
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 필요한 경우 세션 생성
-                        .sessionFixation().newSession() // 로그인 시 새로운 세션 생성
+                        .sessionFixation().none()  // 기존 세션 유지
                         .invalidSessionUrl("/login-web") // 세션이 무효화되면 이 URL로 리다이렉트
                 )
                 .formLogin(form -> form

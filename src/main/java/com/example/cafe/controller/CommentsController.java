@@ -7,14 +7,17 @@ import com.example.cafe.Service.MemberService;
 import com.example.cafe.dto.ArtistDto;
 import com.example.cafe.dto.CommentsDto;
 import com.example.cafe.dto.CommunityDto;
+import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.Member;
 import com.example.cafe.entity.ResultEntity;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,10 +31,13 @@ public class CommentsController {
     private final ArtistService artistService;
 
     @PostMapping("/save")
-    public ResultEntity save(@RequestBody CommentsDto commentsDto) {
+    public ResultEntity save(@RequestBody CommentsDto commentsDto, @AuthenticationPrincipal MemberDto memberDto) {
         ResultEntity result = new ResultEntity();
         try {
-            Member member = memberService.findByEmailEt(commentsDto.getAuthor());
+            // 인증된 사용자를 작성자로 넣기
+            // MemberDto -> Member
+            ModelMapper modelMapper = new ModelMapper();
+            Member member = modelMapper.map(memberDto, Member.class);
             commentsDto.setCommentsAuthor(member);
             if(commentsDto.getFlag().equals("C")) { // Community 글인 경우
                 CommunityDto communityDto = communityService.findByIdCommunity(commentsDto.getCommunityId());

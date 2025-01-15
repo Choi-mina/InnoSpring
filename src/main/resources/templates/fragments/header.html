@@ -104,33 +104,36 @@
         <button class="mypage" id="mypage" sec:authorize="isAuthenticated()" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
         <div class="div1"> </div>
         <button class="login-btn" id="state-logout" sec:authorize="isAnonymous()" onclick="location.href='/login-web'"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
-        <button class="logout-btn" id="state-login" sec:authorize="isAuthenticated()" onclick="location.href='/logout'"><img src="/images/login.png" alt="login btn image" id="logout-btn-image" width="50px"></button>
+        <button class="logout-btn" id="state-login" sec:authorize="isAuthenticated()"><img src="/images/login.png" alt="login btn image" id="logout-btn-image" width="50px"></button>
     </div>
 </div>
 </body>
 <script th:src="@{/common/common.ajax.js}"></script>
 <script>
     var sessionEmail;
-    // 세션 조회
-    // ajaxJsonCall('/get-session', null, function (session) {
-    //     sessionEmail = session.email;
-    //     sessionFlag = session.flag;
-    //     sessionDate = session.date;
-    //     if (session.email != "null" && session.email != null) {
-    //         document.querySelector('.login-btn').setAttribute('id', 'state-login');
-    //         document.getElementById("login-btn-image").src = "/images/login.png";
-    //         document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
-    //         // document.getElementById("mypage").style.display = "block";
-    //         if(session.flag == 'F') {   // fan인 경우 date 표시
-    //
-    //         }
-    //     }
-    // }, function (error) {
-    //     alert("An error occurred: " + error.message);
-    // });
+    var sessionDate;
+    var flag;
 
-    var date = calDate();
-    $('#date').text('ꯁ + ' + date);
+    // 세션 조회
+    ajaxJsonCall('/get-session', null, function (session) {
+        sessionEmail = session.email;
+        sessionDate = session.date;
+        flag = session.flag;
+
+        // FAN인 경우에만 date 표시
+        if(flag === 'ROLE_FAN') {
+            var date = calDate(sessionDate);
+            $('#date').text('ꯁ + ' + date);
+        }
+    }, function (error) {
+        alert("An error occurred: " + error.message);
+    });
+
+    document.getElementById('state-login').addEventListener("click", function(event) {
+        if(confirm("로그아웃하시겠습니까?")) {
+            location.href= '/logout';
+        }
+    })
 
     // 로그인 버튼 클릭
     // document.getElementById("state-logout").addEventListener("click", function(event) {
