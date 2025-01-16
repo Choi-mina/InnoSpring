@@ -12,10 +12,14 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
@@ -37,8 +41,6 @@ public class WebController {
     @RequestMapping("/")
     public String MainWeb() {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
-        // redis에서 key에 해당하는 value를 찾음.
-//        String cachedData = ops.get("user:login:" + email);
 
         return "html/home.html";
     }
@@ -48,8 +50,8 @@ public class WebController {
 
         Map<String, Object> sessionValues = new HashMap<>();
         sessionValues.put("email", session.getAttribute("email"));
-        sessionValues.put("flag", session.getAttribute("flag"));
         sessionValues.put("date", session.getAttribute("date"));
+        sessionValues.put("flag", session.getAttribute("flag"));
         return ResponseEntity.ok(sessionValues);
     }
 
@@ -101,27 +103,74 @@ public class WebController {
     }
 
     @RequestMapping("/mypage-web")
-    public String MyPageWeb(Model model) {
+    public String MyPageWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
         return "html/mypage.html";
     }
 
     @RequestMapping("/community-web")
-    public String CommunityWeb(Model model) {
+    public String CommunityWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
+
         return "html/community.html";
     }
 
     @RequestMapping("artist-web")
-    public String ArtistWeb(Model model) {
+    public String ArtistWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
         return "html/artist.html";
     }
 
     @RequestMapping("schedule-web")
-    public String ScheduleWeb(Model model) {
+    public String ScheduleWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
+
         return "html/schedule.html";
     }
 
     @RequestMapping("/notice-web")
-    public String InformWeb(Model model) {
+    public String InformWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
         return "html/notice.html";
     }
 }

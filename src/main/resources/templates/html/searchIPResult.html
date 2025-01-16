@@ -2,6 +2,8 @@
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -148,6 +150,8 @@
 
   const formBox = document.querySelector('.form-box');
   const typeValue = formBox.getAttribute('type');
+  const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+  const csrfToken = $('meta[name="_csrf"]').attr('content');
 
   // 아이디 찾기를 한 경우에만 이메일 마스킹 처리
   if(typeValue == 'id') {
@@ -183,7 +187,7 @@
         password: newPassword
       };
 
-      ajaxPostJsonCall('/member/change-pw', JSON.stringify(memberDto), function(data) {
+      ajaxPostJsonCall('/member/change-pw', JSON.stringify(memberDto), csrfHeader, csrfToken, function(data) {
         if (data.code === "0000") {
           alert("비밀변호가 변경되었습니다.");
           window.location.href = "/login-web";

@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <meta charset="UTF-8">
     <title>Notice</title>
@@ -88,7 +91,7 @@
         .search-text-box {
             width: 100%;
             height: 100%;
-            text-align: right;
+            text-align: center;
             position: absolute;
             border: 0px;
         }
@@ -252,7 +255,7 @@
         <button id="prev-page-btn" disabled><</button>
         <button id="next-page-btn">></button>
     </div>
-    <button class="write-btn" id="write-btn">+</button>
+    <button class="write-btn" id="write-btn" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button>
 
     <!--공지사항 추가 버튼 클릭 시 나타나는 modal-->
     <div id="writeModal" class="modal">
@@ -292,12 +295,17 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 
 <script th:src="@{/common/common.ajax.js}"></script>
-<script>
+<script th:inline="javascript">
+    const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    const csrfToken = $('meta[name="_csrf"]').attr('content');
     var table = document.getElementById("notice-table");
     var selectedNoticeId = null;
     var isEditing = false;
     var currentPage = 0;
     var pageSize = 5; // 페이지당 표시할 게시글 수
+    /*<![CDATA[*/
+    var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+    /*]]>*/
 
     // 페이지 로드
     $(document).ready(function() {
@@ -314,9 +322,6 @@
             currentPage++;
             findNotice(currentPage);
         });
-
-        if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F'))
-            $('#write-btn').css('display', 'none');
     });
 
     // select-search 옵션 값 가지고오기
@@ -365,14 +370,16 @@
     var btn = document.getElementById("write-btn");
     var span = document.getElementsByClassName("close")[0];
 
-    // 글작성 버튼 클릭 시 모달 열기
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
+    if(userRole !== 'ROLE_FAN') {
+        // 글작성 버튼 클릭 시 모달 열기
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
 
-    // X 버튼 클릭 시 모달 닫기
-    span.onclick = function() {
-        closeWriteModal();
+        // X 버튼 클릭 시 모달 닫기
+        span.onclick = function() {
+            closeWriteModal();
+        }
     }
 
     //  공지사항 등록
@@ -396,7 +403,7 @@
         };
 
         // 공지사항 저장을 위한 API 호출
-        ajaxPostJsonCall('/notice/save', JSON.stringify(noticeDto), function(data) {
+        ajaxPostJsonCall('/notice/save', JSON.stringify(noticeDto), csrfHeader, csrfToken, function(data) {
             if (data.code === "0000") {
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
@@ -412,15 +419,10 @@
     function attachRowClickEvent() {
         $('#notice-table tr').each(function() {
             $(this).click(function() {
-                if(sessionEmail != null) {
-                    var noticeId = $(this).attr('data-notice-id');
-                    if (noticeId) {
-                        // 공지사항 상세정보 가져오기
-                        getNoticeDetail(noticeId);
-                    }
-                } else {
-                    alert("로그인을 해주세요.");
-                    location.href = '/login-web';
+                var noticeId = $(this).attr('data-notice-id');
+                if (noticeId) {
+                    // 공지사항 상세정보 가져오기
+                    getNoticeDetail(noticeId);
                 }
             });
         });
@@ -440,7 +442,8 @@
                     $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.createDate)));
                 $('#detailModal').fadeIn();
                 selectedNoticeId = noticeId;
-                if(sessionFlag == null || (sessionFlag != null && sessionFlag == 'F')) {
+
+                if(userRole == 'ROLE_FAN') {
                     $('#edit-btn').css('display', 'none');
                     $('#delete-btn').css('display', 'none');
                 }
@@ -500,7 +503,7 @@
         };
 
         // 서버로 수정된 데이터를 전송 (Ajax)
-        ajaxPostJsonCall('/notice/modify', JSON.stringify(noticeDto), function (data) {
+        ajaxPostJsonCall('/notice/modify', JSON.stringify(noticeDto), csrfHeader, csrfToken, function (data) {
             if (data.code === "0000") {
                 alert("공지사항이 수정되었습니다.");
                 findNotice(0);
@@ -524,7 +527,7 @@
     // 공지사항 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
         if (selectedNoticeId && confirm("정말로 이 공지사항을 삭제하시겠습니까?")) {
-            ajaxPostJsonCall('/notice/delete?id=' + selectedNoticeId, null, function (data) {
+            ajaxPostJsonCall('/notice/delete?id=' + selectedNoticeId, null, csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("공지사항이 삭제되었습니다.");
                     $('#detailModal').fadeOut();
@@ -637,7 +640,7 @@
         }
 
         // 모달 닫기
-        detailModal.style.display = "none";
+        $('#detailModal').fadeOut();
     }
 
     function handleSearch(page) {   // 검색 이벤트 함수

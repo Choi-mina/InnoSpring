@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
     <title>Artist</title>
@@ -264,7 +267,7 @@
     <div class="artist-div">
         <div class="grid-container" id="artistGrid"></div>
     </div>
-    <button class="write-btn" id="write-btn">+</button>
+    <button class="write-btn" id="write-btn" sec:authorize="hasRole('ROLE_MANAGER') or hasRole('ROLE_ARTIST')">+</button>
 
     <!--  글 작성 modal  -->
     <div id="myModal" class="modal">
@@ -323,25 +326,17 @@
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
-<script>
+<script th:inline="javascript">
+    const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    const csrfToken = $('meta[name="_csrf"]').attr('content');
+    /*<![CDATA[*/
+    var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+    /*]]>*/
+
     var selectedArtistId
     window.onload = function() {
         fetchAllArtistsPost();
-        checkSessionFlag();
     };
-
-    // sessionFlag 확인 후 버튼 표시 여부 결정
-    function checkSessionFlag() {
-        if (sessionFlag !== "undefined" && sessionFlag !== null) {
-            if (sessionFlag === 'F') {
-                document.getElementById('write-btn').style.display = 'none';
-            } else {
-                document.getElementById('write-btn').style.display = 'block';
-            }
-        } else {
-            document.getElementById('write-btn').style.display = 'none';
-        }
-    }
 
     // 전체 아티스트를 조회하는 함수
     function fetchAllArtistsPost() {
@@ -456,7 +451,7 @@
                             }
 
                             // Manager, Artist는 삭제 버튼만 보임
-                            if(sessionFlag === 'M' || sessionFlag === 'A') {
+                            if(userRole === 'ROLE_MANAGER' || userRole === 'ROLE_ARTIST') {
                                 document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
                             }
                         });
@@ -518,7 +513,7 @@
                 flag: "A",
                 artistId: selectedArtistId
             };
-            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 수정되었습니다.");
                     editingState = false;
@@ -538,7 +533,7 @@
         var commentElement = $(this).closest('.comment');
         var commentId = commentElement.attr('id').replace('comment-', ''); // 'comment-'를 제거하여 숫자 ID만 남김
         if(confirmC) {
-            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 삭제되었습니다.");
                     openDetailModal(selectedArtistId);
@@ -559,7 +554,7 @@
         const editPhoto = document.getElementById("editPhoto");
         const commentsSave = document.getElementById("submitComment");
 
-        if(sessionFlag == 'F' || sessionFlag == null) {
+        if(userRole === 'ROLE_FAN') {
             editButton.style.display = "none";
             deleteButton.style.display = "none";
         }
@@ -596,7 +591,10 @@
 
                 fetch('/artist/modify', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -617,7 +615,10 @@
 
         deleteButton.onclick = function() {
             if (confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
-                fetch(`/artist/delete?id=${artist.artistId}`, { method: 'POST' })
+                fetch(`/artist/delete?id=${artist.artistId}`, { method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    } })
                     .then(response => {
                         if (!response.ok) throw new Error("HTTP status " + response.status);
                         return response.json();
@@ -644,7 +645,7 @@
                     flag: "A",
                     artistId: artist.artistId
                 };
-                ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), function (data) {
+                ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
                     if (data.code === "0000") {
                         openDetailModal(artist.artistId);
                         $('#commentInput').val("");
@@ -661,14 +662,17 @@
     var WriteBtn = document.getElementById("write-btn");
     var WriteSpan = document.getElementsByClassName("close")[0];
 
-    // 글작성 버튼 클릭 시 모달 열기
-    WriteBtn.onclick = function() {
-        WriteModal.style.display = "block";
-    }
 
-    // X 버튼 클릭 시 모달 닫기
-    WriteSpan.onclick = function() {
-        WriteModal.style.display = "none";
+    if(userRole !== 'ROLE_FAN') {
+        // 글작성 버튼 클릭 시 모달 열기
+        WriteBtn.onclick = function() {
+            WriteModal.style.display = "block";
+        }
+
+        // X 버튼 클릭 시 모달 닫기
+        WriteSpan.onclick = function() {
+            WriteModal.style.display = "none";
+        }
     }
 
     // '게시하기' 버튼 클릭 핸들러
@@ -699,7 +703,10 @@
 
                 fetch('/artist/save', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -714,7 +721,9 @@
                         }
                     })
                     .catch(error => {
-                        alert("An error occurred: " + error.message);
+                        if(error.message == "HTTP status 413") {
+                            alert("파일의 크기가 커서 게시에 실패했습니다.")
+                        }
                     });
             }
         }

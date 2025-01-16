@@ -2,6 +2,8 @@
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -194,6 +196,9 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 <script>
 
+  const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+  const csrfToken = $('meta[name="_csrf"]').attr('content');
+
   // 0: 버튼을 클릭하지 않음, 1: 이미 존재하는 이메일, 2: 사용가능한 이메일
   var emailCheckFlag = 0;
 
@@ -269,7 +274,7 @@
           flag: selectedValue
         };
 
-        ajaxPostJsonCall('/member/sign-up', JSON.stringify(memberDto), function(data) {
+        ajaxPostJsonCall('/member/sign-up', JSON.stringify(memberDto), csrfHeader, csrfToken, function(data) {
           if (data.code === "0000") {
             alert("회원가입 성공");
             window.location.href = "/login-web";

@@ -13,7 +13,6 @@ var ajaxJsonCall = function(url, param, successCallback, errorCallback, headerOp
     var contentType;
     var dataParam;
     var dataType;
-    var headers = mergeHeaderOptions(headerOptions);
 
     if (typeof param == "string") {
         contentType = "application/json;charset=UTF-8";
@@ -33,7 +32,6 @@ var ajaxJsonCall = function(url, param, successCallback, errorCallback, headerOp
         ,contentType : contentType
         ,data : dataParam
         ,dataType : dataType
-        ,headers : headers
         ,beforeSend : function(xmlHttpRequest) {
             xmlHttpRequest.setRequestHeader("ajax", "true");
         }
@@ -67,7 +65,6 @@ var ajaxJsonCallSync = function(url, param, successCallback, errorCallback, head
     var contentType;
     var dataParam;
     var dataType;
-    var headers = mergeHeaderOptions(headerOptions);
 
     if (typeof param == "string") {
         contentType = "application/json;charset=UTF-8";
@@ -88,7 +85,6 @@ var ajaxJsonCallSync = function(url, param, successCallback, errorCallback, head
         ,data : dataParam
         ,async : false
         ,dataType : dataType
-        ,headers : headers
         ,beforeSend : function(xmlHttpRequest) {
             xmlHttpRequest.setRequestHeader("ajax", "true");
         }
@@ -118,12 +114,11 @@ var ajaxJsonCallSync = function(url, param, successCallback, errorCallback, head
  * @param errorCallback
  * @param headerOptions = { tenantId: integer, tenantCode: string, companyId: string }
  */
-var ajaxPostJsonCall = function(url, param, successCallback, errorCallback, headerOptions = {} ) {
+var ajaxPostJsonCall = function(url, param, csrfHeader, csrfToken, successCallback, errorCallback, headerOptions = {} ) {
 
     var contentType;
     var dataParam;
     var dataType;
-    var headers = mergeHeaderOptions(headerOptions);
 
     if (typeof param == "string") {
         contentType = "application/json;charset=UTF-8";
@@ -143,9 +138,13 @@ var ajaxPostJsonCall = function(url, param, successCallback, errorCallback, head
         ,contentType : contentType
         ,data : dataParam
         ,dataType : dataType
-        ,headers : headers
-        ,beforeSend : function(xmlHttpRequest) {
+        ,beforeSend: function(xmlHttpRequest) {
+            // 기존 헤더 설정
             xmlHttpRequest.setRequestHeader("ajax", "true");
+            // CSRF 헤더 설정 추가
+            if (csrfHeader && csrfToken) {
+                xmlHttpRequest.setRequestHeader(csrfHeader, csrfToken);
+            }
         }
         ,success : function(data) {
             try {
@@ -170,7 +169,6 @@ var asyncAjaxGet = function (url, param, headerOptions = {}) {
         var contentType;
         var dataParam;
         var dataType;
-        var headers = mergeHeaderOptions(headerOptions);
 
         if (typeof param == "string") {
             contentType = "application/json;charset=UTF-8";
@@ -190,7 +188,6 @@ var asyncAjaxGet = function (url, param, headerOptions = {}) {
             ,contentType : contentType
             ,data : dataParam
             ,dataType : dataType
-            ,headers : headers
             ,beforeSend : function(xmlHttpRequest) {
                 xmlHttpRequest.setRequestHeader("ajax", "true");
             }
@@ -220,7 +217,6 @@ var asyncAjaxPost = function (url, param, headerOptions = {}) {
         var contentType;
         var dataParam;
         var dataType;
-        var headers = mergeHeaderOptions(headerOptions);
         var responseData = {};
 
         if (typeof param == "string") {
@@ -243,7 +239,6 @@ var asyncAjaxPost = function (url, param, headerOptions = {}) {
             , contentType: contentType
             , data: dataParam
             , dataType: dataType
-            , headers: headers
             , beforeSend: function (xmlHttpRequest) {
                 xmlHttpRequest.setRequestHeader("ajax", "true");
             }
@@ -267,16 +262,4 @@ var asyncAjaxPost = function (url, param, headerOptions = {}) {
             }
         });
     })
-}
-
-var mergeHeaderOptions = function( headerOptions = { tenantId: undefined, tenantCode: undefined, companyId: undefined, tenantMaster: undefined } ) {
-
-    const headers = {};
-
-    if(headerOptions.tenantId !== undefined) { headers["X-TENANT-ID"] = headerOptions.tenantId; }
-    if(headerOptions.tenantCode !== undefined) { headers["X-TENANT-CODE"] = headerOptions.tenantCode; }
-    if(headerOptions.companyId !== undefined) { headers["X-COMPANY-ID"] = headerOptions.companyId; }
-    if(headerOptions.tenantMaster !== undefined) { headers["X-TENANT-MASTER"] = headerOptions.tenantMaster; }
-
-    return headers;
 }

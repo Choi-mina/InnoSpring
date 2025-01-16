@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -54,7 +55,6 @@
             background-color: transparent;
         }
         .mypage {
-            display: none;
             color: rgba(83 , 52 , 129);
             font-size: 20px;
             font-style: inherit;
@@ -77,6 +77,18 @@
             border: 0;
             background-color: transparent;
         }
+        .logout-btn {
+            color: rgba(255, 255, 255, 1);
+            width: 50px;
+            font-size: 20px;
+            font-style: inherit;
+            text-align: right;
+            font-family: DM Sans;
+            font-weight: 700;
+            flex: 1;
+            border: 0;
+            background-color: transparent;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
@@ -85,59 +97,41 @@
     <div class="navbar-div" id="navbar-div">
         <button class="logo" onclick="location.href='/'">
             <span>InnoSpring</span>
-            <label id="date"></label>
+            <label id="date" sec:authorize="hasRole('ROLE_FAN')"></label>
         </button>
         <div class="div1"> </div>
         <button class="notice" id="notice" onclick="location.href='/notice-web'"><span>공지사항</span></button>
-        <button class="mypage" id="mypage" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
+        <button class="mypage" id="mypage" sec:authorize="isAuthenticated()" onclick="location.href='/mypage-web'"><span>마이페이지</span></button>
         <div class="div1"> </div>
-        <button class="login-btn" id="state-logout"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
+        <button class="login-btn" id="state-logout" sec:authorize="isAnonymous()" onclick="location.href='/login-web'"><img src="/images/logout.png" alt="login btn image" id="login-btn-image" width="50px"></button>
+        <button class="logout-btn" id="state-login" sec:authorize="isAuthenticated()"><img src="/images/login.png" alt="login btn image" id="logout-btn-image" width="50px"></button>
     </div>
 </div>
 </body>
 <script th:src="@{/common/common.ajax.js}"></script>
 <script>
     var sessionEmail;
+    var sessionDate;
+    var flag;
+
     // 세션 조회
     ajaxJsonCall('/get-session', null, function (session) {
         sessionEmail = session.email;
-        sessionFlag = session.flag;
         sessionDate = session.date;
-        if (session.email != "null" && session.email != null) {
-            document.querySelector('.login-btn').setAttribute('id', 'state-login');
-            document.getElementById("login-btn-image").src = "/images/login.png";
-            document.getElementById('login-btn-image').setAttribute('alt', 'logout btn image');
-            document.getElementById("mypage").style.display = "block";
-            if(session.flag == 'F') {   // fan인 경우 date 표시
-                var date = calDate(session.date);
-                $('#date').text('ꯁ + ' + date);
-            }
+        flag = session.flag;
+
+        // FAN인 경우에만 date 표시
+        if(flag === 'ROLE_FAN') {
+            var date = calDate(sessionDate);
+            $('#date').text('ꯁ + ' + date);
         }
     }, function (error) {
         alert("An error occurred: " + error.message);
     });
 
-    // 로그인 버튼 클릭
-    document.getElementById("state-logout").addEventListener("click", function(event) {
-        const button = document.querySelector(".login-btn");
-        const loginState = button.getAttribute('id');
-
-        if (loginState === "state-logout") { // 로그인 상태가 아닌 경우 로그인 페이지로 이동
-            window.location.href = "/login-web";
-        } else if (loginState === "state-login") { // 로그인 상태인 경우 로그아웃 처리
-            const result = confirm('로그아웃 하시겠습니까?');
-            if(result) {
-                // 로그아웃 API 호출
-                ajaxPostJsonCall('/logout', sessionEmail, function (data) {
-                    if (data.code === "0000") {
-                        window.location.href = "/";
-                    }
-                }, function (error) {
-                    alert("An error occurred: " + error.message);
-                });
-            } else {
-                return false;
-            }
+    document.getElementById('state-login').addEventListener("click", function(event) {
+        if(confirm("로그아웃하시겠습니까?")) {
+            location.href= '/logout';
         }
     });
 

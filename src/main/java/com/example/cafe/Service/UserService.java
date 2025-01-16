@@ -19,18 +19,12 @@ public class UserService {
         hashOps = redisTemplate.opsForHash();
     }
 
-    public void saveUserData(String email, String password, String sessionId, String flag, String date) throws Exception {
+    public void saveUserData(String email, String password, String flag, String date) throws Exception {
         String encryptedPassword = EncryptionUtil.encrypt(password);    // 비밀번호 암호화
         String key = "user:session:" + email;
-        hashOps.put(key, "sessionId", sessionId);
         hashOps.put(key, "password", encryptedPassword);
         hashOps.put(key, "flag", flag);
         hashOps.put(key, "date", date);
-    }
-
-    public String getSessionId(String email) {
-        String key = "user:session:" + email;
-        return hashOps.get(key, "sessionId");
     }
 
     public String getPassword(String email) throws Exception {

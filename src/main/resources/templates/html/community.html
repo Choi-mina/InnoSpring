@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
     <meta charset="UTF-8">
     <title>Community</title>
@@ -310,13 +313,18 @@
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 
 <script th:src="@{/common/common.ajax.js}"></script>
-<script>
+<script th:inline="javascript">
     var table = document.getElementById("community-table");
     var selectedCommunityId = null;
     var postIsEditing = false;  // 글이 수정중인지 확인하는 boolean타입 변수
     var commentsIsEditing = false;   // 다른 댓글이 수정중 상태인지 확인
     var currentPage = 0;
     var pageSize = 10; // 페이지당 표시할 게시글 수
+    const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+    const csrfToken = $('meta[name="_csrf"]').attr('content');
+    /*<![CDATA[*/
+    var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+    /*]]>*/
 
     // 페이지 로드
     $(document).ready(function() {
@@ -333,14 +341,6 @@
             currentPage++;
             findCommunity(currentPage);
         });
-        try{
-            if(sessionFlag == null)
-                $('#write-btn').css('display', 'none');
-            else
-                $('#write-btn').css('display', 'block');
-        } catch (e) {
-            $('#write-btn').css('display', 'none');
-        }
     });
 
     // 모달 관련 요소들 가져오기
@@ -380,7 +380,7 @@
         };
 
         // community 글 저장을 위한
-        ajaxPostJsonCall('/community/save', JSON.stringify(communityDto), function(data) {
+        ajaxPostJsonCall('/community/save', JSON.stringify(communityDto), csrfHeader, csrfToken, function(data) {
             if (data.code === "0000") {
                 // 모달 창 닫기 및 폼 초기화
                 $('#writeModal').fadeOut();
@@ -396,15 +396,10 @@
     function attachRowClickEvent() {
         $('#community-table tr').each(function() {
             $(this).click(function() {
-                if(sessionEmail != null) {
-                    var communityId = $(this).attr('data-community-id');
-                    if (communityId) {
-                        // community 글 상세정보 가져오기
-                        getCommunityDetail(communityId);
-                    }
-                } else {
-                    alert("로그인을 해주세요.");
-                    location.href = '/login-web';
+                var communityId = $(this).attr('data-community-id');
+                if (communityId) {
+                    // community 글 상세정보 가져오기
+                    getCommunityDetail(communityId);
                 }
             });
         });
@@ -422,10 +417,10 @@
                 $('#detail-date').text("등록일: " + dateFormat(new Date(data.data.updateDate)));
                 $('#detailModal').fadeIn();
                 selectedCommunityId = communityId;
-                if(sessionEmail == null || (sessionFlag == 'F' && data.data.author != sessionEmail)) {  // Fan인 경우 다른사람 글을 수정, 삭제 불
+                if(sessionEmail == null || (userRole == 'ROLE_FAN' && data.data.author != sessionEmail)) {  // Fan인 경우 다른사람 글을 수정, 삭제 불
                     $('#edit-btn').css('display', 'none');
                     $('#delete-btn').css('display', 'none');
-                } else if(sessionEmail != null && (sessionFlag == 'M' || sessionFlag == 'A') && data.data.author != sessionEmail) { // Artist와 Manager는 다른사람의 글을 삭제만 가능 (수정 불가)
+                } else if(sessionEmail != null && (userRole == 'ROLE_MANAGER' || userRole == 'ROLE_ARTIST') && data.data.author != sessionEmail) { // Artist와 Manager는 다른사람의 글을 삭제만 가능 (수정 불가)
                     $('#edit-btn').css('display', 'none');
                 } else{ // 본인 글만 수정, 삭제 가능
                     $('#edit-btn').css('display', 'block');
@@ -468,7 +463,7 @@
                         }
 
                         // Manager, Artist는 삭제 버튼만 보임
-                        if(sessionFlag === 'M' || sessionFlag === 'A') {
+                        if(userRole === 'ROLE_MANAGER' || userRole === 'USER_ARTIST') {
                             document.querySelector(`#comment-${post.commentsId} .deleteBtn`).style.display = 'block';
                         }
                     });
@@ -536,7 +531,7 @@
         };
 
         // 서버로 수정된 데이터를 전송 (Ajax)
-        ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
+        ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), csrfHeader, csrfToken, function (data) {
             if (data.code === "0000") {
                 alert("포스트가 수정되었습니다.");
                 findCommunity(0);
@@ -560,7 +555,7 @@
     // 삭제 버튼 클릭 시
     $('#delete-btn').click(function () {
         if (selectedCommunityId && confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
-            ajaxPostJsonCall('/community/delete?id=' + selectedCommunityId, null, function (data) {
+            ajaxPostJsonCall('/community/delete?id=' + selectedCommunityId, null, csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("포스트가 삭제되었습니다.");
                     $('#detailModal').fadeOut();
@@ -583,7 +578,7 @@
                 flag: "C",
                 communityId: selectedCommunityId
             };
-            ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), function (data) {
+            ajaxPostJsonCall('/comments/save', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     getCommunityDetail(selectedCommunityId);
                     $('#commentInput').val("");
@@ -635,7 +630,7 @@
                 flag: "C",
                 communityId: selectedCommunityId
             };
-            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+            ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 수정되었습니다.");
                     commentsIsEditing = false;
@@ -655,7 +650,7 @@
         var commentElement = $(this).closest('.comment');
         var commentId = commentElement.attr('id').replace('comment-', ''); // 'comment-'를 제거하여 숫자 ID만 남김
         if(confirmC) {
-            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+            ajaxPostJsonCall('/comments/delete?id=' + commentId, null, csrfHeader, csrfToken, function (data) {
                 if (data.code === "0000") {
                     alert("댓글이 삭제되었습니다.");
                     getCommunityDetail(selectedCommunityId);
