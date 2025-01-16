@@ -2,6 +2,8 @@
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <head>
   <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet" />
   <title>Mypage</title>
@@ -361,7 +363,13 @@
 </div>
 <th:block layout:fragment="footer" th:include="@{fragments/footer}"></th:block>
 </body>
-<script>
+<script th:inline="javascript">
+  const csrfHeader = $('meta[name="_csrf_header"]').attr('content');
+  const csrfToken = $('meta[name="_csrf"]').attr('content');
+  /*<![CDATA[*/
+  var userRole = /*[[${userRole}]]*/ 'ROLE_FAN'; // 기본값 'ROLE_FAN'
+  /*]]>*/
+
   document.getElementById("update-info-btn").addEventListener("click", function() {
     document.getElementById("content").innerHTML = `
       <h2>비밀번호를 입력해주세요.</h2>
@@ -643,20 +651,14 @@
   document.getElementById("withdrawal-btn").addEventListener("click", function() {
     var confirmV = confirm("정말로 탈퇴하시겠습니까?");
     if(confirmV) {
-      ajaxPostJsonCall('/logout', sessionEmail, function (data) {
-        if (data.code === "0000") {
-          ajaxPostJsonCall('/member/delete?email=' + sessionEmail, null, function(data) {
-            if (data.code === "0000") {
-              alert("탈퇴되었습니다.");
-              window.location.href = "/";
-            }
-          }, function(error) {
-            alert("An error occurred: " + error.message);
-          });
-        }
-      }, function (error) {
-        alert("An error occurred: " + error.message);
-      });
+        ajaxPostJsonCall('/member/delete?email=' + sessionEmail, null, csrfHeader, csrfToken, function(data) {
+          if (data.code === "0000") {
+            alert("탈퇴되었습니다.");
+            window.location.href = "/";
+          }
+        }, function(error) {
+          alert("An error occurred: " + error.message);
+        });
     }
   });
 
@@ -701,11 +703,11 @@
         phoneNum: phoneNum.value,
         email: email,
         password: password.value,
-        flag: sessionFlag,
+        flag: userRole,
         createDate: sessionDate
       };
 
-      ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), function(data) {
+      ajaxPostJsonCall('/member/modify', JSON.stringify(memberDto), csrfHeader, csrfToken, function(data) {
         if (data.code === "0000") {
           alert("회원정보가 수정되었습니다.");
           window.location.href = "/mypage-web";
@@ -820,7 +822,7 @@
       };
 
       // 서버로 수정된 데이터를 전송 (Ajax)
-      ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), function (data) {
+      ajaxPostJsonCall('/community/modify', JSON.stringify(communityDto), csrfHeader, csrfToken, function (data) {
         if (data.code === "0000") {
           alert("포스트가 수정되었습니다.");
           drawMyPostsTable(0);
@@ -844,7 +846,7 @@
   // 내 포스트 상세보기 삭제 버튼 클릭 시
   $('#my-post-delete-btn').click(function () {
     if (selectedPostId && confirm("정말로 이 포스트를 삭제하시겠습니까?")) {
-      ajaxPostJsonCall('/community/delete?id=' + selectedPostId, null, function (data) {
+      ajaxPostJsonCall('/community/delete?id=' + selectedPostId, null, csrfHeader, csrfToken, function (data) {
         if (data.code === "0000") {
           alert("포스트가 삭제되었습니다.");
           $('#myPostDetailModal').fadeOut();
@@ -970,7 +972,7 @@
         flag: "C",
         communityId: selectedCommunityId
       };
-      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
         if (data.code === "0000") {
           alert("댓글이 수정되었습니다.");
           commentEditingState = false;
@@ -990,7 +992,7 @@
     var commentElement = $(this).closest('.comment');
     var commentId = commentElement.attr('id').replace('detailCComment-', ''); // 'detailCComment-'를 제거하여 숫자 ID만 남김
     if(confirmC) {
-      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, csrfHeader, csrfToken, function (data) {
         if (data.code === "0000") {
           detailCModal.style.display = "none";
           alert("댓글이 삭제되었습니다.");
@@ -1127,7 +1129,7 @@
         flag: "A",
         artistId: selectedArtistId
       };
-      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), function (data) {
+      ajaxPostJsonCall('/comments/modify', JSON.stringify(commentsDto), csrfHeader, csrfToken, function (data) {
         if (data.code === "0000") {
           alert("댓글이 수정되었습니다.");
           commentEditingState = false;
@@ -1147,7 +1149,7 @@
     var commentElement = $(this).closest('.comment');
     var commentId = commentElement.attr('id').replace('detailAComment-', ''); // 'detailAComment-'를 제거하여 숫자 ID만 남김
     if(confirmC) {
-      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, function (data) {
+      ajaxPostJsonCall('/comments/delete?id=' + commentId, null, csrfHeader, csrfToken, function (data) {
         if (data.code === "0000") {
           detailAModal.style.display = "none";
           alert("댓글이 삭제되었습니다.");

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -102,7 +103,16 @@ public class WebController {
     }
 
     @RequestMapping("/mypage-web")
-    public String MyPageWeb(Model model) {
+    public String MyPageWeb(Model model, Authentication authentication) {
+        // 현재 사용자의 권한 정보 가져오기
+        String userRole = authentication.getAuthorities().stream()
+                .filter(grantedAuthority -> grantedAuthority instanceof SimpleGrantedAuthority)
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("ROLE_FAN"); // 기본값은 ROLE_FAN
+
+        // 권한 정보를 모델에 추가
+        model.addAttribute("userRole", userRole);
         return "html/mypage.html";
     }
 

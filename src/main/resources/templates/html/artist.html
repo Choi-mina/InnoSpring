@@ -721,7 +721,9 @@
                         }
                     })
                     .catch(error => {
-                        alert("An error occurred: " + error.message);
+                        if(error.message == "HTTP status 413") {
+                            alert("파일의 크기가 커서 게시에 실패했습니다.")
+                        }
                     });
             }
         }

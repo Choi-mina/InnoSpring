@@ -3,14 +3,18 @@ package com.example.cafe.controller;
 import com.example.cafe.Service.CommentsService;
 import com.example.cafe.Service.CommunityService;
 import com.example.cafe.Service.MemberService;
+import com.example.cafe.Service.UserService;
 import com.example.cafe.dto.CommentsDto;
 import com.example.cafe.dto.CommunityDto;
 import com.example.cafe.dto.MemberDto;
 import com.example.cafe.entity.ApiResult;
 import com.example.cafe.entity.Member;
 import com.example.cafe.entity.ResultEntity;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -23,6 +27,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/member")
 public class MemberController {
+    @Autowired
+    private UserService userService;
     private final MemberService memberService;
     private final CommunityService communityService;
     private final CommentsService commentsService;
@@ -168,9 +174,22 @@ public class MemberController {
     }
 
     @PostMapping("/delete")
-    public ResultEntity deleteMember(@RequestParam("email") String email) {
+    public ResultEntity deleteMember(@RequestParam("email") String email, final HttpServletRequest httpRequest) {
+        // session 삭제
+        final HttpSession session = httpRequest.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
         ResultEntity result = new ResultEntity();
         try {
+            // Redis에서 세션 정보 삭제
+            try {
+                userService.deleteUserData(email);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             MemberDto member = memberService.findByEmail(email);
             memberService.deleteMember((long) member.getMemId());
 

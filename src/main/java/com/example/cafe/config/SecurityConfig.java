@@ -42,7 +42,7 @@ public class SecurityConfig {
                 // 요청 경로 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/images/**", "/js/**", "/favicon.*", "/*/icon-*", "/common/**").permitAll()
-                        .requestMatchers("/", "/sign-up-web", "/member/**").permitAll()
+                        .requestMatchers("/", "/sign-up-web", "/member/**", "/search-ip-web", "/search-ip-result-web").permitAll()
                         .requestMatchers("/notice/save", "/notice/delete", "/notice/modify", "/schedule/save", "/schedule/modify", "schedule/delete", "/artist/save", "/artist/modify", "artist/delete")
                         .hasAnyRole("MANAGER", "ARTIST")
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
